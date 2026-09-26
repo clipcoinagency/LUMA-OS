@@ -92,6 +92,8 @@ export function pickTextFile(accept = '.json,application/json'): Promise<File | 
     const done = (f: File | null) => { if (!settled) { settled = true; input.remove(); resolve(f); } };
     input.addEventListener('change', () => done(input.files?.[0] ?? null));
     input.addEventListener('cancel', () => done(null));
+    // Older browsers have no "cancel" event: when focus returns without a file, treat it as cancelled.
+    window.addEventListener('focus', () => setTimeout(() => done(input.files?.[0] ?? null), 700), { once: true });
     document.body.appendChild(input);
     input.click();
   });

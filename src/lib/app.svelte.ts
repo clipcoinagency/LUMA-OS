@@ -47,13 +47,17 @@ class AppState {
     applyMotion(s.settings.reduceMotion);
   }
 
+  // $state.snapshot: values coming from components may be reactive proxies, which IndexedDB
+  // cannot store (DataCloneError). Always persist plain data.
   async updateSettings(patch: Partial<Omit<Settings, 'id'>>) {
+    patch = $state.snapshot(patch) as typeof patch;
     if (patch.theme && patch.theme !== this.settings?.theme) applyTheme(patch.theme, true);
     if (patch.reduceMotion !== undefined) applyMotion(patch.reduceMotion);
     this.settings = await saveSettings(patch);
   }
 
   async updateWorkspace(patch: Partial<Omit<Workspace, 'id'>>) {
+    patch = $state.snapshot(patch) as typeof patch;
     this.workspace = await saveWorkspace(patch);
   }
 }

@@ -52,3 +52,10 @@ export function formatMoney(amountMinor: number, currency: string, locale?: stri
 export function sumMinor(values: number[]): number {
   return values.reduce((a, b) => a + b, 0);
 }
+
+/** Select options like "EUR — Euro", localized where the platform supports it. */
+export function currencyOptions(): { value: string; label: string }[] {
+  let names: Intl.DisplayNames | null = null;
+  try { names = new Intl.DisplayNames(undefined, { type: 'currency' }); } catch { /* codes only */ }
+  return CURRENCIES.map((c) => ({ value: c, label: names ? `${c} — ${names.of(c) ?? c}` : c }));
+}

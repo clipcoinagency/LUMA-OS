@@ -93,7 +93,16 @@ Windows primary is the Browser Edition, and a desktop app is only shipped once i
 
 ### 3.3 CI (GitHub Actions) — see §8 for results
 
-- Firefox + WebKit engines on Windows and macOS runners, real **Safari** on macOS via `safaridriver`.
+- Same validator on GitHub's Windows Server and macOS 26 (arm64) runners
+  ([results](validation/ci/)):
+  - **Edge 153 + Chrome 152/153:** all checks pass on both OSes (file:// and http).
+  - **WebKit 26.6 (Safari's engine, via Playwright):** 25/25 persistence + backup/restore checks pass
+    from **file://** on Windows *and* macOS — strong evidence the Safari engine supports our workflow.
+    Its offline-reload check failed with "WebKit encountered an internal error" (a Playwright
+    offline-emulation + service-worker limitation) → must be confirmed on a real iPhone (test C3).
+  - **Firefox (Playwright build): hung on launch on both OSes** → diagnostics workflow in progress.
+  - **Real Safari 26.6 (safaridriver):** the page script did not run under WebDriver from file://
+    → diagnostics in progress (WebDriver may block file:// navigation; not the same as a user double-click).
 - Android debug APK built with Capacitor 8 from the same `poc/web` → **success, 3.8 MB zipped**.
 - Tauri 2 desktop build → **success**: Windows NSIS installer + exe 2.75 MB zipped, macOS universal DMG 3.43 MB zipped.
 
@@ -276,7 +285,8 @@ adapter — reusing the proven PoC code.
 | PoC · Android APK (Capacitor 8) | ✅ success (2 min) | `app-debug.apk`, 3.78 MB zipped |
 | PoC · Desktop app (Tauri 2) — Windows | ✅ success | NSIS installer + exe, 2.75 MB zipped |
 | PoC · Desktop app (Tauri 2) — macOS | ✅ success | universal DMG, 3.43 MB zipped |
-| PoC · browser validation (Win + macOS, Firefox/WebKit/real Safari) | ⏳ see Actions run | results artifact + run summary |
+| PoC · browser validation — Windows runner | Edge ✅ Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox ⏳ hung | [results](validation/ci/Windows-VALIDATION-RESULTS.md) |
+| PoC · browser validation — macOS runner | Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox ⏳ hung, real Safari ⏳ | [results](validation/ci/macOS-VALIDATION-RESULTS.md) |
 
 Artifacts are downloadable (GitHub login required) from
 https://github.com/clipcoinagency/LUMA-OS/actions — these are the files for the real-device tests.

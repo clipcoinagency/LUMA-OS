@@ -2,7 +2,7 @@ name: "PoC · engine diagnostics (Firefox, WebKit, real Safari)"
 
 on:
   push:
-    paths: ["poc/tests/engine-debug.mjs", "poc/tests/safari-webdriver.mjs", ".github/workflows/poc-engines.yml"]
+    paths: ["poc/web/index.html", "poc/tests/**", ".github/workflows/poc-engines.yml"]
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,10 @@ jobs:
       - name: Engine step-by-step diagnostics
         run: node poc/tests/engine-debug.mjs
         timeout-minutes: 10
+        continue-on-error: true
+      - name: Firefox full validation (restarts, backup/restore, invalid files)
+        run: node poc/tests/validate.mjs --only=firefox --stress=5000
+        timeout-minutes: 12
         continue-on-error: true
       - name: Real Safari via safaridriver (macOS)
         if: runner.os == 'macOS'

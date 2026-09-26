@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-26T17:58:39.086Z",
-  "url": "file:///Users/runner/work/LUMA-OS/LUMA-OS/poc/web/index.html",
+  "at": "2026-09-26T18:05:40.660Z",
+  "url": "http://127.0.0.1:4817/index.html",
   "checks": [
     {
       "status": "info",
@@ -8,9 +8,114 @@
       "detail": "26.6.2"
     },
     {
-      "status": "fail",
-      "name": "Safari WebDriver run",
-      "detail": "write: TypeError: undefined is not an object (evaluating 'window.lifeosPoc.writeProbe')"
+      "status": "info",
+      "name": "Real Safari loads PoC via file://",
+      "detail": "{\"ok\":false,\"idb\":true,\"title\":\"Failed to open page\",\"href\":\"safari-resource:/ErrorPage.html\",\"err\":null,\"poc\":\"undefined\",\"ready\":\"complete\"}"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari loads PoC via http://localhost",
+      "detail": "{\"ok\":true,\"idb\":true,\"title\":\"Life OS · Storage PoC\",\"href\":\"http://127.0.0.1:4817/index.html\",\"err\":null,\"poc\":\"object\",\"ready\":\"complete\"}"
+    },
+    {
+      "status": "info",
+      "name": "Persistence steps below run against",
+      "detail": "http://127.0.0.1:4817/index.html"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari: IndexedDB opens + writes on file://",
+      "detail": "secure=true"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari: data survives navigating away + reopening (same session)",
+      "detail": "{\"token\":\"9fqeon11muipa8nl\",\"records\":1000}"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: IndexedDB opens and reads",
+      "detail": "1000 existing records"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Write → read test value",
+      "detail": "kh8bquuqmuipa93i"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Write 1,000 dated records in batch",
+      "detail": "58 ms"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Query records by local date",
+      "detail": "40 records today"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Export produces a valid backup",
+      "detail": "0.3 MB"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Clear data",
+      "detail": ""
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Restore brings every record back",
+      "detail": "2000 records"
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: empty file",
+      "detail": "This file is empty."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: not JSON",
+      "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: wrong kind of file",
+      "detail": "This file isn't a Life OS backup."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: newer version",
+      "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: edited / corrupted",
+      "detail": "This backup appears damaged or was edited (integrity check failed)."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Rejects invalid backup: truncated download",
+      "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+    },
+    {
+      "status": "pass",
+      "name": "Real Safari self-test: Local date keys (midnight, DST, leap year)",
+      "detail": ""
+    },
+    {
+      "status": "info",
+      "name": "Real Safari self-test: Your previous test data was put back",
+      "detail": ""
+    },
+    {
+      "status": "info",
+      "name": "Real Safari self-test: Persistent storage granted",
+      "detail": "false"
+    },
+    {
+      "status": "info",
+      "name": "Real Safari: storage persisted / estimate",
+      "detail": "{\"estimate\":\"1.5 MB / 78643.2 MB\",\"persisted\":\"false\"}"
     }
   ]
 }

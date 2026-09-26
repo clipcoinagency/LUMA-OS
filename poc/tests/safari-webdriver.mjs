@@ -56,7 +56,7 @@ try {
   await wd('POST', `/session/${sid}/url`, { url: URL_ });
   let r = await execAsync(sid, `${waitReady} const p = await window.lifeosPoc.writeProbe(); await window.lifeosPoc.addRecords(1000); return { token: p.token, ua: navigator.userAgent, secure: isSecureContext };`);
   if (!r.ok) throw new Error('write: ' + r.e);
-  add('pass', 'Real Safari: IndexedDB opens + writes on file://', `secure=${r.v.secure}`);
+  add('pass', `Real Safari: IndexedDB opens + writes (${URL_.startsWith('file') ? 'file://' : 'http://localhost'})`, `secure=${r.v.secure}`);
   const token = r.v.token;
   await wd('POST', `/session/${sid}/url`, { url: 'about:blank' });
   await wd('POST', `/session/${sid}/url`, { url: URL_ });

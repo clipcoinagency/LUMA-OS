@@ -569,7 +569,9 @@
   }
   function requestPersist() {
     if (!navigator.storage || !navigator.storage.persist) return Promise.resolve('API not available');
-    return navigator.storage.persist().then(String, function (e) { return 'error: ' + e.name; });
+    // Firefox answers persist() with a permission prompt; never block the app waiting for the user.
+    var timeout = new Promise(function (res) { setTimeout(function () { res('no answer yet (browser is asking the user)'); }, 4000); });
+    return Promise.race([navigator.storage.persist().then(String, function (e) { return 'error: ' + e.name; }), timeout]);
   }
 
   // ---------------------------------------------------------------- actions

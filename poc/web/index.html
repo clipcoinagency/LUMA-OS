@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0b1226">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Life OS PoC">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Life OS · Storage PoC</title>
+<!--
+  Life OS — Phase 0 storage / launch proof of concept.
+  Deliberately ONE self-contained file: no external CSS/JS/fonts, no ES module
+  scripts (Chromium refuses <script type="module" src> over file://).
+  The storage code here is the prototype for the real app's data layer.
+-->
+<style>
+  :root {
+    --bg: #f7f3f0; --surface: #ffffff; --surface-2: #f1ebe7; --text: #2a2226; --muted: #6f6368;
+    --line: #e6dcd7; --accent: #b0697e; --accent-ink: #ffffff; --ok: #2f7d57; --warn: #9a6a12; --bad: #b3413b;
+    --radius: 16px; --shadow: 0 1px 2px rgba(40,20,30,.06), 0 8px 24px rgba(40,20,30,.06);
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #070b16; --surface: #0e1526; --surface-2: #131c31; --text: #e6ecf7; --muted: #8d9ab3;
+      --line: #1d2842; --accent: #4fd6f0; --accent-ink: #04111a; --ok: #43d49a; --warn: #f0c35a; --bad: #ff7a70;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font);
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  main { max-width: 880px; margin: 0 auto; display: grid; gap: 16px; }
+  header h1 { font-size: 22px; margin: 4px 0 2px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+  .hero { display: grid; gap: 6px; }
+  .hero .big { font-size: 20px; font-weight: 650; }
+  .hero[data-state="ok"] .big { color: var(--ok); }
+  .hero[data-state="warn"] .big { color: var(--warn); }
+  .hero[data-state="bad"] .big { color: var(--bad); }
+  .grid-btn { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  button, .btn {
+    font: inherit; font-weight: 600; min-height: 44px; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--text); text-align: left;
+    transition: transform .12s ease, background-color .15s ease, border-color .15s ease;
+  }
+  button:hover, .btn:hover { border-color: var(--accent); }
+  button:active, .btn:active { transform: scale(.98); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  button.danger { color: var(--bad); }
+  button:disabled { opacity: .5; cursor: progress; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  dl.env { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 6px 14px; margin: 0; font-size: 13.5px; }
+  dl.env dt { color: var(--muted); }
+  dl.env dd { margin: 0; overflow-wrap: anywhere; }
+  ol.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  ol.checks li { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+  .tag { font: 600 11px/1 var(--font); padding: 4px 7px; border-radius: 999px; flex: none; text-transform: uppercase; letter-spacing: .05em; }
+  .tag.pass { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .tag.fail { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .tag.info { background: var(--surface-2); color: var(--muted); }
+  #log { font: 12.5px/1.55 var(--mono); max-height: 260px; overflow: auto; margin: 0; white-space: pre-wrap; color: var(--muted); }
+  #log .err { color: var(--bad); } #log .ok { color: var(--ok); }
+  .steps { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); padding: 22px; max-width: min(460px, calc(100vw - 32px)); box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+  dialog::backdrop { background: rgba(8, 10, 20, .45); }
+  dialog[open] { animation: pop .16s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+  dialog h3 { margin: 0 0 8px; font-size: 18px; }
+  dialog p { margin: 0 0 10px; color: var(--muted); }
+  dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+  #toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { *, dialog[open] { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Life OS — Storage &amp; Launch Test</h1>
+    <p>Phase 0 proof of concept. Checks that this device keeps your data after closing and reopening, and that backups work.</p>
+  </header>
+
+  <section class="card hero" id="hero" data-state="info" aria-live="polite">
+    <div class="big" id="heroTitle">Checking storage…</div>
+    <div id="heroBody"></div>
+  </section>
+
+  <section class="card">
+    <h2>Manual persistence test</h2>
+    <ol class="steps">
+      <li>Tap <b>Write test value</b>.</li>
+      <li>Close the app / browser <b>completely</b> (not just the tab; on phones swipe it away).</li>
+      <li>Open it again the same way. The green box above should say the value was found.</li>
+      <li>Optional: turn on airplane mode and repeat.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Actions</h2>
+    <div class="grid-btn">
+      <button class="primary" id="btnWrite">Write test value</button>
+      <button id="btnRead">Read test value</button>
+      <button id="btnSelfTest">Run full self-test</button>
+      <button id="btnAdd500">Add 500 dated records</button>
+      <button id="btnAdd20k">Stress: add 20,000 records</button>
+      <button id="btnCount">Count records</button>
+      <button id="btnExport">Export backup</button>
+      <label class="btn" for="fileImport" id="lblImport" tabindex="0" role="button">Import backup…</label>
+      <button id="btnPersist">Request persistent storage</button>
+      <button class="danger" id="btnClear">Clear all test data</button>
+    </div>
+    <input type="file" id="fileImport" accept=".json,application/json" class="sr-only">
+  </section>
+
+  <section class="card" id="selfTestCard" hidden>
+    <h2>Self-test results</h2>
+    <ol class="checks" id="selfTestList"></ol>
+  </section>
+
+  <section class="card">
+    <h2>Environment</h2>
+    <dl class="env" id="env"></dl>
+  </section>
+
+  <section class="card">
+    <h2>Log</h2>
+    <pre id="log" aria-live="polite"></pre>
+  </section>
+</main>
+
+<dialog id="confirmDlg" aria-labelledby="confirmTitle">
+  <h3 id="confirmTitle"></h3>
+  <div id="confirmBody"></div>
+  <div class="row">
+    <button id="confirmCancel" value="cancel">Cancel</button>
+    <button id="confirmOk" class="primary" value="ok">Confirm</button>
+  </div>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var POC_VERSION = '0.1.0';
+  var SCHEMA_VERSION = 1;               // IndexedDB schema version (drives migrations)
+  var DB_NAME = 'lifeos-poc';
+  var BACKUP_FORMAT = 'lifeos-poc-backup';
+  var BACKUP_FORMAT_VERSION = 1;
+  var MAX_BACKUP_BYTES = 150 * 1024 * 1024;
+  var STORES = ['meta', 'records'];
+  var DEVICE_ONLY_META = ['launches'];  // diagnostics that belong to this device, never to a backup
+
+  // ---------------------------------------------------------------- dates
+  // Rule: calendar days are stored as local "YYYY-MM-DD" keys, never derived
+  // from toISOString() (that is UTC and shifts the day near midnight).
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function localDateKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function parseDateKey(key) {
+    var p = key.split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2]);  // local midnight, NOT new Date("YYYY-MM-DD") which is UTC
+  }
+  function addDays(key, n) {
+    var d = parseDateKey(key);
+    d.setDate(d.getDate() + n);
+    return localDateKey(d);
+  }
+  var DATE_KEY_RE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+  // ---------------------------------------------------------------- platform
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+  function detectPlatform() {
+    if (window.__TAURI__ || window.__TAURI_INTERNALS__) return 'tauri';
+    var cap = window.Capacitor;
+    if (cap && ((typeof cap.getPlatform === 'function' && cap.getPlatform() !== 'web') || window.androidBridge)) return 'capacitor';
+    if (location.protocol === 'file:') return 'file';
+    return 'web';
+  }
+  var PLATFORM = detectPlatform();
+
+  // ---------------------------------------------------------------- errors
+  function friendly(err) {
+    var name = err && err.name;
+    if (name === 'QuotaExceededError') return 'This device is out of storage space for Life OS.';
+    if (name === 'InvalidStateError' || name === 'SecurityError') return 'Storage is blocked here (private/incognito window or browser setting).';
+    if (name === 'VersionError') return 'Your saved data was created by a newer version of Life OS.';
+    if (name === 'UnknownError') return 'The browser could not access its storage. Restarting the browser usually fixes this.';
+    return 'Something went wrong while accessing storage.';
+  }
+
+  // ---------------------------------------------------------------- IndexedDB
+  // Versioned migrations: each step runs once, in order, inside the upgrade transaction.
+  var MIGRATIONS = {
+    1: function (db) {
+      db.createObjectStore('meta', { keyPath: 'key' });
+      var rec = db.createObjectStore('records', { keyPath: 'id' });
+      rec.createIndex('by_date', 'date');
+      rec.createIndex('by_type', 'type');
+    }
+  };
+
+  var dbPromise = null;
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(Object.assign(new Error('IndexedDB is not available'), { name: 'InvalidStateError' })); return; }
+      var req;
+      try { req = indexedDB.open(DB_NAME, SCHEMA_VERSION); } catch (e) { reject(e); return; }
+      req.onupgradeneeded = function (ev) {
+        for (var v = ev.oldVersion + 1; v <= SCHEMA_VERSION; v++) MIGRATIONS[v](req.result, req.transaction);
+      };
+      req.onsuccess = function () {
+        var db = req.result;
+        db.onversionchange = function () { db.close(); dbPromise = null; toast('Life OS was updated in another window. Please reload.'); };
+        resolve(db);
+      };
+      req.onerror = function () { reject(req.error); };
+      req.onblocked = function () { toast('Please close other Life OS windows to finish updating.'); };
+    });
+    dbPromise.catch(function () { dbPromise = null; });
+    return dbPromise;
+  }
+
+  // Run `work(tx, set)` in one transaction; resolves with set()'s value once the
+  // transaction has COMMITTED (not merely when requests succeed).
+  function tx(stores, mode, work) {
+    return openDB().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var t = mode === 'readwrite' ? db.transaction(stores, mode, { durability: 'strict' }) : db.transaction(stores, mode);
+        var result;
+        t.oncomplete = function () { resolve(result); };
+        t.onerror = function () { reject(t.error); };
+        t.onabort = function () { reject(t.error || new Error('Transaction aborted')); };
+        try { work(t, function (v) { result = v; }); } catch (e) { try { t.abort(); } catch (_) {} reject(e); }
+      });
+    });
+  }
+
+  function getMeta(key) {
+    return tx(['meta'], 'readonly', function (t, set) {
+      t.objectStore('meta').get(key).onsuccess = function (e) { set(e.target.result ? e.target.result.value : undefined); };
+    });
+  }
+  function setMeta(key, value) {
+    return tx(['meta'], 'readwrite', function (t) { t.objectStore('meta').put({ key: key, value: value }); });
+  }
+
+  function recordLaunch() {
+    return tx(['meta'], 'readwrite', function (t, set) {
+      var os = t.objectStore('meta');
+      os.get('launches').onsuccess = function (e) {
+        var v = (e.target.result && e.target.result.value) || { count: 0, first: null, history: [] };
+        var now = new Date().toISOString();
+        v.count += 1; v.first = v.first || now; v.last = now;
+        v.history = (v.history || []).concat([{ n: v.count, at: now, platform: PLATFORM }]).slice(-10);
+        os.put({ key: 'launches', value: v });
+        set(v);
+      };
+    });
+  }
+
+  function writeProbe() {
+    var launches = state.launches ? state.launches.count : null;
+    var value = {
+      token: Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
+      writtenAt: new Date().toISOString(),
+      localDate: localDateKey(),
+      launch: launches,
+      platform: PLATFORM
+    };
+    return setMeta('probe', value).then(function () { return value; });
+  }
+  function readProbe() { return getMeta('probe'); }
+
+  var TYPES = ['task', 'habit', 'goal', 'note', 'fitness', 'finance'];
+  function addRecords(n) {
+    var t0 = performance.now();
+    var today = localDateKey();
+    var days = Math.max(1, Math.min(1095, Math.ceil(n / 20)));  // spread across up to ~3 years of history
+    var stamp = Date.now().toString(36);
+    var CHUNK = 5000;
+    var i = 0;
+    function next() {
+      if (i >= n) return Promise.resolve();
+      var end = Math.min(n, i + CHUNK);
+      return tx(['records'], 'readwrite', function (t) {
+        var os = t.objectStore('records');
+        for (; i < end; i++) {
+          var type = TYPES[i % TYPES.length];
+          var rec = { id: 'poc-' + stamp + '-' + i, type: type, date: addDays(today, -(i % days)),
+            createdAt: new Date().toISOString(), title: type + ' sample #' + i, done: i % 3 === 0 };
+          if (type === 'finance') { rec.amountMinor = (i * 7919) % 50000; rec.currency = 'USD'; }  // money as integer minor units
+          os.put(rec);
+        }
+      }).then(next);
+    }
+    return next().then(function () { return { added: n, ms: Math.round(performance.now() - t0) }; });
+  }
+
+  function counts() {
+    return tx(STORES, 'readonly', function (t, set) {
+      var out = {};
+      STORES.forEach(function (s) { t.objectStore(s).count().onsuccess = function (e) { out[s] = e.target.result; }; });
+      set(out);
+    });
+  }
+  function countByDate(key) {
+    return tx(['records'], 'readonly', function (t, set) {
+      t.objectStore('records').index('by_date').count(IDBKeyRange.only(key)).onsuccess = function (e) { set(e.target.result); };
+    });
+  }
+  function queryRange(fromKey, toKey) {
+    var t0 = performance.now();
+    return tx(['records'], 'readonly', function (t, set) {
+      t.objectStore('records').index('by_date').getAll(IDBKeyRange.bound(fromKey, toKey)).onsuccess = function (e) { set(e.target.result); };
+    }).then(function (rows) { return { rows: rows.length, ms: Math.round(performance.now() - t0) }; });
+  }
+  function clearAll() {
+    return tx(STORES, 'readwrite', function (t) {
+      var meta = t.objectStore('meta');
+      // keep device diagnostics so the launch counter keeps counting
+      var keep = [];
+      DEVICE_ONLY_META.forEach(function (k) { meta.get(k).onsuccess = function (e) { if (e.target.result) keep.push(e.target.result); }; });
+      meta.getAllKeys().onsuccess = function () {
+        meta.clear();
+        t.objectStore('records').clear();
+        keep.forEach(function (row) { meta.put(row); });
+      };
+    });
+  }
+
+  // ---------------------------------------------------------------- backup
+  function fnv1a(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return (h >>> 0).toString(16).padStart(8, '0');
+  }
+
+  function buildBackup() {
+    return tx(STORES, 'readonly', function (t, set) {
+      var data = {};
+      STORES.forEach(function (s) { t.objectStore(s).getAll().onsuccess = function (e) { data[s] = e.target.result; }; });
+      set(data);
+    }).then(function (data) {
+      data.meta = data.meta.filter(function (row) { return DEVICE_ONLY_META.indexOf(row.key) === -1; });
+      return {
+        format: BACKUP_FORMAT,
+        formatVersion: BACKUP_FORMAT_VERSION,
+        app: 'Life OS (storage PoC)',
+        appVersion: POC_VERSION,
+        schemaVersion: SCHEMA_VERSION,
+        exportedAt: new Date().toISOString(),
+        exportedLocalDate: localDateKey(),
+        platform: PLATFORM,
+        counts: { meta: data.meta.length, records: data.records.length },
+        checksum: 'fnv1a32:' + fnv1a(JSON.stringify(data)),
+        data: data
+      };
+    });
+  }
+
+  function reject(msg) { return { ok: false, message: msg }; }
+  function validateBackupText(text) {
+    if (typeof text !== 'string' || !text.trim()) return reject('This file is empty.');
+    var obj;
+    try { obj = JSON.parse(text); } catch (e) { return reject("This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."); }
+    if (!obj || typeof obj !== 'object' || obj.format !== BACKUP_FORMAT) return reject("This file isn't a Life OS backup.");
+    if (!Number.isInteger(obj.schemaVersion) || obj.schemaVersion < 1) return reject('This backup is missing its version information, so it cannot be restored safely.');
+    if (obj.schemaVersion > SCHEMA_VERSION) return reject('This backup was made by a newer version of Life OS (data version ' + obj.schemaVersion + '). Please update Life OS, then restore again.');
+    if (!obj.data || typeof obj.data !== 'object') return reject('This backup is incomplete.');
+    for (var s = 0; s < STORES.length; s++) if (!Array.isArray(obj.data[STORES[s]])) return reject('This backup is incomplete (missing "' + STORES[s] + '").');
+    if (obj.checksum !== 'fnv1a32:' + fnv1a(JSON.stringify(obj.data))) return reject('This backup appears damaged or was edited (integrity check failed).');
+    var seen = Object.create(null);
+    var recs = obj.data.records;
+    for (var i = 0; i < recs.length; i++) {
+      var r = recs[i];
+      if (!r || typeof r.id !== 'string' || !r.id) return reject('This backup contains an invalid record (#' + (i + 1) + ').');
+      if (!DATE_KEY_RE.test(r.date)) return reject('This backup contains a record with an invalid date (#' + (i + 1) + ').');
+      if (seen[r.id]) return reject('This backup contains duplicate records.');
+      seen[r.id] = 1;
+    }
+    for (var m = 0; m < obj.data.meta.length; m++) if (!obj.data.meta[m] || typeof obj.data.meta[m].key !== 'string') return reject('This backup contains invalid settings data.');
+    // (schemaVersion < SCHEMA_VERSION would be migrated here in later versions)
+    return { ok: true, backup: obj, summary: { exportedAt: obj.exportedAt, appVersion: obj.appVersion, records: recs.length, meta: obj.data.meta.length } };
+  }
+
+  // Atomic: clear + write happen in ONE transaction, so a failure leaves the old data untouched.
+  function restoreBackup(backup) {
+    return tx(STORES, 'readwrite', function (t) {
+      var meta = t.objectStore('meta');
+      var keep = [];
+      DEVICE_ONLY_META.forEach(function (k) { meta.get(k).onsuccess = function (e) { if (e.target.result) keep.push(e.target.result); }; });
+      meta.getAllKeys().onsuccess = function () {
+        STORES.forEach(function (s) {
+          var os = t.objectStore(s);
+          os.clear();
+          backup.data[s].forEach(function (row) { if (s !== 'meta' || DEVICE_ONLY_META.indexOf(row.key) === -1) os.put(row); });
+        });
+        keep.forEach(function (row) { meta.put(row); });
+        meta.put({ key: 'lastRestore', value: { at: new Date().toISOString(), from: backup.exportedAt } });
+      };
+    });
+  }
+
+  // ---------------------------------------------------------------- file save adapters
+  function browserDownload(name, text) {
+    var url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    return Promise.resolve({ ok: true, via: 'download', where: 'your Downloads folder' });
+  }
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = function () { rej(new Error('load ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function saveTextFile(name, text) {
+    if (PLATFORM === 'tauri') {
+      var T = window.__TAURI__;
+      if (T && T.dialog && T.fs) {
+        return T.dialog.save({ defaultPath: name, filters: [{ name: 'Life OS backup', extensions: ['json'] }] }).then(function (p) {
+          if (!p) return { ok: false, cancelled: true };
+          return T.fs.writeTextFile(p, text).then(function () { return { ok: true, via: 'tauri-save-dialog', where: p }; });
+        });
+      }
+      log('Tauri dialog/fs plugins not exposed; falling back to WebView download', 'err');
+      return browserDownload(name, text);
+    }
+    if (PLATFORM === 'capacitor') {
+      var ready = window.LifeOSNative ? Promise.resolve() : loadScript('native-capacitor.js');
+      return ready.then(function () { return window.LifeOSNative.saveTextFile(name, text); });
+    }
+    if (isIOS() && navigator.canShare) {
+      var file = new File([text], name, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: name }).then(function () { return { ok: true, via: 'share-sheet', where: 'the location you chose' }; },
+          function (e) { if (e && e.name === 'AbortError') return { ok: false, cancelled: true }; return browserDownload(name, text); });
+      }
+    }
+    return browserDownload(name, text);
+  }
+
+  // ---------------------------------------------------------------- UI helpers
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { launches: null, storageOk: false, opSeq: 0 };
+
+  function log(msg, cls) {
+    var line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = new Date().toLocaleTimeString() + '  ' + msg;
+    $('log').prepend(line);
+  }
+  var toastTimer;
+  function toast(msg) {
+    var el = $('toast'); el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3200);
+  }
+  // Deterministic hooks for the automated harness.
+  function op(name, result, message) {
+    state.opSeq += 1;
+    document.body.dataset.opSeq = String(state.opSeq);
+    document.body.dataset.lastOp = name + ':' + result;
+    document.body.dataset.lastMessage = message || '';
+  }
+
+  function confirmDialog(title, bodyHtml, okLabel, danger) {
+    return new Promise(function (resolve) {
+      var dlg = $('confirmDlg');
+      $('confirmTitle').textContent = title;
+      $('confirmBody').innerHTML = bodyHtml;
+      var ok = $('confirmOk'); ok.textContent = okLabel || 'Confirm';
+      ok.className = danger ? 'primary danger' : 'primary';
+      function done(v) { dlg.close(); cleanup(); resolve(v); }
+      function onOk() { done(true); } function onCancel() { done(false); }
+      function onClose() { cleanup(); resolve(false); }
+      function cleanup() { ok.removeEventListener('click', onOk); $('confirmCancel').removeEventListener('click', onCancel); dlg.removeEventListener('cancel', onClose); }
+      ok.addEventListener('click', onOk); $('confirmCancel').addEventListener('click', onCancel); dlg.addEventListener('cancel', onClose);
+      dlg.showModal();
+      $('confirmCancel').focus();  // safe default focus for destructive prompts
+    });
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function busy(btn, fn) {
+    return function () {
+      if (btn) btn.disabled = true;
+      return Promise.resolve().then(fn).catch(function (e) {
+        log('Error: ' + friendly(e) + ' [' + (e && (e.name + ': ' + e.message)) + ']', 'err');
+        toast(friendly(e));
+      }).then(function () { if (btn) btn.disabled = false; });
+    };
+  }
+
+  function renderHero(probe, err) {
+    var hero = $('hero');
+    if (err) {
+      hero.dataset.state = 'bad';
+      $('heroTitle').textContent = 'Storage is not available here';
+      $('heroBody').textContent = friendly(err) + ' Life OS cannot save data in this mode.';
+      return;
+    }
+    var L = state.launches;
+    if (probe) {
+      var sameLaunch = probe.launch === L.count;
+      hero.dataset.state = sameLaunch ? 'info' : 'ok';
+      $('heroTitle').textContent = sameLaunch
+        ? 'Test value saved (this launch). Now close completely and reopen.'
+        : '✅ Data survived relaunch — value from launch #' + probe.launch + ' found';
+      $('heroBody').textContent = 'This is launch #' + L.count + '. Value "' + probe.token + '" was written ' +
+        new Date(probe.writtenAt).toLocaleString() + ' (' + probe.platform + ').';
+    } else {
+      hero.dataset.state = 'warn';
+      $('heroTitle').textContent = 'No test value yet';
+      $('heroBody').textContent = 'This is launch #' + L.count + '. Tap “Write test value”, then close completely and reopen.';
+    }
+  }
+
+  function renderEnv() {
+    var rows = [
+      ['Platform', PLATFORM + (isIOS() ? ' (iOS/iPadOS)' : '')],
+      ['Page URL', location.href.split('?')[0]],
+      ['Origin', location.origin],
+      ['Secure context', String(window.isSecureContext)],
+      ['IndexedDB', state.storageOk ? 'working' : 'NOT working'],
+      ['Launches here', state.launches ? String(state.launches.count) : '—'],
+      ['Persistent storage', '…'],
+      ['Storage used / quota', '…'],
+      ['Service worker', 'serviceWorker' in navigator ? (navigator.serviceWorker.controller ? 'controlling (offline ready)' : 'available, not controlling') : 'not available'],
+      ['Display mode', matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'standalone (installed)' : 'browser'],
+      ['Today (local key)', localDateKey()],
+      ['toISOString date', new Date().toISOString().slice(0, 10) + ' (UTC — never used for day keys)'],
+      ['Time zone', (Intl.DateTimeFormat().resolvedOptions().timeZone || '?') + ', UTC' + (-new Date().getTimezoneOffset() / 60 >= 0 ? '+' : '') + (-new Date().getTimezoneOffset() / 60)],
+      ['User agent', navigator.userAgent],
+      ['PoC version', POC_VERSION + ' · schema v' + SCHEMA_VERSION]
+    ];
+    $('env').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd data-k="' + esc(r[0]) + '">' + esc(r[1]) + '</dd>'; }).join('');
+    storageInfo().then(function (info) {
+      var dd = document.querySelector('[data-k="Persistent storage"]'); if (dd) dd.textContent = info.persisted;
+      var dq = document.querySelector('[data-k="Storage used / quota"]'); if (dq) dq.textContent = info.estimate;
+    });
+  }
+  function mb(n) { return (n / 1048576).toFixed(1) + ' MB'; }
+  function storageInfo() {
+    var s = navigator.storage;
+    var p = s && s.persisted ? s.persisted().then(String, function () { return 'error'; }) : Promise.resolve('API not available');
+    var e = s && s.estimate ? s.estimate().then(function (x) { return mb(x.usage || 0) + ' / ' + mb(x.quota || 0); }, function () { return 'error'; }) : Promise.resolve('API not available');
+    return Promise.all([p, e]).then(function (v) { return { persisted: v[0], estimate: v[1] }; });
+  }
+  function requestPersist() {
+    if (!navigator.storage || !navigator.storage.persist) return Promise.resolve('API not available');
+    return navigator.storage.persist().then(String, function (e) { return 'error: ' + e.name; });
+  }
+
+  // ---------------------------------------------------------------- actions
+  function doExport() {
+    return buildBackup().then(function (b) {
+      var name = 'LifeOS-PoC-Backup-' + localDateKey() + '.json';
+      var text = JSON.stringify(b);
+      return saveTextFile(name, text).then(function (r) {
+        if (r.cancelled) { op('export', 'cancelled'); log('Export cancelled'); return r; }
+        op('export', 'ok', name);
+        log('Exported ' + b.counts.records + ' records (' + mb(text.length) + ') via ' + r.via + ' → ' + r.where, 'ok');
+        toast('Backup saved to ' + r.where);
+        return r;
+      });
+    }).catch(function (e) { op('export', 'error', friendly(e)); throw e; });
+  }
+
+  function doImportFile(file) {
+    if (!file) return Promise.resolve();
+    if (file.size > MAX_BACKUP_BYTES) { var m = 'This file is too large to be a Life OS backup.'; op('restore', 'rejected', m); log(m, 'err'); toast(m); return Promise.resolve(); }
+    return file.text().then(function (text) {
+      var v = validateBackupText(text);
+      if (!v.ok) { op('restore', 'rejected', v.message); log('Restore rejected: ' + v.message + ' Nothing was changed.', 'err'); toast(v.message + ' Nothing was changed.'); return; }
+      return counts().then(function (c) {
+        var body = '<p>Backup from <b>' + esc(new Date(v.summary.exportedAt).toLocaleString()) + '</b> (Life OS ' + esc(v.summary.appVersion) + ') with <b>' +
+          v.summary.records + '</b> records.</p><p>This will <b>replace</b> the ' + c.records +
+          ' records currently on this device. If you might need them, cancel and export a backup first.</p>';
+        return confirmDialog('Replace your data with this backup?', body, 'Replace my data', true).then(function (yes) {
+          if (!yes) { op('restore', 'cancelled'); log('Restore cancelled — nothing changed.'); return; }
+          return restoreBackup(v.backup).then(function () {
+            op('restore', 'ok', String(v.summary.records));
+            log('Restored ' + v.summary.records + ' records from backup.', 'ok');
+            toast('Backup restored');
+            return readProbe().then(function (p) { renderHero(p); });
+          });
+        });
+      });
+    }).catch(function (e) { op('restore', 'error', friendly(e)); throw e; });
+  }
+
+  function doClear() {
+    return counts().then(function (c) {
+      return confirmDialog('Clear all test data?', '<p>This permanently deletes ' + c.records + ' test records and the test value on this device. Export a backup first if you want to keep them.</p>', 'Delete test data', true);
+    }).then(function (yes) {
+      if (!yes) { op('clear', 'cancelled'); return; }
+      return clearAll().then(function () { op('clear', 'ok'); log('All test data cleared.', 'ok'); toast('Test data cleared'); renderHero(null); });
+    });
+  }
+
+  // In-page self-test: safe for real data (snapshots first, restores at the end).
+  function selfTest() {
+    var list = $('selfTestList'); list.innerHTML = ''; $('selfTestCard').hidden = false;
+    var results = [];
+    function add(status, name, detail) {
+      results.push({ status: status, name: name, detail: detail || '' });
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="tag ' + status + '">' + status + '</span><span>' + esc(name) + (detail ? ' <span style="color:var(--muted)">— ' + esc(detail) + '</span>' : '') + '</span>';
+      list.appendChild(li);
+    }
+    function check(cond, name, detail) { add(cond ? 'pass' : 'fail', name, detail); return cond; }
+    var snapshot;
+    return buildBackup().then(function (b) {
+      snapshot = b;
+      check(true, 'IndexedDB opens and reads', snapshot.counts.records + ' existing records');
+      return writeProbe();
+    }).then(function (w) { return readProbe().then(function (r) { check(r && r.token === w.token, 'Write → read test value', w.token); }); })
+    .then(function () { return counts(); })
+    .then(function (before) {
+      return addRecords(1000).then(function (r) {
+        return counts().then(function (after) { check(after.records - before.records === 1000, 'Write 1,000 dated records in batch', r.ms + ' ms'); });
+      });
+    })
+    .then(function () { return countByDate(localDateKey()).then(function (n) { check(n > 0, 'Query records by local date', n + ' records today'); }); })
+    .then(function () { return buildBackup(); })
+    .then(function (b) {
+      var text = JSON.stringify(b);
+      var v = validateBackupText(text);
+      check(v.ok, 'Export produces a valid backup', mb(text.length));
+      return clearAll().then(counts).then(function (c) {
+        check(c.records === 0, 'Clear data');
+        return restoreBackup(v.backup);
+      }).then(counts).then(function (c) {
+        check(c.records === b.counts.records, 'Restore brings every record back', c.records + ' records');
+        var bad = [
+          ['empty file', ''],
+          ['not JSON', 'PK\u0003\u0004garbage'],
+          ['wrong kind of file', '{"hello":"world"}'],
+          ['newer version', JSON.stringify(Object.assign({}, b, { schemaVersion: 99 }))],
+          ['edited / corrupted', text.replace('sample #1"', 'sample #1 edited"')],
+          ['truncated download', text.slice(0, Math.floor(text.length / 2))]
+        ];
+        bad.forEach(function (x) { var r = validateBackupText(x[1]); check(!r.ok, 'Rejects invalid backup: ' + x[0], r.ok ? 'ACCEPTED' : r.message); });
+      });
+    })
+    .then(function () {
+      var ok = localDateKey(new Date(2026, 8, 15, 23, 59)) === '2026-09-15' && addDays('2026-10-31', 1) === '2026-11-01' &&
+        addDays('2026-03-08', 1) === '2026-03-09' && addDays('2026-01-01', -1) === '2025-12-31' && addDays('2028-02-28', 1) === '2028-02-29';
+      check(ok, 'Local date keys (midnight, DST, leap year)');
+    })
+    .then(function () { return restoreBackup(snapshot).then(function () { add('info', 'Your previous test data was put back'); }); })
+    .then(function () { return requestPersist().then(function (p) { add('info', 'Persistent storage granted', p); }); })
+    .then(function () {
+      var failed = results.filter(function (r) { return r.status === 'fail'; }).length;
+      op('selftest', failed ? 'fail' : 'ok', JSON.stringify(results));
+      log('Self-test finished: ' + (failed ? failed + ' FAILED' : 'all passed'), failed ? 'err' : 'ok');
+      return results;
+    })
+    .catch(function (e) {
+      add('fail', 'Self-test crashed', friendly(e) + ' (' + e.name + ')');
+      op('selftest', 'fail');
+      if (snapshot) return restoreBackup(snapshot).then(function () { return results; });
+      return results;
+    });
+  }
+
+  // ---------------------------------------------------------------- wire up
+  function bind(id, fn) { var b = $(id); b.addEventListener('click', busy(b, fn)); }
+  bind('btnWrite', function () { return writeProbe().then(function (v) { op('write', 'ok', v.token); log('Wrote test value ' + v.token, 'ok'); renderHero(v); }); });
+  bind('btnRead', function () { return readProbe().then(function (v) { op('read', 'ok', v ? v.token : ''); log(v ? 'Read test value ' + v.token + ' (written ' + v.writtenAt + ')' : 'No test value stored'); }); });
+  bind('btnAdd500', function () { return addRecords(500).then(function (r) { log('Added 500 records in ' + r.ms + ' ms', 'ok'); }); });
+  bind('btnAdd20k', function () { return addRecords(20000).then(function (r) { log('Added 20,000 records in ' + r.ms + ' ms', 'ok'); }); });
+  bind('btnCount', function () { return counts().then(function (c) { log('Records: ' + c.records + ', settings rows: ' + c.meta); }); });
+  bind('btnExport', doExport);
+  bind('btnClear', doClear);
+  bind('btnSelfTest', selfTest);
+  bind('btnPersist', function () { return requestPersist().then(function (p) { log('navigator.storage.persist() → ' + p); renderEnv(); }); });
+  $('fileImport').addEventListener('change', function (e) {
+    var input = e.target, file = input.files && input.files[0];
+    busy(null, function () { return doImportFile(file); })().then(function () { input.value = ''; });
+  });
+  $('lblImport').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('fileImport').click(); } });
+
+  // Web-only extras (hosted demo / iPhone test): manifest + service worker. Skipped on file:// and in native shells.
+  if (PLATFORM === 'web') {
+    var link = document.createElement('link'); link.rel = 'manifest'; link.href = 'manifest.webmanifest'; document.head.appendChild(link);
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register('sw.js').then(function () { log('Service worker registered (offline support)'); }, function (e) { log('Service worker failed: ' + e.message, 'err'); });
+    }
+  }
+
+  var ready = openDB()
+    .then(recordLaunch)
+    .then(function (L) { state.launches = L; state.storageOk = true; return readProbe(); })
+    .then(function (p) {
+      renderHero(p); renderEnv();
+      log('Launch #' + state.launches.count + ' on ' + PLATFORM + (p ? ' — found test value ' + p.token : ''));
+      window.lifeosPocReady = true;
+    })
+    .catch(function (e) {
+      state.storageOk = false; renderHero(null, e); renderEnv();
+      log('Storage unavailable: ' + (e && (e.name + ': ' + e.message)), 'err');
+      window.lifeosPocError = (e && e.name) || 'Error';
+    });
+
+  window.lifeosPoc = {
+    ready: ready, version: POC_VERSION, platform: PLATFORM,
+    localDateKey: function (d) { return localDateKey(d ? new Date(d) : undefined); }, addDays: addDays,
+    launches: function () { return state.launches; },
+    writeProbe: writeProbe, readProbe: readProbe, addRecords: addRecords, counts: counts,
+    countByDate: countByDate, queryRange: queryRange, buildBackup: buildBackup,
+    validateBackupText: function (t) { var v = validateBackupText(t); return { ok: v.ok, message: v.message }; },
+    storageInfo: storageInfo, requestPersist: requestPersist, selfTest: function () { return selfTest(); },
+    roundtrip: function () {
+      var t0 = performance.now(), t1, t2;
+      return buildBackup().then(function (b) {
+        var text = JSON.stringify(b); t1 = performance.now();
+        var v = validateBackupText(text); t2 = performance.now();
+        if (!v.ok) return { ok: false, message: v.message };
+        return restoreBackup(v.backup).then(counts).then(function (c) {
+          return { ok: c.records === b.counts.records, exportMs: Math.round(t1 - t0), validateMs: Math.round(t2 - t1), restoreMs: Math.round(performance.now() - t2) };
+        });
+      });
+    }
+  };
+})();
+</script>
+</body>
+</html>

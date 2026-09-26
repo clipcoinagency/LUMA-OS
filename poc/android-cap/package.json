@@ -1,0 +1,19 @@
+{
+  "name": "lifeos-poc-android",
+  "private": true,
+  "description": "Capacitor shell that packages the SAME poc/web files into an Android APK.",
+  "scripts": {
+    "bridge": "esbuild bridge-src.js --bundle --format=iife --minify --outfile=../web/native-capacitor.js",
+    "sync": "npm run bridge && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/filesystem": "8.1.3",
+    "@capacitor/share": "8.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2",
+    "esbuild": "0.28.2"
+  }
+}

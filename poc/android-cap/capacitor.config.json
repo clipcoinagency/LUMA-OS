@@ -1,0 +1,9 @@
+{
+  "appId": "com.lifeos.poc",
+  "appName": "Life OS PoC",
+  "webDir": "../web",
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": true
+  }
+}

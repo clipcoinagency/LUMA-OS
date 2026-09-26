@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>file:// script-loading probe</title></head>
+<body>
+<!-- Which script-loading styles work when a page is opened from disk (file://)?
+     The real app build must only use the styles that pass everywhere. -->
+<script>window.__probe = { inlineClassic: true };</script>
+<script src="probe-classic.js"></script>
+<script type="module">window.__probe.inlineModule = true;</script>
+<script type="module" src="probe-module.js"></script>
+<script>
+  fetch('probe-classic.js').then(function () { window.__probe.fetchSibling = true; }, function () { window.__probe.fetchSibling = false; });
+  setTimeout(function () { window.__probe.done = true; document.body.textContent = JSON.stringify(window.__probe); }, 1200);
+</script>
+</body>
+</html>

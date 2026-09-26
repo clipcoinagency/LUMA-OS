@@ -1,0 +1,18 @@
+{
+  "name": "life-os",
+  "version": "0.0.0-phase0",
+  "private": true,
+  "description": "Life OS V1 — local-first personal productivity app (shared web core + platform packaging).",
+  "type": "module",
+  "scripts": {
+    "icons": "node scripts/make-icons.mjs",
+    "poc:validate": "node poc/tests/validate.mjs",
+    "poc:serve": "node poc/tests/serve.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

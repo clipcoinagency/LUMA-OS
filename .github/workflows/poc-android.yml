@@ -1,0 +1,35 @@
+name: "PoC · Android APK (Capacitor)"
+
+on:
+  push:
+    paths: ["poc/web/**", "poc/android-cap/**", ".github/workflows/poc-android.yml"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poc/android-cap
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm install --no-audit --no-fund
+      - name: Bundle native bridge (Filesystem + Share)
+        run: npm run bridge
+      - name: Generate Android project from the shared web files
+        run: |
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: poc/android-cap/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Report size
+        run: ls -la android/app/build/outputs/apk/debug/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-PoC-android-debug-apk
+          path: poc/android-cap/android/app/build/outputs/apk/debug/app-debug.apk

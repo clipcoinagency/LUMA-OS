@@ -1,0 +1,50 @@
+name: "PoC · browser storage validation"
+
+on:
+  push:
+    paths: ["poc/web/**", "poc/tests/**", "package.json", ".github/workflows/poc-validate.yml"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: validate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            only: edge,chrome,firefox,webkit,edge-app,tz
+          - os: macos-latest
+            only: chrome,firefox,webkit,tz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npx playwright install firefox webkit
+      - name: Validate (Playwright, real browser restarts)
+        run: node poc/tests/validate.mjs --only=${{ matrix.only }}
+        continue-on-error: true
+      - name: Real Safari via safaridriver (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          sudo safaridriver --enable
+          node poc/tests/safari-webdriver.mjs
+        continue-on-error: true
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          cat poc/tests/results/VALIDATION-RESULTS.md >> "$GITHUB_STEP_SUMMARY" || true
+          echo '## Real Safari (safaridriver)' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat poc/tests/results/safari-webdriver.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo 'n/a' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat poc/tests/results/VALIDATION-RESULTS.md || true
+          cat poc/tests/results/safari-webdriver.json 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-${{ matrix.os }}
+          path: poc/tests/results/

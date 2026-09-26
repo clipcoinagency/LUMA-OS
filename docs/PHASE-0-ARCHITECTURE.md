@@ -14,7 +14,7 @@ Legend: ✅ validated here with evidence · 🟨 build validated / engine valida
 | Area | Decision | Status |
 |---|---|---|
 | Shared core | One web app, built to **one self-contained `index.html`** (all JS/CSS/fonts/icons inlined, classic scripts only) | ✅ file:// rules verified |
-| Framework | **Svelte 5 + TypeScript + Vite + vite-plugin-singlefile** (Phase 1) | decision |
+| Framework | **Svelte 5 + TypeScript + Vite + vite-plugin-singlefile** — build output (44.8 KB incl. runtime + transitions) runs from file:// in Edge + Chrome, IndexedDB survives restart | ✅ `poc/stack-check` |
 | Storage | **IndexedDB**, own thin wrapper, versioned migrations, strict durability | ✅ Edge + Chrome |
 | Dates | Local calendar keys `YYYY-MM-DD`; never `toISOString()` for days | ✅ 3 time zones + DST |
 | Money | Integer minor units (cents) + ISO currency code | decision |

@@ -1,0 +1,16 @@
+{
+  "name": "lifeos-stack-check",
+  "private": true,
+  "type": "module",
+  "description": "Phase 0: proves Svelte 5 + Vite + vite-plugin-singlefile output works from file:// with IndexedDB.",
+  "scripts": {
+    "build": "vite build",
+    "check-output": "node check-output.mjs"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "svelte": "5.57.1",
+    "vite": "8.3.1",
+    "vite-plugin-singlefile": "2.3.3"
+  }
+}

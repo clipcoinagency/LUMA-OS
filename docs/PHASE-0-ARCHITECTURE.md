@@ -15,7 +15,7 @@ Legend: ✅ validated here with evidence · 🟨 build validated / engine valida
 |---|---|---|
 | Shared core | One web app, built to **one self-contained `index.html`** (all JS/CSS/fonts/icons inlined, classic scripts only) | ✅ file:// rules verified |
 | Framework | **Svelte 5 + TypeScript + Vite + vite-plugin-singlefile** — build output (44.8 KB incl. runtime + transitions) runs from file:// in Edge + Chrome, IndexedDB survives restart | ✅ `poc/stack-check` |
-| Storage | **IndexedDB**, own thin wrapper, versioned migrations, strict durability | ✅ Edge + Chrome |
+| Storage | **IndexedDB**, own thin wrapper, versioned migrations, strict durability | ✅ Edge, Chrome, Firefox, WebKit; real Safari (http) |
 | Dates | Local calendar keys `YYYY-MM-DD`; never `toISOString()` for days | ✅ 3 time zones + DST |
 | Money | Integer minor units (cents) + ISO currency code | decision |
 | Backup | Versioned JSON with format marker, schema version, counts, checksum; validate → preview → confirm → **atomic** restore | ✅ |
@@ -100,9 +100,16 @@ Windows primary is the Browser Edition, and a desktop app is only shipped once i
     from **file://** on Windows *and* macOS — strong evidence the Safari engine supports our workflow.
     Its offline-reload check failed with "WebKit encountered an internal error" (a Playwright
     offline-emulation + service-worker limitation) → must be confirmed on a real iPhone (test C3).
-  - **Firefox (Playwright build): hung on launch on both OSes** → diagnostics workflow in progress.
-  - **Real Safari 26.6 (safaridriver):** the page script did not run under WebDriver from file://
-    → diagnostics in progress (WebDriver may block file:// navigation; not the same as a user double-click).
+  - **Firefox 155:** full suite passes on file:// (25/25) and http (26/26) on Windows + macOS, including
+    restarts, restore, invalid backups and folder move (data still visible); write/read also passes in
+    ephemeral and persistent profiles
+    ([diagnostics](validation/ci/)). The earlier "hang" was **`navigator.storage.persist()` showing a
+    permission prompt** that headless automation never answers. Product rule: never await
+    `persist()` in a user flow; ask only from an explicit "keep my data safe" action, with a timeout.
+  - **Real Safari 26.6 (safaridriver):** passes the **entire self-test** (IndexedDB, 1,000 dated records,
+    export, clear, atomic restore, all 6 invalid-backup rejections, date keys) over http://localhost.
+    safaridriver refuses to open file:// pages ("Failed to open page") — an automation restriction, so
+    **double-click in Safari on a real Mac remains test B1**.
 - Android debug APK built with Capacitor 8 from the same `poc/web` → **success, 3.8 MB zipped**.
 - Tauri 2 desktop build → **success**: Windows NSIS installer + exe 2.75 MB zipped, macOS universal DMG 3.43 MB zipped.
 
@@ -207,9 +214,10 @@ Electron was rejected: ~90–100 MB per platform exceeds Etsy's 20 MB file limit
 
 ### macOS — 🟨 pending real Mac
 
-Browser Edition in Safari/Chrome is the candidate primary. Real Safari's IndexedDB-on-file:// behaviour
-is checked in CI via `safaridriver` (same session only — Safari automation uses ephemeral storage);
-**quit-and-relaunch persistence and Safari's 7-day storage rule must be tested on a real Mac.**
+Browser Edition in Safari/Chrome is the candidate primary. Evidence so far: Chrome on macOS passes
+everything from file://; the WebKit engine passes all persistence/backup checks from file://; real
+Safari 26.6 passes the full self-test over localhost. Not yet proven: **real Safari opened by
+double-click (file://), quit-and-relaunch persistence, and Safari's 7-day storage rule** → real Mac (B1).
 Unsigned `.app`s on macOS 15+ require System Settings → Privacy & Security → "Open Anyway"
 (the Control-click bypass was removed), so the Tauri `.dmg` should only ship **notarized**
 (Apple Developer Program, $99/yr).
@@ -285,8 +293,8 @@ adapter — reusing the proven PoC code.
 | PoC · Android APK (Capacitor 8) | ✅ success (2 min) | `app-debug.apk`, 3.78 MB zipped |
 | PoC · Desktop app (Tauri 2) — Windows | ✅ success | NSIS installer + exe, 2.75 MB zipped |
 | PoC · Desktop app (Tauri 2) — macOS | ✅ success | universal DMG, 3.43 MB zipped |
-| PoC · browser validation — Windows runner | Edge ✅ Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox ⏳ hung | [results](validation/ci/Windows-VALIDATION-RESULTS.md) |
-| PoC · browser validation — macOS runner | Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox ⏳ hung, real Safari ⏳ | [results](validation/ci/macOS-VALIDATION-RESULTS.md) |
+| PoC · browser validation — Windows runner | Edge ✅ Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox 155 ✅ 25/25 file:// + 26/26 http | [results](validation/ci/Windows-VALIDATION-RESULTS.md) |
+| PoC · browser validation — macOS runner | Chrome ✅ WebKit ✅ (offline-reload ❌ automation) Firefox 155 ✅ 25/25 file:// + 26/26 http, **real Safari 26.6 ✅ self-test (http)** | [results](validation/ci/macOS-VALIDATION-RESULTS.md) |
 
 Artifacts are downloadable (GitHub login required) from
 https://github.com/clipcoinagency/LUMA-OS/actions — these are the files for the real-device tests.

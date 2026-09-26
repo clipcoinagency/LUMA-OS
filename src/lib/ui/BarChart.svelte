@@ -22,7 +22,7 @@
   </div>
   <table class="sr-only">
     <caption>{label}</caption>
-    <tbody>{#each data as d (d.label)}<tr><th scope="row">{d.label}</th><td>{format(d.value)}</td></tr>{/each}</tbody>
+    <tbody>{#each data as d, i (i)}<tr><th scope="row">{d.label}</th><td>{format(d.value)}</td></tr>{/each}</tbody>
   </table>
 </figure>
 

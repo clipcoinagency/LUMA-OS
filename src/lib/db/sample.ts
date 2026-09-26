@@ -69,7 +69,8 @@ export async function seedSampleData(days = 90, seed = 7): Promise<Record<string
 
     const nTasks = 1 + Math.floor(r() * 3);
     for (let k = 0; k < nTasks; k++) {
-      const done = d < end ? r() < 0.8 : r() < 0.3;
+      const age = days - 1 - i; // days before today
+      const done = age === 0 ? r() < 0.3 : age < 7 ? r() < 0.85 : r() < 0.99;
       tasks.push({ id: newId('task'), title: pick(taskTitles), notes: '', priority: pick(['none', 'low', 'medium', 'high'] as const), dueDate: d, tags: [], done, completedOn: done ? d : null, createdOn: addDays(d, -1) < start ? start : addDays(d, -1), ...stamp });
     }
 

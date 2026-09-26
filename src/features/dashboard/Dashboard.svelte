@@ -1,66 +1,100 @@
 <script lang="ts">
-  // Phase 2 dashboard frame: greeting + the user's widgets in their chosen order and layout.
-  // Widget bodies are filled with live data in Phase 3.
+  // Dashboard: greeting, quick actions, then the user's widgets in their order.
+  // Layout: widgets are dealt into balanced columns (each goes to the currently shortest column,
+  // by estimated height) — preserves reading order and never leaves grid gaps. Column count
+  // follows the chosen layout, the screen width and how many widgets there are.
+  import type { Component } from 'svelte';
   import { Settings2 } from '@lucide/svelte';
-  import Card from '../../lib/ui/Card.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
+  import { clock } from '../../lib/clock.svelte';
   import { router } from '../../lib/router.svelte';
-  import { MODULES, WIDGETS } from '../../lib/modules';
   import { visibleWidgets } from '../../lib/workspace';
-  import { formatDateKey, today } from '../../lib/util/dates';
+  import { formatDateKey } from '../../lib/util/dates';
+  import type { WidgetId } from '../../lib/db/schema';
+  import QuickActions from './widgets/QuickActions.svelte';
+  import TodayTasks from './widgets/TodayTasks.svelte';
+  import HabitCheckin from './widgets/HabitCheckin.svelte';
+  import GoalProgress from './widgets/GoalProgress.svelte';
+  import Upcoming from './widgets/Upcoming.svelte';
+  import WellnessToday from './widgets/WellnessToday.svelte';
+  import FinanceMonth from './widgets/FinanceMonth.svelte';
+  import RecentNotes from './widgets/RecentNotes.svelte';
+  import WeekStats from './widgets/WeekStats.svelte';
 
-  const widgets = $derived(visibleWidgets(app.workspace!));
-  const layout = $derived(app.workspace!.dashboardLayout);
+  const COMPONENTS: Partial<Record<WidgetId, Component>> = {
+    'today-tasks': TodayTasks, 'habit-progress': HabitCheckin, 'goal-progress': GoalProgress, 'upcoming-events': Upcoming,
+    'wellness-summary': WellnessToday, 'finance-summary': FinanceMonth, 'recent-notes': RecentNotes, 'week-stats': WeekStats,
+  };
+  const WEIGHT: Partial<Record<WidgetId, number>> = {
+    'today-tasks': 6, 'habit-progress': 6, 'goal-progress': 5, 'upcoming-events': 4, 'wellness-summary': 6,
+    'finance-summary': 5, 'recent-notes': 5, 'week-stats': 5,
+  };
+
+  let width = $state(800);
+  const ws = $derived(app.workspace!);
+  const all = $derived(visibleWidgets(ws));
+  const showQuick = $derived(all.includes('quick-actions'));
+  const hasActivity = $derived(ws.enabledModules.some((m) => m === 'tasks' || m === 'habits' || m === 'wellness'));
+  const cards = $derived(all.filter((w) => w !== 'quick-actions' && (w !== 'week-stats' || hasActivity)));
+
+  const cols = $derived.by(() => {
+    const max = ws.dashboardLayout === 'focus' ? 1 : ws.dashboardLayout === 'compact' ? (width >= 1060 ? 3 : width >= 660 ? 2 : 1) : width >= 720 ? 2 : 1;
+    return Math.max(1, Math.min(max, cards.length));
+  });
+  const columns = $derived.by(() => {
+    const out: WidgetId[][] = Array.from({ length: cols }, () => []);
+    const h = new Array(cols).fill(0) as number[];
+    for (const w of cards) {
+      const i = h.indexOf(Math.min(...h));
+      out[i]!.push(w);
+      h[i]! += WEIGHT[w] ?? 5;
+    }
+    return out;
+  });
+
   const name = $derived(app.settings!.displayName);
-
-  function greeting(): string {
-    const h = new Date().getHours();
-    return h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-  }
+  const greeting = $derived(clock.hour < 5 ? 'Good night' : clock.hour < 12 ? 'Good morning' : clock.hour < 18 ? 'Good afternoon' : 'Good evening');
 </script>
 
-<header class="hello">
-  <p class="date">{formatDateKey(today())}</p>
-  <h1>{greeting()}{name ? `, ${name}` : ''}</h1>
-</header>
+<div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
+  <header class="hello">
+    <p class="date">{formatDateKey(clock.today)}</p>
+    <h1>{greeting}{name ? `, ${name}` : ''}</h1>
+  </header>
 
-{#if widgets.length === 0}
-  <Card>
+  {#if showQuick}<div class="quick"><QuickActions /></div>{/if}
+
+  {#if cards.length === 0 && !showQuick}
     <div class="none">
-      <p>Your dashboard is empty. Pick the widgets you want to see.</p>
+      <p>Your dashboard is empty. Choose the widgets you want to see.</p>
       <Button variant="primary" onclick={() => router.go({ name: 'settings' })}>{#snippet icon()}<Settings2 />{/snippet}Choose widgets</Button>
     </div>
-  </Card>
-{:else}
-  <div class="grid {layout}">
-    {#each widgets as id, i (id)}
-      {@const wd = WIDGETS[id]}
-      {@const mod = wd.module ? MODULES[wd.module] : null}
-      <div class="cell" class:wide={i === 0 && layout !== 'focus'} style="--i:{i}">
-        <Card title={wd.name}>
-          <div class="placeholder" style="--c:{mod?.color ?? 'var(--accent)'}">
-            {#if mod}<span class="ico" aria-hidden="true"><mod.icon size={20} /></span>{/if}
-            <p class="meta">{wd.description}</p>
-          </div>
-        </Card>
-      </div>
-    {/each}
-  </div>
-{/if}
+  {:else}
+    <div class="cols" style="--cols:{cols}">
+      {#each columns as col, ci (ci)}
+        <div class="dcol">
+          {#each col as w, i (w)}
+            {@const C = COMPONENTS[w]}
+            {#if C}<div class="cell" style="--i:{ci + i * cols}"><C /></div>{/if}
+          {/each}
+        </div>
+      {/each}
+    </div>
+  {/if}
+</div>
 
 <style>
-  .hello { display: grid; gap: var(--space-1); margin-bottom: var(--space-6); }
+  .dash { max-width: 1180px; }
+  .dash.focus { max-width: 720px; }
+  .hello { display: grid; gap: var(--space-1); margin-bottom: var(--space-5); }
   .date { color: var(--text-2); font-weight: 600; }
   h1 { font-size: clamp(var(--text-2xl), 5vw, var(--text-3xl)); }
-  .grid { display: grid; gap: var(--space-4); }
-  .focus { grid-template-columns: minmax(0, 720px); }
-  .balanced { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
-  .compact { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: var(--space-3); }
-  @media (min-width: 900px) { .balanced .wide { grid-column: span 2; } }
-  .cell { animation: rise var(--dur-slow) var(--ease-out) both; animation-delay: calc(var(--i) * 45ms); }
+  .quick { margin-bottom: var(--space-4); }
+  .cols { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
+  .dcol { display: grid; gap: var(--space-4); min-width: 0; align-content: start; }
+  .compact .cols, .compact .dcol { gap: var(--space-3); }
+  .cell { animation: rise var(--dur-slow) var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
-  .placeholder { display: flex; align-items: center; gap: var(--space-3); min-height: 64px; }
-  .ico { width: 40px; height: 40px; border-radius: var(--radius-md); display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); flex: none; }
-  .none { display: grid; gap: var(--space-4); justify-items: start; }
+  .none { display: grid; gap: var(--space-4); justify-items: start; padding: var(--space-6); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
 </style>

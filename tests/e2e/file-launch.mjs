@@ -85,7 +85,7 @@ for (const channel of channels) {
   check((await theme(page)) === 'dark', 'Relaunch: onboarding skipped, theme + name kept');
   nav = await navLabels(page);
   check(nav[1]?.trim() === 'Habits', 'Relaunch: module order kept');
-  check(await page.locator('.grid.focus').count() === 1, 'Relaunch: Focus layout kept');
+  check(await page.locator('.dash.focus').count() === 1, 'Relaunch: Focus layout kept');
 
   // settings: turn Finance on → widget + nav appear; Habits off → gone
   await page.locator('aside.sidebar').getByRole('link', { name: 'Settings' }).click();

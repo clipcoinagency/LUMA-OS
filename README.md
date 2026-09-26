@@ -11,7 +11,8 @@ no tracking — **your data stays on your device**.
 | 0 · Architecture & platform feasibility | ✅ Windows/engines validated · device tests pending ([plan](docs/DEVICE-TEST-PLAN.md)) |
 | 1 · Foundation, design system, data layer | ✅ done |
 | 2 · Onboarding & workspace customisation | ✅ done |
-| 3 · Dashboard (live widgets) | next |
+| 3 · Dashboard (live widgets) | ✅ done |
+| 4 · The seven modules | next |
 
 - 📄 Architecture & decisions: [`docs/PHASE-0-ARCHITECTURE.md`](docs/PHASE-0-ARCHITECTURE.md)
 - ✅ Validation evidence: [`docs/validation/`](docs/validation/)

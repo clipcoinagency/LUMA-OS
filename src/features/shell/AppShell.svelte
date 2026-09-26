@@ -4,6 +4,7 @@
   import type { Snippet } from 'svelte';
   import { LayoutDashboard, Settings as SettingsIcon, MoreHorizontal } from '@lucide/svelte';
   import Modal from '../../lib/ui/Modal.svelte';
+  import QuickHost from '../quick/QuickHost.svelte';
   import { app } from '../../lib/app.svelte';
   import { router, href, type Route } from '../../lib/router.svelte';
   import { MODULES } from '../../lib/modules';
@@ -68,6 +69,8 @@
     </button>
   </nav>
 </div>
+
+<QuickHost />
 
 <Modal bind:open={more} title="More" size="sm">
   <div class="sheet-links">

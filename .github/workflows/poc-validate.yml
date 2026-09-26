@@ -5,6 +5,9 @@ on:
     paths: ["poc/web/**", "poc/tests/**", "package.json", ".github/workflows/poc-validate.yml"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: poc-validate-${{ github.ref }}
   cancel-in-progress: true
@@ -50,6 +53,21 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat poc/tests/results/VALIDATION-RESULTS.md || true
           cat poc/tests/results/safari-webdriver.json 2>/dev/null || true
+      - name: Annotations (readable without login)
+        if: always()
+        run: node poc/tests/annotate.mjs "${{ runner.os }}"
+      - name: Publish results to ci-results branch
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          mkdir -p /tmp/out && cp -r poc/tests/results/. /tmp/out/ 2>/dev/null || true
+          cd /tmp/out
+          git init -q -b "ci-results-${{ runner.os }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Validation results for ${{ github.sha }} (${{ runner.os }})" || true
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:ci-results-${{ runner.os }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

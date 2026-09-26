@@ -20,8 +20,8 @@ Legend: ✅ validated here with evidence · 🟨 build validated / engine valida
 | Money | Integer minor units (cents) + ISO currency code | decision |
 | Backup | Versioned JSON with format marker, schema version, counts, checksum; validate → preview → confirm → **atomic** restore | ✅ |
 | Offline | Zero network calls in purchased builds; service worker only for the hosted build | ✅ |
-| Windows | **Browser Edition** (`Life OS.html`, opens in Edge by default) = primary. Tauri desktop app only once code-signed | ✅ / 🟨 |
-| macOS | Browser Edition; Tauri `.dmg` only once notarized | 🟨 |
+| Windows | **Browser Edition** (`Life OS.html`, opens in Edge by default) = primary. Tauri desktop app (builds: 2.75 MB) only once code-signed | ✅ / 🟨 |
+| macOS | Browser Edition; Tauri universal `.dmg` (builds: 3.43 MB) only once notarized | 🟨 |
 | Android | **Capacitor APK** wrapping the same `index.html` | 🟨 APK builds (3.8 MB) |
 | iPhone/iPad | **Home-Screen web app** installed once from an https URL, then fully offline | ⬜ needs iPhone test |
 | Etsy | 5 files ≤ 20 MB each: START HERE PDF + Windows + Mac + Android + Any-device zips | decision |
@@ -92,7 +92,7 @@ Windows primary is the Browser Edition, and a desktop app is only shipped once i
 
 - Firefox + WebKit engines on Windows and macOS runners, real **Safari** on macOS via `safaridriver`.
 - Android debug APK built with Capacitor 8 from the same `poc/web` → **success, 3.8 MB zipped**.
-- Tauri 2 desktop build for Windows (NSIS installer) and macOS (universal DMG).
+- Tauri 2 desktop build → **success**: Windows NSIS installer + exe 2.75 MB zipped, macOS universal DMG 3.43 MB zipped.
 
 ---
 
@@ -268,4 +268,14 @@ adapter — reusing the proven PoC code.
 
 ## 8. CI results
 
-_Filled in from the GitHub Actions runs below._
+| Run | Result | Output |
+|---|---|---|
+| PoC · Android APK (Capacitor 8) | ✅ success (2 min) | `app-debug.apk`, 3.78 MB zipped |
+| PoC · Desktop app (Tauri 2) — Windows | ✅ success | NSIS installer + exe, 2.75 MB zipped |
+| PoC · Desktop app (Tauri 2) — macOS | ✅ success | universal DMG, 3.43 MB zipped |
+| PoC · browser validation (Win + macOS, Firefox/WebKit/real Safari) | ⏳ see Actions run | results artifact + run summary |
+
+Artifacts are downloadable (GitHub login required) from
+https://github.com/clipcoinagency/LUMA-OS/actions — these are the files for the real-device tests.
+A successful **build** is not a platform validation: runtime behaviour on devices is still ⬜/🟨 until
+DEVICE-TEST-PLAN.md is executed.

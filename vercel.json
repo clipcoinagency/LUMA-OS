@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "echo 'static PoC: no install'",
-  "buildCommand": "echo 'static PoC: no build'",
-  "outputDirectory": "poc/web",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build && node scripts/vercel-assemble.mjs",
+  "outputDirectory": ".vercel-out",
   "headers": [
     { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }, { "key": "Service-Worker-Allowed", "value": "/" }] },
     { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }, { "key": "Referrer-Policy", "value": "no-referrer" }] }

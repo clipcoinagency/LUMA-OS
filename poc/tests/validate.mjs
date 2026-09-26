@@ -4,7 +4,7 @@
 //   launch #1  open → write test value → write 1,000 dated records → CLOSE THE WHOLE BROWSER
 //   launch #2  reopen same profile → value + records still there → refresh → export (real download)
 //              → clear → restore via file picker (confirm dialog) → reject 6 invalid backups
-//              → cancel path → stress 20,000 records → CLOSE
+//              → cancel path → stress N records (--stress, default 20,000) → CLOSE
 //   launch #3  reopen → restored + stress data survived
 //   extras     folder-move behaviour, offline reload (http), file:// script-loading rules, time zones
 //
@@ -24,6 +24,10 @@ const PORT = 4817;
 const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')));
 const only = args.only ? args.only.split(',') : null;
 const headed = 'headed' in args;
+const STRESS = Number(args.stress || 20000);          // CI uses a smaller number; full 20k measured locally
+const TOTAL = 1000 + STRESS;
+const fmt = (n) => n.toLocaleString('en-US');
+const TARGET_TIMEOUT_MS = Number(args.timeout || 6 * 60 * 1000);
 
 const TARGETS = [
   { id: 'edge', label: 'Microsoft Edge (installed, default .html handler)', type: chromium, launch: { channel: 'msedge' } },
@@ -185,15 +189,15 @@ async function runTarget(t, mode, server) {
     }
 
     // stress / performance
-    const s = await api(page, 'addRecords', 20000);
-    r.info('Stress: write 20,000 more records', `${s.ms} ms`);
+    const s = await api(page, 'addRecords', STRESS);
+    r.info(`Stress: write ${fmt(STRESS)} more records`, `${s.ms} ms`);
     const today = await page.evaluate(() => window.lifeosPoc.localDateKey());
     const monthStart = today.slice(0, 8) + '01';
     const q2 = await page.evaluate(([a, b]) => window.lifeosPoc.queryRange(a, b), [monthStart, today]);
-    r.expect(q2.ms < 1000, 'Month query on 21,000 records < 1 s', `${q2.rows} rows in ${q2.ms} ms`);
+    r.expect(q2.ms < 1000, `Month query on ${fmt(TOTAL)} records < 1 s`, `${q2.rows} rows in ${q2.ms} ms`);
     const bt0 = Date.now();
     const bsize = await page.evaluate(() => window.lifeosPoc.buildBackup().then((b) => JSON.stringify(b).length));
-    r.expect(Date.now() - bt0 < 5000, 'Export of 21,000 records < 5 s', `${Date.now() - bt0} ms, ${(bsize / 1048576).toFixed(1)} MB`);
+    r.expect(Date.now() - bt0 < 5000, `Export of ${fmt(TOTAL)} records < 5 s`, `${Date.now() - bt0} ms, ${(bsize / 1048576).toFixed(1)} MB`);
     const est = await api(page, 'storageInfo');
     r.info('Storage persisted / estimate', `${est.persisted} · ${est.estimate}`);
     await ctx.close(); ctx = null;
@@ -204,11 +208,11 @@ async function runTarget(t, mode, server) {
     ({ page, openMs: opened } = await openApp(ctx, url));
     c = await api(page, 'counts');
     const p5 = await api(page, 'readProbe');
-    r.expect(c.records === 21000 && p5?.token === probe.token, 'Restored + stress data survive another restart', `${c.records} records`);
-    r.info('Cold open with 21,000 records', `${opened} ms (incl. browser page load)`);
+    r.expect(c.records === TOTAL && p5?.token === probe.token, 'Restored + stress data survive another restart', `${c.records} records`);
+    r.info(`Cold open with ${fmt(TOTAL)} records`, `${opened} ms (incl. browser page load)`);
     r.expect((await api(page, 'launches')).count === launchesBefore3 + 1, 'Launch counter keeps counting across restore + restart');
     const rt = await api(page, 'roundtrip');
-    r.expect(rt.ok && rt.restoreMs < 15000, 'Full backup → restore of 21,000 records', `export ${rt.exportMs} ms, validate ${rt.validateMs} ms, restore ${rt.restoreMs} ms`);
+    r.expect(rt.ok && rt.restoreMs < 15000, `Full backup → restore of ${fmt(TOTAL)} records`, `export ${rt.exportMs} ms, validate ${rt.validateMs} ms, restore ${rt.restoreMs} ms`);
 
     // ---------------- mode-specific extras
     if (mode === 'file') {
@@ -336,6 +340,17 @@ function toMarkdown(results, startedAt) {
   return lines.join('\n');
 }
 
+// A hung engine must not stall the whole run: give up on that target and keep going.
+function withTimeout(promise, meta) {
+  let timer;
+  const timeout = new Promise((res) => { timer = setTimeout(() => res({ ...meta, checks: [{ status: 'fail', name: 'Timed out', detail: `no result after ${TARGET_TIMEOUT_MS / 1000}s (engine hung)` }] }), TARGET_TIMEOUT_MS); });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+async function saveResults() {
+  await fs.writeFile(path.join(OUT, 'validation-results.json'), JSON.stringify({ startedAt, results }, null, 2));
+  await fs.writeFile(path.join(OUT, 'VALIDATION-RESULTS.md'), toMarkdown(results, startedAt));
+}
+
 const startedAt = now();
 await fs.mkdir(OUT, { recursive: true });
 await fs.mkdir(TMP, { recursive: true });
@@ -346,16 +361,16 @@ try {
     if (only && !only.includes(t.id)) continue;
     for (const mode of MODES) {
       console.log(`\n▶ ${t.label} — ${mode}`);
-      results.push(await runTarget(t, mode, server));
+      results.push(await withTimeout(runTarget(t, mode, server), { target: t.id, label: t.label, mode }));
+      await saveResults();
     }
   }
-  if (!only || only.includes('edge-app')) { console.log('\n▶ Edge app-window mode'); results.push(await runEdgeAppMode()); }
-  if (!only || only.includes('tz')) { console.log('\n▶ Time zones'); results.push(await runTimezones()); }
+  if (!only || only.includes('edge-app')) { console.log('\n▶ Edge app-window mode'); results.push(await withTimeout(runEdgeAppMode(), { target: 'edge-app', label: 'Edge app-window launcher', mode: 'file' })); await saveResults(); }
+  if (!only || only.includes('tz')) { console.log('\n▶ Time zones'); results.push(await withTimeout(runTimezones(), { target: 'timezones', label: 'Time zones', mode: 'file' })); await saveResults(); }
 } finally {
   server.close();
 }
-await fs.writeFile(path.join(OUT, 'validation-results.json'), JSON.stringify({ startedAt, results }, null, 2));
-await fs.writeFile(path.join(OUT, 'VALIDATION-RESULTS.md'), toMarkdown(results, startedAt));
+await saveResults();
 const failed = results.flatMap((x) => x.checks).filter((c) => c.status === 'fail').length;
 console.log(`\nDone. ${failed} failed check(s). Results in poc/tests/results/`);
-process.exitCode = failed ? 1 : 0;
+process.exit(failed ? 1 : 0);  // exit even if a timed-out browser is still hanging

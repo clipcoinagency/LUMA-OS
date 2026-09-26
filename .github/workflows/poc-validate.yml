@@ -5,6 +5,10 @@ on:
     paths: ["poc/web/**", "poc/tests/**", "package.json", ".github/workflows/poc-validate.yml"]
   workflow_dispatch:
 
+concurrency:
+  group: poc-validate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: validate (${{ matrix.os }})
@@ -17,6 +21,7 @@ jobs:
           - os: macos-latest
             only: chrome,firefox,webkit,tz
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,13 +29,15 @@ jobs:
       - run: npm ci
       - run: npx playwright install firefox webkit
       - name: Validate (Playwright, real browser restarts)
-        run: node poc/tests/validate.mjs --only=${{ matrix.only }}
+        run: node poc/tests/validate.mjs --only=${{ matrix.only }} --stress=5000
+        timeout-minutes: 25
         continue-on-error: true
       - name: Real Safari via safaridriver (macOS)
         if: runner.os == 'macOS'
         run: |
           sudo safaridriver --enable
           node poc/tests/safari-webdriver.mjs
+        timeout-minutes: 5
         continue-on-error: true
       - name: Summary
         if: always()

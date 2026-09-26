@@ -1,0 +1,39 @@
+1.1s firefox/ephemeral/file launched 
+6.8s firefox/ephemeral/file goto ok 
+7.0s firefox/ephemeral/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+7.0s firefox/ephemeral/file RESULT PASS write/read llp14wkamuipemua / llp14wkamuipemua
+8.4s firefox/ephemeral/http launched 
+9.5s firefox/ephemeral/http goto ok 
+9.5s firefox/ephemeral/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+11.4s firefox/ephemeral/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+11.5s firefox/ephemeral/http RESULT PASS write/read tkn0gkwcmuipeq8p / tkn0gkwcmuipeq8p
+14.4s firefox/persistent/file launched 
+16.0s firefox/persistent/file goto ok 
+16.0s firefox/persistent/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+17.5s firefox/persistent/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+17.5s firefox/persistent/file RESULT PASS write/read o669c80vmuipeuxv / o669c80vmuipeuxv
+20.1s firefox/persistent/http launched 
+21.5s firefox/persistent/http goto ok 
+21.5s firefox/persistent/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+23.0s firefox/persistent/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+23.0s firefox/persistent/http RESULT PASS write/read i3s2wqs9muipez5v / i3s2wqs9muipez5v
+23.6s webkit/ephemeral/file launched 
+23.8s webkit/ephemeral/file goto ok 
+23.8s webkit/ephemeral/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+25.3s webkit/ephemeral/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+25.3s webkit/ephemeral/file RESULT PASS write/read ehko1o78muipf0yr / ehko1o78muipf0yr
+25.4s webkit/ephemeral/http launched 
+25.5s webkit/ephemeral/http goto ok 
+25.6s webkit/ephemeral/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+27.1s webkit/ephemeral/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+27.1s webkit/ephemeral/http RESULT PASS write/read 6qd1er5omuipf2al / 6qd1er5omuipf2al
+27.3s webkit/persistent/file launched 
+27.3s webkit/persistent/file goto ok 
+27.3s webkit/persistent/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+28.8s webkit/persistent/file state {"href":"file:///D:/a/LUMA-OS/LUMA-OS/poc/web/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+28.8s webkit/persistent/file RESULT PASS write/read cizrybrsmuipf3nu / cizrybrsmuipf3nu
+29.1s webkit/persistent/http launched 
+29.1s webkit/persistent/http goto ok 
+29.1s webkit/persistent/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":false,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+30.6s webkit/persistent/http state {"href":"http://127.0.0.1:4817/index.html","ready":"complete","poc":"object","ok":true,"err":null,"idb":true,"body":"Life OS — Storage & Launch Test\n\nPhase 0 proof of concept. Checks that this devi"}
+30.7s webkit/persistent/http RESULT PASS write/read khg72p7dmuipf51z / khg72p7dmuipf51z

@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-26T17:58:39.086Z",
+  "url": "file:///Users/runner/work/LUMA-OS/LUMA-OS/poc/web/index.html",
+  "checks": [
+    {
+      "status": "info",
+      "name": "Safari version",
+      "detail": "26.6.2"
+    },
+    {
+      "status": "fail",
+      "name": "Safari WebDriver run",
+      "detail": "write: TypeError: undefined is not an object (evaluating 'window.lifeosPoc.writeProbe')"
+    }
+  ]
+}

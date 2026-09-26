@@ -2,7 +2,7 @@ name: "PoC · browser storage validation"
 
 on:
   push:
-    paths: ["poc/web/**", "poc/tests/**", "package.json", ".github/workflows/poc-validate.yml"]
+    paths: ["poc/web/**", "poc/tests/validate.mjs", "poc/tests/serve.mjs", "poc/tests/annotate.mjs", "package.json", ".github/workflows/poc-validate.yml"]
   workflow_dispatch:
 
 permissions:

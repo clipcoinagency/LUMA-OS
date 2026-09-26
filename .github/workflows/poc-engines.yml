@@ -1,0 +1,51 @@
+name: "PoC · engine diagnostics (Firefox, WebKit, real Safari)"
+
+on:
+  push:
+    paths: ["poc/tests/engine-debug.mjs", "poc/tests/safari-webdriver.mjs", ".github/workflows/poc-engines.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: poc-engines-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diag:
+    name: diag (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npx playwright install firefox webkit
+      - name: Engine step-by-step diagnostics
+        run: node poc/tests/engine-debug.mjs
+        timeout-minutes: 10
+        continue-on-error: true
+      - name: Real Safari via safaridriver (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          sudo safaridriver --enable
+          node poc/tests/safari-webdriver.mjs
+        timeout-minutes: 5
+        continue-on-error: true
+      - name: Publish results to ci-diag branch
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/out && cp -r poc/tests/results/. /tmp/out/ 2>/dev/null || true
+          cd /tmp/out
+          git init -q -b "ci-diag-${{ runner.os }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Diagnostics for ${{ github.sha }}" || true
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:ci-diag-${{ runner.os }}"

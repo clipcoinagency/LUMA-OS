@@ -6,9 +6,12 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
+import { startServer } from './serve.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const URL_ = pathToFileURL(path.join(HERE, '..', 'web', 'index.html')).href;
+const FILE_URL = pathToFileURL(path.join(HERE, '..', 'web', 'index.html')).href;
+const HTTP_URL = 'http://127.0.0.1:4817/index.html';
+let URL_ = FILE_URL;
 const BASE = 'http://127.0.0.1:4444';
 const checks = [];
 const add = (status, name, detail = '') => { checks.push({ status, name, detail: String(detail) }); console.log(`[${status}] ${name} ${detail}`); };
@@ -32,6 +35,24 @@ try {
   const s = await wd('POST', '/session', { capabilities: { alwaysMatch: { browserName: 'safari' } } });
   sid = s.sessionId;
   add('info', 'Safari version', s.capabilities.browserVersion);
+  const server = await startServer(4817);
+  // Diagnose file:// first: does Safari (under WebDriver) load and run the page at all?
+  const probeState = 'return { href: location.href, title: document.title, ready: document.readyState, poc: typeof window.lifeosPoc, ok: window.lifeosPocReady === true, err: window.lifeosPocError || null, idb: !!window.indexedDB };';
+  for (const u of [FILE_URL, HTTP_URL]) {
+    try {
+      await wd('POST', `/session/${sid}/url`, { url: u });
+      await sleep(2500);
+      const st = await wd('POST', `/session/${sid}/execute/sync`, { script: probeState, args: [] });
+      const works = st.poc === 'object' && (st.ok || st.err);
+      add(works && st.ok ? 'pass' : 'info', `Real Safari loads PoC via ${u.startsWith('file') ? 'file://' : 'http://localhost'}`, JSON.stringify(st));
+      if (u === FILE_URL && works && st.ok) { URL_ = FILE_URL; break; }
+      URL_ = HTTP_URL;
+    } catch (e) {
+      add('info', `Real Safari navigation to ${u.startsWith('file') ? 'file://' : 'http'}`, e.message);
+      URL_ = HTTP_URL;
+    }
+  }
+  add('info', 'Persistence steps below run against', URL_);
   await wd('POST', `/session/${sid}/url`, { url: URL_ });
   let r = await execAsync(sid, `${waitReady} const p = await window.lifeosPoc.writeProbe(); await window.lifeosPoc.addRecords(1000); return { token: p.token, ua: navigator.userAgent, secure: isSecureContext };`);
   if (!r.ok) throw new Error('write: ' + r.e);
@@ -54,4 +75,4 @@ try {
 }
 await fs.mkdir(path.join(HERE, 'results'), { recursive: true });
 await fs.writeFile(path.join(HERE, 'results', 'safari-webdriver.json'), JSON.stringify({ at: new Date().toISOString(), url: URL_, checks }, null, 2));
-process.exitCode = checks.some((c) => c.status === 'fail') ? 1 : 0;
+process.exit(checks.some((c) => c.status === "fail") ? 1 : 0);  // exit even though the local server is still open

@@ -66,6 +66,9 @@ Other measured facts:
 - **Folder move/copy:** in Chromium, all `file://` pages share one storage origin, so a copy of the app
   in another folder sees the same data. Good for updates (new version in a new folder keeps data);
   it also means data is tied to the *browser profile*, not the folder.
+- **Downloaded file (Mark of the Web):** a copy named `Life OS.html` tagged `ZoneId=3` (as Windows does
+  for files from an Etsy download / Explorer-extracted zip), in a folder with spaces, opens in Edge and
+  keeps its data across a restart. No warning applies to `.html`.
 - `navigator.storage.persist()` returns **false** on file:// and on localhost in Edge/Chrome → storage
   is "best effort". It is not evicted under normal conditions, but "Clear browsing data → cookies and
   site data" deletes it. Backups are therefore a product feature, not an afterthought.

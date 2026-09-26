@@ -4,21 +4,36 @@ Local-first personal productivity app (Tasks · Goals · Habits · Calendar · N
 sold as a downloadable digital product. One shared web core, packaged per platform. No accounts, no backend,
 no tracking — **your data stays on your device**.
 
-## Status: Phase 0 — architecture & platform feasibility
+## Status
 
-The full UI is intentionally **not** built yet. This phase validates storage, launch, offline and
-backup/restore behaviour on each target platform before committing to an architecture.
+| Phase | State |
+|---|---|
+| 0 · Architecture & platform feasibility | ✅ Windows/engines validated · device tests pending ([plan](docs/DEVICE-TEST-PLAN.md)) |
+| 1 · Foundation, design system, data layer | ✅ done (this commit) |
+| 2 · Onboarding & workspace customisation | next |
 
-- 📄 Architecture decision & platform plan: [`docs/PHASE-0-ARCHITECTURE.md`](docs/PHASE-0-ARCHITECTURE.md)
+- 📄 Architecture & decisions: [`docs/PHASE-0-ARCHITECTURE.md`](docs/PHASE-0-ARCHITECTURE.md)
 - ✅ Validation evidence: [`docs/validation/`](docs/validation/)
-- 🧪 Proof of concept (single self-contained HTML file): [`poc/web/index.html`](poc/web/index.html)
+- 📱 Hosted storage test (iPhone/iPad Home-Screen test): https://luma-os-beta.vercel.app
 
-## Run the PoC validation locally (developer machine)
+## Develop
 
 ```bash
 npm ci
-npm run poc:validate -- --only=edge,chrome,edge-app,tz
+npm run dev        # live dev server
+npm run check      # type-check
+npm test           # unit tests (data layer, backup, dates, money)
+npm run build      # → dist/index.html, ONE self-contained file (fails if anything external sneaks in)
+npm run test:e2e   # opens dist/index.html from file:// in Edge + Chrome and drives the real UI
 ```
 
-Manual test on any device: open `poc/web/index.html` (or the hosted copy), tap **Write test value**,
-fully close the app/browser, reopen — the banner must say the value survived.
+## Structure
+
+```
+src/lib/db        schema v1, IndexedDB layer + migrations, defaults, sample data
+src/lib/backup    backup format, validation, safety snapshots, atomic restore, resets
+src/lib/platform  the only per-platform code (save/pick files on browser, iOS, Tauri, Android)
+src/lib/ui        design-system components
+src/styles        tokens (Soft + Dark themes), base styles, bundled fonts
+poc/              Phase 0 proofs of concept (storage PoC, Capacitor + Tauri shells, validators)
+```

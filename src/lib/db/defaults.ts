@@ -89,15 +89,20 @@ export interface BootInfo {
   launches: number;
 }
 
-/** Opens the database, seeds defaults on first run, records a launch. */
-export async function boot(): Promise<BootInfo> {
+/** Loads settings + workspace, creating defaults when missing (first run, or after a reset). */
+export async function loadState(): Promise<Omit<BootInfo, 'launches'>> {
   let settings = await get('settings', 'settings');
   let workspace = await get('workspace', 'workspace');
   const firstRun = !settings || !workspace;
   if (!settings) { settings = defaultSettings(); await put('settings', settings); }
   if (!workspace) { workspace = defaultWorkspace(); await put('workspace', workspace); }
   if (firstRun && (await getAll('finance_categories')).length === 0) await putMany('finance_categories', defaultFinanceCategories());
+  return { settings, workspace, firstRun };
+}
 
+/** Opens the database, seeds defaults on first run, records a launch. */
+export async function boot(): Promise<BootInfo> {
+  const { settings, workspace, firstRun } = await loadState();
   const launches = await transact<number>('meta', 'readwrite', (t, set) => {
     const os = t.objectStore('meta');
     os.get('launches').onsuccess = (e) => {

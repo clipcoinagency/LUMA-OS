@@ -10,7 +10,7 @@ import { newId } from '../util/ids';
 import { transact, getAll } from '../db/idb';
 import { APP_VERSION } from '../db/defaults';
 import {
-  BACKUP_STORES, DEVICE_META_KEYS, SCHEMA_VERSION, STORES,
+  BACKUP_STORES, CONFIG_STORES, DEVICE_META_KEYS, SCHEMA_VERSION, STORES,
   type ModuleId, type SafetySnapshot, type StoreName,
 } from '../db/schema';
 
@@ -128,7 +128,7 @@ export function validateBackupText(text: string): ValidationResult {
       if (def.dateField && !isDateKey(row[def.dateField])) return fail(`This backup contains a ${store} entry with an invalid date (#${i + 1}).`);
     }
     counts[store] = rows.length;
-    if (store !== 'meta' && store !== 'settings' && store !== 'workspace') total += rows.length;
+    if (!CONFIG_STORES.includes(store)) total += rows.length;
   }
   if ((data.settings?.length ?? 0) > 1 || (data.workspace?.length ?? 0) > 1) return fail('This backup contains conflicting settings.');
 

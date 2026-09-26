@@ -1,0 +1,132 @@
+/* Life OS design tokens.
+   One shared system (spacing, type scale, motion, component anatomy); two themes with distinct
+   personalities — Soft (warm cream + dusty rose, serif display, generous radii, diffuse shadows)
+   and Dark (navy/near-black + cyan, geometric display, crisp radii, faint glow). Not an inversion. */
+
+:root {
+  /* spacing — 4px grid */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-7: 32px; --space-8: 40px; --space-9: 48px; --space-10: 64px;
+
+  /* type scale */
+  --text-xs: 0.75rem;   /* 12 */
+  --text-sm: 0.84375rem;/* 13.5 */
+  --text-base: 0.9375rem; /* 15 */
+  --text-md: 1.0625rem; /* 17 */
+  --text-lg: 1.25rem;   /* 20 */
+  --text-xl: 1.5rem;    /* 24 */
+  --text-2xl: 1.875rem; /* 30 */
+  --text-3xl: 2.375rem; /* 38 */
+  --leading-tight: 1.2; --leading: 1.5;
+  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+
+  /* motion — short, purposeful */
+  --dur-fast: 120ms; --dur: 200ms; --dur-slow: 320ms;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-emphasis: cubic-bezier(.3, 1.25, .5, 1); /* tiny overshoot, used sparingly */
+
+  /* layout */
+  --touch: 44px;
+  --sidebar-w: 248px;
+  --content-max: 1180px;
+  --z-nav: 20; --z-overlay: 40; --z-toast: 60;
+}
+
+/* ------------------------------------------------------------------ Soft */
+:root, [data-theme='soft'] {
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --display-weight: 560;
+  --display-tracking: -0.015em;
+
+  --bg: #fbf6f2;
+  --bg-accent: radial-gradient(1200px 500px at 85% -10%, #f6e3e3 0%, transparent 60%),
+               radial-gradient(900px 420px at -10% 0%, #f7ece2 0%, transparent 55%);
+  --surface: #ffffff;
+  --surface-2: #f8f0ec;
+  --surface-3: #f1e5e0;
+  --border: #ecdfd9;
+  --border-strong: #dcc8c0;
+  --text: #2b2126;
+  --text-2: #685860;   /* 6.9:1 on surface */
+  --text-3: #8f7c83;   /* 3.9:1 — decorative/meta only, never body copy */
+
+  --accent: #a5546c;       /* 5.2:1 with white text */
+  --accent-hover: #93465e;
+  --accent-soft: #f6e1e6;
+  --accent-ink: #7d3a4f;   /* accent text on light surfaces */
+  --on-accent: #ffffff;
+  --accent-2: #b0875c;     /* champagne */
+  --accent-2-soft: #f5ebdf;
+
+  --success: #2f7d58; --success-soft: #e2f1e8;
+  --warning: #99620f; --warning-soft: #f8ecd6;
+  --danger: #b23c3c;  --danger-soft: #f8e1df;
+  --info: #3f6ea8;    --info-soft: #e3ecf7;
+
+  --focus: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+  --shadow-1: 0 1px 2px rgba(70, 35, 45, .05), 0 2px 8px rgba(70, 35, 45, .04);
+  --shadow-2: 0 2px 6px rgba(70, 35, 45, .05), 0 12px 32px rgba(70, 35, 45, .08);
+  --shadow-3: 0 8px 20px rgba(70, 35, 45, .08), 0 30px 70px rgba(70, 35, 45, .14);
+  --glow: none;
+
+  --radius-xs: 8px; --radius-sm: 12px; --radius-md: 16px; --radius-lg: 22px; --radius-xl: 28px;
+  --radius-btn: 999px;
+  --card-border: 1px solid var(--border);
+
+  /* module identity colours (icons, chart series) */
+  --mod-tasks: #a5546c; --mod-goals: #b0875c; --mod-habits: #4f8f75; --mod-calendar: #6c78b8;
+  --mod-notes: #9a7a5a; --mod-wellness: #4f98a8; --mod-finance: #7a6bb0;
+
+  --scrim: rgba(43, 25, 32, .35);
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------ Dark */
+[data-theme='dark'] {
+  --font-display: 'Space Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
+  --display-weight: 600;
+  --display-tracking: -0.02em;
+
+  --bg: #060a13;
+  --bg-accent: radial-gradient(1100px 480px at 80% -12%, rgba(79, 216, 242, .10) 0%, transparent 60%),
+               radial-gradient(900px 420px at -10% 10%, rgba(124, 140, 255, .08) 0%, transparent 55%);
+  --surface: #0d1526;
+  --surface-2: #121c32;
+  --surface-3: #18243f;
+  --border: #1d2a47;
+  --border-strong: #2b3c63;
+  --text: #e8eef9;
+  --text-2: #a3b0c9;   /* 8.1:1 on surface */
+  --text-3: #6d7a96;
+
+  --accent: #4fd8f2;       /* cyan; dark ink on it = 11:1 */
+  --accent-hover: #7ae3f6;
+  --accent-soft: rgba(79, 216, 242, .12);
+  --accent-ink: #7ae3f6;
+  --on-accent: #03141b;
+  --accent-2: #8d9bff;
+  --accent-2-soft: rgba(141, 155, 255, .14);
+
+  --success: #3ed69b; --success-soft: rgba(62, 214, 155, .12);
+  --warning: #f2c35b; --warning-soft: rgba(242, 195, 91, .12);
+  --danger: #ff7a73;  --danger-soft: rgba(255, 122, 115, .12);
+  --info: #7fb0ff;    --info-soft: rgba(127, 176, 255, .12);
+
+  --focus: 0 0 0 3px rgba(79, 216, 242, .45);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-2: 0 6px 24px rgba(0, 0, 0, .45);
+  --shadow-3: 0 18px 60px rgba(0, 0, 0, .6);
+  --glow: 0 0 0 1px rgba(79, 216, 242, .18), 0 0 24px rgba(79, 216, 242, .10);
+
+  --radius-xs: 6px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 14px; --radius-xl: 18px;
+  --radius-btn: 10px;
+  --card-border: 1px solid var(--border);
+
+  --mod-tasks: #4fd8f2; --mod-goals: #f2c35b; --mod-habits: #3ed69b; --mod-calendar: #8d9bff;
+  --mod-notes: #c7a6ff; --mod-wellness: #5ee0c6; --mod-finance: #ff9ec4;
+
+  --scrim: rgba(1, 4, 10, .6);
+  color-scheme: dark;
+}

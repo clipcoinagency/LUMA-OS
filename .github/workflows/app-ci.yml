@@ -1,0 +1,26 @@
+name: "App · check, test, build"
+
+on:
+  push:
+    paths: ["src/**", "tests/unit/**", "index.html", "vite.config.ts", "svelte.config.js", "tsconfig.json", "package.json", "package-lock.json", "scripts/check-singlefile.mjs", ".github/workflows/app-ci.yml"]
+  workflow_dispatch:
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Type-check (svelte-check)
+        run: npm run check
+      - name: Unit tests (data layer, backup, dates, money)
+        run: npm test
+      - name: Build single-file app + self-contained guard
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-app-single-file
+          path: dist/index.html

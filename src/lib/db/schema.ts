@@ -242,6 +242,8 @@ export const STORES: Record<StoreName, StoreDef> = {
 
 export const STORE_NAMES = Object.keys(STORES) as StoreName[];
 export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);
+/** Stores holding configuration rather than user entries (not counted as "records"). */
+export const CONFIG_STORES: StoreName[] = ['meta', 'settings', 'workspace', 'finance_categories'];
 
 /** meta keys that describe this device, not the user's workspace — never exported/restored. */
 export const DEVICE_META_KEYS = ['launches', 'installedAt', 'lastOpenedAt', 'persistRequested', 'lastBackupAt', 'lastRestoreAt', 'lastResetAt'];

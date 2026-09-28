@@ -1,0 +1,57 @@
+name: "App · e2e (cross-OS)"
+
+# Runs the same Playwright e2e suite used throughout development, but on GitHub-hosted Windows and
+# macOS runners rather than just this one dev machine — real installed Edge (Windows) / Chrome
+# (macOS), real IndexedDB, real file:// launches. This is automated cross-OS coverage, not a
+# substitute for docs/DEVICE-TEST-PLAN.md's real-device tests (phones, tablets, actual installers
+# on a human's machine) — those still need a person with the hardware.
+on:
+  push:
+    paths: ["src/**", "tests/e2e/**", "index.html", "vite.config.ts", "svelte.config.js", "package.json", ".github/workflows/app-e2e.yml"]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: e2e (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            channel: msedge
+          - os: macos-latest
+            channel: chrome
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - name: Unit tests
+        run: npm test
+      - name: e2e — backup-reminder
+        run: node tests/e2e/backup-reminder.mjs --only=${{ matrix.channel }}
+      - name: e2e — dashboard
+        run: node tests/e2e/dashboard.mjs --only=${{ matrix.channel }}
+      - name: e2e — file-launch
+        run: node tests/e2e/file-launch.mjs --only=${{ matrix.channel }}
+      - name: e2e — history
+        run: node tests/e2e/history.mjs --only=${{ matrix.channel }}
+      - name: e2e — modules
+        run: node tests/e2e/modules.mjs --only=${{ matrix.channel }}
+      - name: e2e — reduced-motion
+        run: node tests/e2e/reduced-motion.mjs --only=${{ matrix.channel }}
+      - name: e2e — a11y-fixes
+        run: node tests/e2e/a11y-fixes.mjs --only=${{ matrix.channel }}
+      - name: e2e — phone-360
+        run: node tests/e2e/phone-360.mjs --only=${{ matrix.channel }}
+      - name: e2e — capacitor-bridge
+        run: node tests/e2e/capacitor-bridge.mjs --only=${{ matrix.channel }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots-${{ runner.os }}
+          path: tests/e2e/screenshots/
+          if-no-files-found: ignore

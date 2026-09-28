@@ -168,7 +168,8 @@ await soft('Calendar flow', async () => {
   await dlg(page).getByLabel('Event', { exact: true }).fill('Yoga class');
   await dlg(page).getByRole('button', { name: 'Add event' }).click();
   await page.locator('.agenda').getByText('Yoga class').waitFor();
-  check(await page.locator('.chip').filter({ hasText: 'Yoga class' }).count() > 0, 'Calendar: event in agenda + month grid');
+  // month-grid cells show a count chip ("1 event"), not the title — check the selected (today) cell got one
+  check(await page.locator('.day.sel .chip').getByText('1 event').isVisible(), 'Calendar: event in agenda + month grid count');
   const label = await page.locator('.mn .label').innerText();
   await page.getByRole('button', { name: 'Next month' }).click();
   check((await page.locator('.mn .label').innerText()) !== label, 'Calendar: browse to next month');

@@ -1,6 +1,7 @@
 <script lang="ts">
   // Daily log for any day (history stays per-day), workouts, and 30-day trends. Lifestyle tracking only.
-  import { Plus, ChevronLeft, ChevronRight, Droplet, Moon, Footprints, Scale, Dumbbell, Minus, Angry, Frown, Meh, Smile, Laugh } from '@lucide/svelte';
+  import { Plus, ChevronLeft, ChevronRight, Droplet, Moon, Footprints, Scale, Dumbbell, Minus } from '@lucide/svelte';
+  import { MOODS } from '../../../lib/moods';
   import PageHeader from '../PageHeader.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import Sparkline from '../../../lib/ui/Sparkline.svelte';
@@ -31,7 +32,6 @@
 
   const units = $derived(app.settings?.units ?? { weight: 'kg', water: 'glasses' });
   const step = $derived(units.water === 'ml' ? 250 : units.water === 'oz' ? 8 : 1);
-  const MOODS = [{ v: 1, i: Angry, l: 'Awful', c: '#c0605a' }, { v: 2, i: Frown, l: 'Low', c: '#c98a4a' }, { v: 3, i: Meh, l: 'Okay', c: '#9a9a6a' }, { v: 4, i: Smile, l: 'Good', c: '#4f9a78' }, { v: 5, i: Laugh, l: 'Great', c: '#3f8fae' }] as const;
 
   const days30 = $derived(eachDay(addDays(clock.today, -29), clock.today));
   const by = $derived(new Map(range.map((r) => [r.date, r])));
@@ -80,8 +80,8 @@
         <label class="f"><span class="fl"><Scale size={16} aria-hidden="true" />Weight ({units.weight})</span><input class="in num" inputmode="decimal" value={entry.weight ?? ''} placeholder="—" onchange={(e) => set({ weight: num(e.currentTarget.value, 700) })} /></label>
       </div>
       <div class="mood" role="radiogroup" aria-label="Mood">
-        {#each MOODS as m (m.v)}
-          <button type="button" role="radio" aria-checked={entry.mood === m.v} aria-label={m.l} class:on={entry.mood === m.v} style="--m:{m.c}" onclick={() => set({ mood: entry?.mood === m.v ? null : m.v })}><m.i size={22} aria-hidden="true" /><span>{m.l}</span></button>
+        {#each MOODS as m (m.value)}
+          <button type="button" role="radio" aria-checked={entry.mood === m.value} aria-label={m.label} class:on={entry.mood === m.value} style="--m:{m.color}" onclick={() => set({ mood: entry?.mood === m.value ? null : m.value })}><m.icon size={22} aria-hidden="true" /><span>{m.label}</span></button>
         {/each}
       </div>
       <label class="note"><span class="fl">Note</span><textarea rows="2" value={entry.note} placeholder="How did the day feel?" onchange={(e) => set({ note: e.currentTarget.value.slice(0, 500) })}></textarea></label>
@@ -110,7 +110,7 @@
       <div class="t"><span class="tl">Average sleep</span><span class="tv num">{f1(avg(sleep))} h</span><Sparkline values={sleep} label="Sleep, last 30 days" color="var(--mod-wellness)" height={40} /></div>
       <div class="t"><span class="tl">Weight</span><span class="tv num">{f1(latestWeight)} {units.weight}</span><Sparkline values={weight} label="Weight, last 30 days" color="var(--accent-2)" height={40} /></div>
       <div class="t"><span class="tl">Average water</span><span class="tv num">{f1(avg(water))} {units.water}</span><Sparkline values={water} label="Water, last 30 days" color="var(--info)" height={40} /></div>
-      <div class="t"><span class="tl">Average mood</span><span class="tv num">{avg(mood) === null ? '—' : MOODS[Math.round(avg(mood)!) - 1]?.l}</span><Sparkline values={mood} label="Mood, last 30 days" color="var(--success)" height={40} /></div>
+      <div class="t"><span class="tl">Average mood</span><span class="tv num">{avg(mood) === null ? '—' : MOODS[Math.round(avg(mood)!) - 1]?.label}</span><Sparkline values={mood} label="Mood, last 30 days" color="var(--success)" height={40} /></div>
     </div>
     <h3 class="sub">Steps, last 14 days</h3>
     <BarChart data={steps14} label="Steps per day, last 14 days" height={120} format={(v) => `${v.toLocaleString()} steps`} highlight={13} />

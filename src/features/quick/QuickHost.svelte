@@ -6,8 +6,9 @@
   import GoalForm from './GoalForm.svelte';
   import EventForm from './EventForm.svelte';
   import NoteForm from './NoteForm.svelte';
+  import WorkoutForm from './WorkoutForm.svelte';
   import { quick, type QuickKind } from './quick.svelte';
-  import type { CalendarEvent, Goal, Habit, Task, Transaction, TransactionType } from '../../lib/db/schema';
+  import type { CalendarEvent, Goal, Habit, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
   const pre = <T,>(k: string) => (quick.preset[k] as T | undefined) ?? null;
 
   // function bindings: each form is "open" while the controller points at it; closing clears it
@@ -21,3 +22,4 @@
 <GoalForm bind:open={is('goal'), set('goal')} goal={pre<Goal>('goal')} />
 <EventForm bind:open={is('event'), set('event')} date={quick.preset.date as string | undefined} event={pre<CalendarEvent>('event')} />
 <NoteForm bind:open={is('note'), set('note')} />
+<WorkoutForm bind:open={is('workout'), set('workout')} date={quick.preset.date as string | undefined} workout={pre<Workout>('workout')} />

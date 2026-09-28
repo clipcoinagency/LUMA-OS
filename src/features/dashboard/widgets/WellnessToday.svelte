@@ -1,6 +1,7 @@
 <script lang="ts">
   // Log today's basics without leaving the dashboard. Each value is saved on today's row only.
-  import { Droplet, Moon, Footprints, Minus, Plus, Angry, Frown, Meh, Smile, Laugh } from '@lucide/svelte';
+  import { Droplet, Moon, Footprints, Minus, Plus } from '@lucide/svelte';
+  import { MOODS } from '../../../lib/moods';
   import WidgetCard from '../WidgetCard.svelte';
   import Sparkline from '../../../lib/ui/Sparkline.svelte';
   import { changes } from '../../../lib/db/changes.svelte';
@@ -25,7 +26,6 @@
   const unit = $derived(app.settings?.units.water ?? 'glasses');
   const step = $derived(unit === 'ml' ? 250 : unit === 'oz' ? 8 : 1);
   const waterLabel = $derived(unit === 'glasses' ? 'glasses' : unit);
-  const MOODS = [{ v: 1, i: Angry, l: 'Awful', c: '#c0605a' }, { v: 2, i: Frown, l: 'Low', c: '#c98a4a' }, { v: 3, i: Meh, l: 'Okay', c: '#9a9a6a' }, { v: 4, i: Smile, l: 'Good', c: '#4f9a78' }, { v: 5, i: Laugh, l: 'Great', c: '#3f8fae' }] as const;
 
   const set = (patch: Partial<WellnessDay>) => updateWellness(clock.today, patch);
   function num(v: string, max: number): number | null {
@@ -55,9 +55,9 @@
       </div>
     </div>
     <div class="mood" role="radiogroup" aria-label="Mood today">
-      {#each MOODS as m (m.v)}
-        <button type="button" role="radio" aria-checked={day.mood === m.v} aria-label={m.l} title={m.l} class:on={day.mood === m.v}
-          style="--m:{m.c}" onclick={() => set({ mood: day?.mood === m.v ? null : m.v })}><m.i size={22} aria-hidden="true" /></button>
+      {#each MOODS as m (m.value)}
+        <button type="button" role="radio" aria-checked={day.mood === m.value} aria-label={m.label} title={m.label} class:on={day.mood === m.value}
+          style="--m:{m.color}" onclick={() => set({ mood: day?.mood === m.value ? null : m.value })}><m.icon size={22} aria-hidden="true" /></button>
       {/each}
     </div>
     {#if sleepTrend.filter((v) => v !== null).length > 2}

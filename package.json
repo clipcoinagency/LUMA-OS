@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:e2e": "node tests/e2e/file-launch.mjs && node tests/e2e/dashboard.mjs",
     "icons": "node scripts/make-icons.mjs",
+    "package:browser": "node scripts/package-browser-edition.mjs",
     "poc:validate": "node poc/tests/validate.mjs",
     "poc:serve": "node poc/tests/serve.mjs"
   },

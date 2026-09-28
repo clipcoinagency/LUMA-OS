@@ -81,7 +81,8 @@ const out = [
   ['poc/web/icons/icon-512.png', 512, { rounded: true }],
   ['poc/web/icons/icon-512-maskable.png', 512, { rounded: false, inset: 0.2 }],
   ['poc/web/icons/apple-touch-icon.png', 180, { rounded: false }], // iOS applies its own mask; must be opaque
-  ['poc/assets/icon-1024.png', 1024, { rounded: true }],          // source for `tauri icon` / Android
+  ['poc/assets/icon-1024.png', 1024, { rounded: true }],          // source for the PoC's `tauri icon` / Android
+  ['packaging/assets/icon-1024.png', 1024, { rounded: true }],    // source for the real app's `tauri icon` / Android
 ];
 for (const [rel, size, opts] of out) {
   const file = path.join(ROOT, rel);

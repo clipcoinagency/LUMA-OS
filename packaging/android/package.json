@@ -1,0 +1,19 @@
+{
+  "name": "lifeos-android",
+  "private": true,
+  "description": "Capacitor shell that packages the real app (repo root dist/index.html, built by `npm run build`) into an Android APK.",
+  "scripts": {
+    "bridge": "esbuild bridge-src.js --bundle --format=iife --minify --outfile=../../dist/native-capacitor.js",
+    "sync": "npm run bridge && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/filesystem": "8.1.3",
+    "@capacitor/share": "8.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2",
+    "esbuild": "0.28.2"
+  }
+}

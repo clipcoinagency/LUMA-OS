@@ -1,0 +1,55 @@
+name: "App · Desktop app (Tauri)"
+
+on:
+  push:
+    paths: ["src/**", "index.html", "vite.config.ts", "svelte.config.js", "packaging/desktop-tauri/**", "packaging/assets/**", ".github/workflows/app-desktop.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: ""
+            rust_targets: ""
+            out: packaging/desktop-tauri/src-tauri/target/release
+          - os: macos-latest
+            args: "--target universal-apple-darwin"
+            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
+            out: packaging/desktop-tauri/src-tauri/target/universal-apple-darwin/release
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "packaging/desktop-tauri/src-tauri -> target"
+      - name: Build the real app (dist/index.html)
+        run: npm ci && npm run build
+      - name: Install Tauri shell deps
+        working-directory: packaging/desktop-tauri
+        run: npm install --no-audit --no-fund
+      - name: Generate platform icons from the shared source icon
+        working-directory: packaging/desktop-tauri
+        run: npm run icons
+      - name: Build
+        working-directory: packaging/desktop-tauri
+        run: npx tauri build ${{ matrix.args }}
+      - name: Report sizes
+        shell: bash
+        working-directory: ${{ matrix.out }}
+        run: find bundle -maxdepth 2 -type f \( -name '*.exe' -o -name '*.dmg' \) -exec ls -la {} \; ; ls -la *.exe 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-desktop-${{ runner.os }}
+          path: |
+            ${{ matrix.out }}/bundle/nsis/*.exe
+            ${{ matrix.out }}/bundle/dmg/*.dmg
+            ${{ matrix.out }}/lifeos.exe

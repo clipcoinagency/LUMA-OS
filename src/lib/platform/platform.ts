@@ -54,6 +54,21 @@ function download(name: string, text: string): SaveResult {
   return { ok: true, where: 'your Downloads folder' };
 }
 
+// The Capacitor Filesystem/Share bridge can't be inlined into the single-file build (it's native
+// glue code specific to the Android shell, bundled separately by packaging/android's build step) —
+// it ships as a sibling `native-capacitor.js` next to index.html inside the app's webDir instead,
+// and is loaded on demand the first time a save is attempted. A classic (non-module) script tag
+// like this loads fine even from file://; only `type="module"` and fetch() are blocked there.
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
 export async function saveTextFile(name: string, text: string): Promise<SaveResult> {
   const platform = detectPlatform();
   if (platform === 'tauri') {
@@ -66,7 +81,12 @@ export async function saveTextFile(name: string, text: string): Promise<SaveResu
     }
     return download(name, text);
   }
-  if (platform === 'capacitor' && window.LifeOSNative) return window.LifeOSNative.saveTextFile(name, text);
+  if (platform === 'capacitor') {
+    if (!window.LifeOSNative) {
+      try { await loadScript('native-capacitor.js'); } catch { /* fall through to download below */ }
+    }
+    if (window.LifeOSNative) return window.LifeOSNative.saveTextFile(name, text);
+  }
   if (isIOS() && typeof navigator.canShare === 'function') {
     const file = new File([text], name, { type: 'application/json' });
     if (navigator.canShare({ files: [file] })) {

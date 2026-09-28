@@ -1,0 +1,39 @@
+name: "App · Android APK (Capacitor)"
+
+on:
+  push:
+    paths: ["src/**", "index.html", "vite.config.ts", "svelte.config.js", "packaging/android/**", "packaging/assets/**", ".github/workflows/app-android.yml"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Build the real app (dist/index.html)
+        run: npm ci && npm run build
+      - name: Install Capacitor shell deps
+        working-directory: packaging/android
+        run: npm install --no-audit --no-fund
+      - name: Bundle native bridge (Filesystem + Share) next to dist/index.html
+        working-directory: packaging/android
+        run: npm run bridge
+      - name: Generate Android project from the built app
+        working-directory: packaging/android
+        run: |
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: packaging/android/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Report size
+        working-directory: packaging/android/android
+        run: ls -la app/build/outputs/apk/debug/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-android-debug-apk
+          path: packaging/android/android/app/build/outputs/apk/debug/app-debug.apk

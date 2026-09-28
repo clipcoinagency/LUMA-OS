@@ -1,0 +1,12 @@
+{
+  "name": "lifeos-desktop",
+  "private": true,
+  "description": "Tauri shell that packages the real app (repo root dist/index.html, built by `npm run build`) as a Windows/macOS desktop app.",
+  "scripts": {
+    "icons": "tauri icon ../assets/icon-1024.png",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.5"
+  }
+}

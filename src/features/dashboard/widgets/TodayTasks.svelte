@@ -10,6 +10,7 @@
   import { changes } from '../../../lib/db/changes.svelte';
   import { clock } from '../../../lib/clock.svelte';
   import { dur } from '../../../lib/motion';
+  import { reclaimFocusIfLost } from '../../../lib/ui/reclaimFocus';
   import { createTask, listTasks, setTaskDone, splitToday, type TodayTasks } from '../../../lib/domain/tasks';
   import { diffDays } from '../../../lib/util/dates';
   import { href } from '../../../lib/router.svelte';
@@ -33,6 +34,10 @@
   const total = $derived(data ? data.today.length + data.doneToday.length : 0);
 
   async function toggle(t: Task, done: boolean) {
+    // Completing a task removes it from `shown`, eventually destroying its checkbox's <li> once
+    // the async refetch re-renders — see TasksPage.svelte's identical fix for why this has to
+    // watch for the loss rather than check at a fixed point.
+    reclaimFocusIfLost(() => document.getElementById('dash-task-draft'));
     await setTaskDone(t.id, done, clock.today);
     if (done) toast(`Done: ${t.title}`, { action: { label: 'Undo', run: () => void setTaskDone(t.id, false) } });
   }
@@ -56,7 +61,7 @@
       <ul class="list">
         {#each shown as t (t.id)}
           <li animate:flip={{ duration: dur(220) }} out:fade={{ duration: dur(150) }}>
-            <Checkbox label="Complete {t.title}" checked={t.done} size={22} onchange={(v) => toggle(t, v)} />
+            <Checkbox id="dash-task-check-{t.id}" label="Complete {t.title}" checked={t.done} size={22} onchange={(v) => toggle(t, v)} />
             <span class="title">{t.title}</span>
             {#if overdueBy(t) > 0}<Badge tone="danger">{overdueBy(t) === 1 ? 'Yesterday' : `${overdueBy(t)}d late`}</Badge>
             {:else if t.priority === 'high'}<Badge tone="warning">High</Badge>{/if}
@@ -70,7 +75,7 @@
     <label class="add">
       <Plus size={18} aria-hidden="true" />
       <span class="sr-only">Add a task for today</span>
-      <input bind:value={draft} onkeydown={add} placeholder="Add a task for today…" maxlength="200" />
+      <input id="dash-task-draft" bind:value={draft} onkeydown={add} placeholder="Add a task for today…" maxlength="200" />
     </label>
   {/if}
 </WidgetCard>

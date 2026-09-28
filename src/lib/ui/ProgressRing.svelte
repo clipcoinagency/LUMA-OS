@@ -1,12 +1,13 @@
 <script lang="ts">
   import { Tween } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+  import { dur } from '../motion';
 
   interface Props { value: number; max?: number; size?: number; stroke?: number; label: string; color?: string; showValue?: boolean }
   let { value, max = 100, size = 64, stroke = 7, label, color = 'var(--accent)', showValue = true }: Props = $props();
 
   const pct = $derived(max > 0 ? Math.max(0, Math.min(1, value / max)) : 0);
-  const tween = new Tween(0, { duration: 700, easing: cubicOut });
+  const tween = new Tween(0, { duration: dur(700), easing: cubicOut });
   $effect(() => { tween.target = pct; });
 
   const r = $derived((size - stroke) / 2);

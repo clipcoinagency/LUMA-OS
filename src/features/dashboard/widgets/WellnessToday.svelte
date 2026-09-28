@@ -2,6 +2,7 @@
   // Log today's basics without leaving the dashboard. Each value is saved on today's row only.
   import { Droplet, Moon, Footprints, Minus, Plus } from '@lucide/svelte';
   import { MOODS } from '../../../lib/moods';
+  import { roveRadiogroup } from '../../../lib/ui/roveRadiogroup';
   import WidgetCard from '../WidgetCard.svelte';
   import Sparkline from '../../../lib/ui/Sparkline.svelte';
   import { changes } from '../../../lib/db/changes.svelte';
@@ -54,9 +55,9 @@
         <input id="w-steps" class="inp num" inputmode="numeric" value={day.steps ?? ''} placeholder="—" onchange={(e) => { const n = num(e.currentTarget.value, 200000); set({ steps: n === null ? null : Math.round(n) }); }} />
       </div>
     </div>
-    <div class="mood" role="radiogroup" aria-label="Mood today">
-      {#each MOODS as m (m.value)}
-        <button type="button" role="radio" aria-checked={day.mood === m.value} aria-label={m.label} title={m.label} class:on={day.mood === m.value}
+    <div class="mood" role="radiogroup" aria-label="Mood today" use:roveRadiogroup>
+      {#each MOODS as m, i (m.value)}
+        <button type="button" role="radio" aria-checked={day.mood === m.value} tabindex={day.mood === m.value || (!day.mood && i === 0) ? 0 : -1} aria-label={m.label} title={m.label} class:on={day.mood === m.value}
           style="--m:{m.color}" onclick={() => set({ mood: day?.mood === m.value ? null : m.value })}><m.icon size={22} aria-hidden="true" /></button>
       {/each}
     </div>
@@ -72,7 +73,7 @@
   .lbl { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); font-weight: 650; color: var(--text-2); }
   .lbl :global(svg) { color: var(--mod-wellness); }
   .stepper { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .stepper button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: grid; place-items: center; color: var(--text-2); cursor: pointer; }
+  .stepper button { width: var(--touch); height: var(--touch); border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: grid; place-items: center; color: var(--text-2); cursor: pointer; }
   .stepper button:disabled { opacity: .35; cursor: default; }
   .val { font-weight: 700; font-size: var(--text-md); }
   .val small { font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }

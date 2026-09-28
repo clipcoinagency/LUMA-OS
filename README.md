@@ -15,7 +15,7 @@ no tracking — **your data stays on your device**.
 | 4 · The seven modules | ✅ done |
 | 5 · Calendar / history view | ✅ done |
 | 6 · Backup/restore | ✅ done (export/restore/reset since Phase 1/2, first-run "I have a backup"; a dismissible "back up now" reminder banner added this phase) |
-| 7 · Polish, animation, responsive | ongoing throughout, no dedicated pass yet |
+| 7 · Polish, animation, responsive | ✅ done (reduced-motion audit across all JS-driven transitions; accessibility fixes — MonthGrid screen-reader content, focus management in Notes/Tasks/MonthNav/Wellness day-nav, radiogroup arrow-key nav, SearchField label, workout double-submit guard, touch targets; 360px overflow sweep) |
 | 8 · Platform packaging (real app → Windows/macOS/Android) | not started — Phase 0's Tauri/Capacitor shells wrap the storage PoC only, not this app |
 | 9 · Vercel demo | ✅ live at `/app/`, informal — no dedicated marketing/demo flow |
 | 10 · Full QA / customer-package testing | real-device tests pending, see [`docs/DEVICE-TEST-PLAN.md`](docs/DEVICE-TEST-PLAN.md) |

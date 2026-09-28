@@ -47,6 +47,11 @@
     if (n.id === selectedId) return;
     leave();
     selectedId = n.id; title = n.title; content = n.content; date = n.date; saved = ''; wasNew = false;
+    // On the phone-width split view the list pane is hidden once an editor is open, which would
+    // otherwise drop focus to <body> (an ancestor going display:none takes any focused descendant
+    // with it) — moving focus into the now-visible editor keeps keyboard/screen-reader users
+    // oriented, on phone and desktop alike.
+    queueMicrotask(() => document.getElementById('note-title')?.focus());
   }
   async function create() {
     leave();
@@ -77,6 +82,9 @@
     const old = await deleteRecord('notes', current.id);
     selectedId = null;
     toast('Note deleted', { action: old ? { label: 'Undo', run: () => void restoreRecord('notes', old) } : undefined });
+    // The trash button the confirm dialog would normally restore focus to no longer exists once
+    // the editor collapses back to the empty-state pick — send focus somewhere still on the page.
+    queueMicrotask(() => document.getElementById('notes-search')?.focus());
   }
   function when(n: Note) {
     const d = diffDays(n.date, clock.today);
@@ -108,12 +116,12 @@
   {:else}
     <div class="split" class:editing={!!current}>
       <aside class="listcol">
-        <SearchField bind:value={q} label="Search notes" placeholder="Search notes" />
+        <SearchField id="notes-search" bind:value={q} label="Search notes" placeholder="Search notes" />
         {#if filtered.length === 0}<EmptyState compact title="No matches" body="Try another word.">{#snippet icon()}<SearchX />{/snippet}</EmptyState>{/if}
         <ul class="list">
           {#each filtered as n (n.id)}
             <li>
-              <button type="button" class="item" class:sel={n.id === selectedId} onclick={() => select(n)} aria-current={n.id === selectedId || undefined}>
+              <button type="button" id="note-item-{n.id}" class="item" class:sel={n.id === selectedId} onclick={() => select(n)} aria-current={n.id === selectedId || undefined}>
                 <span class="row"><span class="t">{#if n.pinned}<Pin size={13} aria-label="Pinned" />{/if}{n.title || 'Untitled'}</span><span class="meta">{when(n)}</span></span>
                 {#if preview(n)}<span class="p">{preview(n)}</span>{/if}
               </button>
@@ -124,7 +132,7 @@
       <section class="editor" aria-label="Note editor">
         {#if current}
           <div class="etop">
-            <button type="button" class="back" onclick={() => { leave(); selectedId = null; }} aria-label="Back to notes"><ArrowLeft size={18} /> Notes</button>
+            <button type="button" class="back" onclick={() => { const backTo = selectedId; leave(); selectedId = null; queueMicrotask(() => (document.getElementById(`note-item-${backTo}`) ?? document.getElementById('notes-search'))?.focus()); }} aria-label="Back to notes"><ArrowLeft size={18} /> Notes</button>
             <span class="meta status" aria-live="polite">{saved === 'saving' ? 'Saving…' : saved === 'saved' ? 'Saved' : ''}</span>
             <button type="button" class="ic" aria-label={current.pinned ? 'Unpin note' : 'Pin note'} onclick={() => togglePin(current!)}>{#if current.pinned}<PinOff size={18} />{:else}<Pin size={18} />{/if}</button>
             <button type="button" class="ic danger" aria-label="Delete note" onclick={() => (confirmDelete = true)}><Trash2 size={18} /></button>

@@ -5,6 +5,7 @@
   import Segmented from '../../lib/ui/Segmented.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
+  import { roveRadiogroup } from '../../lib/ui/roveRadiogroup';
   import { deleteHabit, saveHabit } from '../../lib/domain/habits';
   import type { Habit, HabitFrequency } from '../../lib/db/schema';
 
@@ -82,9 +83,9 @@
       </div>
     {/if}
     <div class="field"><span class="lbl">Colour</span>
-      <div class="swatches" role="radiogroup" aria-label="Colour">
+      <div class="swatches" role="radiogroup" aria-label="Colour" use:roveRadiogroup>
         {#each COLORS as c (c)}
-          <button type="button" role="radio" aria-checked={color === c} aria-label="Colour {c}" class="sw" class:on={color === c} style="--c:{c}" onclick={() => (color = c)}></button>
+          <button type="button" role="radio" aria-checked={color === c} tabindex={color === c ? 0 : -1} aria-label="Colour {c}" class="sw" class:on={color === c} style="--c:{c}" onclick={() => (color = c)}></button>
         {/each}
       </div>
     </div>

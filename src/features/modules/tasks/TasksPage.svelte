@@ -15,6 +15,7 @@
   import { clock } from '../../../lib/clock.svelte';
   import { dur } from '../../../lib/motion';
   import { openQuick } from '../../quick/quick.svelte';
+  import { reclaimFocusIfLost } from '../../../lib/ui/reclaimFocus';
   import { listTasks, setTaskDone, sortTasks } from '../../../lib/domain/tasks';
   import { diffDays, formatDateKey } from '../../../lib/util/dates';
   import type { Task } from '../../../lib/db/schema';
@@ -82,6 +83,13 @@
     return view === 'upcoming' ? null : { text: formatDateKey(t.dueDate, { day: 'numeric', month: 'short' }), tone: 'neutral' };
   }
   async function toggle(t: Task, v: boolean) {
+    // Completing/reopening a task can move it out of its current group (e.g. Today → Done today)
+    // or drop it from the view entirely (Upcoming/All only list open tasks) — either way the
+    // checkbox's <li> is eventually destroyed by the keyed {#each}, dropping keyboard focus to
+    // <body>. That re-render only happens once the DB write's version bump is noticed by the
+    // page's own async refetch, so there's no single point right after this function to check —
+    // watch for the loss and redirect the moment it actually happens.
+    reclaimFocusIfLost(() => document.getElementById('add-task-btn'));
     await setTaskDone(t.id, v, clock.today);
     if (v) toast(`Done: ${t.title}`, { action: { label: 'Undo', run: () => void setTaskDone(t.id, false) } });
   }
@@ -97,7 +105,7 @@
 </script>
 
 <PageHeader module="tasks">
-  {#snippet actions()}<Button variant="primary" onclick={() => openQuick('task')}>{#snippet icon()}<Plus />{/snippet}Add task</Button>{/snippet}
+  {#snippet actions()}<Button id="add-task-btn" variant="primary" onclick={() => openQuick('task')}>{#snippet icon()}<Plus />{/snippet}Add task</Button>{/snippet}
 </PageHeader>
 
 <div class="toolbar">
@@ -140,7 +148,7 @@
             {#each g.tasks as t (t.id)}
               {@const due = dueLabel(t)}
               <li animate:flip={{ duration: dur(220) }} out:fade={{ duration: dur(140) }} class:done={t.done}>
-                <Checkbox label="{t.done ? 'Mark not done' : 'Complete'}: {t.title}" checked={t.done} size={22} onchange={(v) => toggle(t, v)} />
+                <Checkbox id="task-check-{t.id}" label="{t.done ? 'Mark not done' : 'Complete'}: {t.title}" checked={t.done} size={22} onchange={(v) => toggle(t, v)} />
                 <button type="button" class="body" onclick={() => openQuick('task', { task: $state.snapshot(t) })}>
                   <span class="title">{t.title}</span>
                   {#if t.notes || t.tags.length}

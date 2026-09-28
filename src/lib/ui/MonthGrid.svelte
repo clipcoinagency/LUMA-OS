@@ -28,6 +28,13 @@
   });
   const dayNames = $derived(weeks[0]!.map((d) => formatDateKey(d, { weekday: 'short' })));
   const inMonth = (d: DateKey) => d.slice(0, 7) === month.slice(0, 7);
+  // aria-label on the gridcell button (below) sets its accessible NAME, which overrides any
+  // nested text content entirely — so per-day details rendered by the `cell` snippet (event
+  // counts, habit done/missed dots) would otherwise be invisible to screen readers. Wiring the
+  // content wrapper up as an aria-describedby target adds it as a DESCRIPTION instead, which is
+  // additive rather than a replacement, and still correctly picks up any aria-label a snippet
+  // puts on its own nested elements (e.g. a habit dot's aria-label="done").
+  const gridId = `mg${Math.random().toString(36).slice(2, 8)}`;
   let focusKey = $state<DateKey | null>(null);
   const tabKey = $derived(focusKey && inMonth(focusKey) ? focusKey : selected && inMonth(selected) ? selected : inMonth(today) ? today : startOfMonth(month));
 
@@ -54,9 +61,10 @@
       {#each w as d (d)}
         <button type="button" role="gridcell" data-day={d} class="day" class:out={!inMonth(d)} class:today={d === today} class:sel={d === selected}
           aria-selected={d === selected} aria-current={d === today ? 'date' : undefined} aria-label={formatDateKey(d, { weekday: 'long', month: 'long', day: 'numeric' })}
+          aria-describedby={cell ? `${gridId}-${d}` : undefined}
           tabindex={d === tabKey ? 0 : -1} onclick={() => onselect?.(d)} onkeydown={(e) => key(e, d)}>
           <span class="num">{Number(d.slice(8))}</span>
-          {#if cell}<span class="content">{@render cell(d)}</span>{/if}
+          {#if cell}<span class="content" id="{gridId}-{d}">{@render cell(d)}</span>{/if}
         </button>
       {/each}
     </div>

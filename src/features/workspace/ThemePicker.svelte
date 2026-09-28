@@ -2,6 +2,7 @@
   // Each option is a miniature of the real UI rendered IN that theme (data-theme scoped), so the
   // preview is honest. Selecting applies the theme to the whole app immediately.
   import { Check } from '@lucide/svelte';
+  import { roveRadiogroup } from '../../lib/ui/roveRadiogroup';
   import type { ThemeId } from '../../lib/db/schema';
 
   interface Props { value: ThemeId; onchange: (t: ThemeId) => void }
@@ -13,9 +14,9 @@
   ];
 </script>
 
-<div class="grid" role="radiogroup" aria-label="Theme">
-  {#each options as o (o.id)}
-    <button type="button" role="radio" aria-checked={value === o.id} class="opt" class:on={value === o.id} onclick={() => onchange(o.id)}>
+<div class="grid" role="radiogroup" aria-label="Theme" use:roveRadiogroup>
+  {#each options as o, i (o.id)}
+    <button type="button" role="radio" aria-checked={value === o.id} tabindex={value === o.id || (!options.some((x) => x.id === value) && i === 0) ? 0 : -1} class="opt" class:on={value === o.id} onclick={() => onchange(o.id)}>
       <div class="preview" data-theme={o.id} aria-hidden="true">
         <div class="pv-top"><span class="pv-dot"></span><span class="pv-title">Good morning</span></div>
         <div class="pv-cards">

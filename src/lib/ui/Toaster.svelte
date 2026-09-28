@@ -2,11 +2,12 @@
   import { fly } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import { toasts, dismiss } from './toast.svelte';
+  import { dur } from '../motion';
 </script>
 
 <div class="toaster" role="status" aria-live="polite">
   {#each toasts as t (t.id)}
-    <div class="toast {t.tone}" in:fly={{ y: 16, duration: 200 }} out:fly={{ y: 8, duration: 150 }} animate:flip={{ duration: 200 }}>
+    <div class="toast {t.tone}" in:fly={{ y: 16, duration: dur(200) }} out:fly={{ y: 8, duration: dur(150) }} animate:flip={{ duration: dur(200) }}>
       <span>{t.message}</span>
       {#if t.action}
         <button type="button" onclick={() => { t.action?.run(); dismiss(t.id); }}>{t.action.label}</button>

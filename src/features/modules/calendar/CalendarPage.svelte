@@ -76,7 +76,7 @@
       {#snippet cell(d)}
         {@const n = eventsByDay.get(d) ?? 0}
         {@const hasHistory = dots.has(d)}
-        {#if n > 0}<span class="chip">{n} event{n === 1 ? '' : 's'}</span>{/if}
+        {#if n > 0}<span class="chip" aria-hidden="true">{n} event{n === 1 ? '' : 's'}</span>{/if}
         {#if n > 0 || hasHistory}
           <span class="dotrow" aria-hidden="true">
             {#if n > 0}<span class="dotm event"></span>{/if}

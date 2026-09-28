@@ -1,5 +1,6 @@
 <script lang="ts">
   // Dashboard layout: each option shows a tiny diagram of how the dashboard will be arranged.
+  import { roveRadiogroup } from '../../lib/ui/roveRadiogroup';
   import type { Workspace } from '../../lib/db/schema';
 
   type Layout = Workspace['dashboardLayout'];
@@ -13,9 +14,9 @@
   ];
 </script>
 
-<div class="grid" role="radiogroup" aria-label="Dashboard layout">
-  {#each options as o (o.id)}
-    <button type="button" role="radio" aria-checked={value === o.id} class="opt" class:on={value === o.id} onclick={() => onchange(o.id)}>
+<div class="grid" role="radiogroup" aria-label="Dashboard layout" use:roveRadiogroup>
+  {#each options as o, i (o.id)}
+    <button type="button" role="radio" aria-checked={value === o.id} tabindex={value === o.id || (!options.some((x) => x.id === value) && i === 0) ? 0 : -1} class="opt" class:on={value === o.id} onclick={() => onchange(o.id)}>
       <span class="diagram {o.id}" aria-hidden="true">
         {#each Array(o.id === 'focus' ? 3 : o.id === 'balanced' ? 4 : 6) as _, i (i)}<span></span>{/each}
       </span>

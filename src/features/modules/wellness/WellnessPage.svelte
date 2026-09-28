@@ -8,6 +8,8 @@
   import BarChart from '../../../lib/ui/BarChart.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import WorkoutForm from '../../quick/WorkoutForm.svelte';
+  import { roveRadiogroup } from '../../../lib/ui/roveRadiogroup';
+  import { reclaimFocusIfLost } from '../../../lib/ui/reclaimFocus';
   import { changes } from '../../../lib/db/changes.svelte';
   import { clock } from '../../../lib/clock.svelte';
   import { app } from '../../../lib/app.svelte';
@@ -21,6 +23,15 @@
   let workouts = $state.raw<Workout[]>([]);
   let formOpen = $state(false);
   let editing = $state.raw<Workout | null>(null);
+  let prevDayBtn: HTMLButtonElement | undefined = $state();
+
+  // "Next day" disables right at the today-boundary — a click that lands exactly on today leaves
+  // the just-activated, still-focused button disabled, dropping focus to <body>. "Previous day"
+  // has no such limit, so it's a safe landing spot.
+  function shiftDay(n: number) {
+    day = addDays(day, n);
+    reclaimFocusIfLost(() => prevDayBtn);
+  }
 
   $effect(() => { void changes.version; const d = day; void getWellness(d).then((w) => { entry = w; }); });
   $effect(() => {
@@ -62,9 +73,9 @@
 <div class="grid">
   <section class="card log" aria-labelledby="log-h">
     <header class="lh">
-      <button type="button" class="nav" aria-label="Previous day" onclick={() => (day = addDays(day, -1))}><ChevronLeft size={18} /></button>
+      <button bind:this={prevDayBtn} type="button" class="nav" aria-label="Previous day" onclick={() => shiftDay(-1)}><ChevronLeft size={18} /></button>
       <h2 id="log-h">{dayLabel}</h2>
-      <button type="button" class="nav" aria-label="Next day" disabled={day >= clock.today} onclick={() => (day = addDays(day, 1))}><ChevronRight size={18} /></button>
+      <button type="button" class="nav" aria-label="Next day" disabled={day >= clock.today} onclick={() => shiftDay(1)}><ChevronRight size={18} /></button>
     </header>
     {#if entry}
       <div class="fields">
@@ -79,9 +90,9 @@
         <label class="f"><span class="fl"><Footprints size={16} aria-hidden="true" />Steps</span><input class="in num" inputmode="numeric" value={entry.steps ?? ''} placeholder="—" onchange={(e) => { const n = num(e.currentTarget.value, 200000); set({ steps: n === null ? null : Math.round(n) }); }} /></label>
         <label class="f"><span class="fl"><Scale size={16} aria-hidden="true" />Weight ({units.weight})</span><input class="in num" inputmode="decimal" value={entry.weight ?? ''} placeholder="—" onchange={(e) => set({ weight: num(e.currentTarget.value, 700) })} /></label>
       </div>
-      <div class="mood" role="radiogroup" aria-label="Mood">
-        {#each MOODS as m (m.value)}
-          <button type="button" role="radio" aria-checked={entry.mood === m.value} aria-label={m.label} class:on={entry.mood === m.value} style="--m:{m.color}" onclick={() => set({ mood: entry?.mood === m.value ? null : m.value })}><m.icon size={22} aria-hidden="true" /><span>{m.label}</span></button>
+      <div class="mood" role="radiogroup" aria-label="Mood" use:roveRadiogroup>
+        {#each MOODS as m, i (m.value)}
+          <button type="button" role="radio" aria-checked={entry.mood === m.value} tabindex={entry.mood === m.value || (!entry.mood && i === 0) ? 0 : -1} aria-label={m.label} class:on={entry.mood === m.value} style="--m:{m.color}" onclick={() => set({ mood: entry?.mood === m.value ? null : m.value })}><m.icon size={22} aria-hidden="true" /><span>{m.label}</span></button>
         {/each}
       </div>
       <label class="note"><span class="fl">Note</span><textarea rows="2" value={entry.note} placeholder="How did the day feel?" onchange={(e) => set({ note: e.currentTarget.value.slice(0, 500) })}></textarea></label>
@@ -134,7 +145,7 @@
   .in { border: 0; background: none; font-size: var(--text-lg); font-weight: 700; color: var(--text); min-height: 36px; width: 100%; padding: 0; }
   .in:focus-visible { box-shadow: var(--focus); }
   .stepper { display: flex; align-items: center; justify-content: space-between; }
-  .stepper button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: grid; place-items: center; color: var(--text-2); cursor: pointer; }
+  .stepper button { width: var(--touch); height: var(--touch); border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: grid; place-items: center; color: var(--text-2); cursor: pointer; }
   .stepper button:disabled { opacity: .35; }
   .big { font-size: var(--text-lg); font-weight: 700; }
   .mood { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: var(--space-4); }

@@ -4,6 +4,7 @@
   import type { Component } from 'svelte';
   import { flip } from 'svelte/animate';
   import { ChevronUp, ChevronDown } from '@lucide/svelte';
+  import { dur } from '../motion';
 
   interface Props {
     items: T[];
@@ -35,7 +36,7 @@
   {#each items as item, i (item.id)}
     {@const Icon = icons[item.id]}
     {@const on = enabled ? enabled.includes(item.id) : true}
-    <li animate:flip={{ duration: 220 }} class:off={!on}>
+    <li animate:flip={{ duration: dur(220) }} class:off={!on}>
       {#if Icon}<span class="ico" style="--c:{item.color ?? 'var(--accent)'}" aria-hidden="true"><Icon size={18} /></span>{/if}
       <span class="text">
         <span class="lbl">{item.label}</span>

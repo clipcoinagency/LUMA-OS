@@ -5,6 +5,7 @@
   import Segmented from '../../lib/ui/Segmented.svelte';
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
+  import { roveRadiogroup } from '../../lib/ui/roveRadiogroup';
   import { deleteRecord, restoreRecord, saveRecord } from '../../lib/domain/records';
   import { newId } from '../../lib/util/ids';
   import { isDateKey, nowIso, today } from '../../lib/util/dates';
@@ -20,6 +21,7 @@
   let note = $state('');
   let error = $state('');
   let confirmDelete = $state(false);
+  let saving = $state(false);
 
   $effect(() => {
     if (!open) return;
@@ -32,16 +34,20 @@
 
   async function save(e?: Event) {
     e?.preventDefault();
+    if (saving) return;
     const m = Math.round(Number(minutes));
     if (!(m > 0 && m <= 1440)) { error = 'Enter the duration in minutes, like 30.'; return; }
     if (!isDateKey(date)) { error = 'Pick a date.'; return; }
-    const at = nowIso();
-    await saveRecord('workouts', {
-      id: workout?.id ?? newId('wo'), date, type: type === 'Other' && custom.trim() ? custom.trim() : type, durationMin: m,
-      intensity: intensity as Workout['intensity'], note: note.trim(), createdAt: workout?.createdAt ?? at, updatedAt: at,
-    });
-    toast(workout ? 'Workout updated' : 'Workout logged', { tone: 'success' });
-    open = false;
+    saving = true;
+    try {
+      const at = nowIso();
+      await saveRecord('workouts', {
+        id: workout?.id ?? newId('wo'), date, type: type === 'Other' && custom.trim() ? custom.trim() : type, durationMin: m,
+        intensity: intensity as Workout['intensity'], note: note.trim(), createdAt: workout?.createdAt ?? at, updatedAt: at,
+      });
+      toast(workout ? 'Workout updated' : 'Workout logged', { tone: 'success' });
+      open = false;
+    } finally { saving = false; }
   }
   async function del() {
     confirmDelete = false;
@@ -54,8 +60,8 @@
 
 <Modal bind:open title={workout ? 'Edit workout' : 'Log a workout'} size="sm">
   <form class="form" onsubmit={save}>
-    <div class="types" role="radiogroup" aria-label="Workout type">
-      {#each TYPES as t (t)}<button type="button" role="radio" aria-checked={type === t} class="chip" class:on={type === t} onclick={() => (type = t)}>{t}</button>{/each}
+    <div class="types" role="radiogroup" aria-label="Workout type" use:roveRadiogroup>
+      {#each TYPES as t (t)}<button type="button" role="radio" aria-checked={type === t} tabindex={type === t ? 0 : -1} class="chip" class:on={type === t} onclick={() => (type = t)}>{t}</button>{/each}
     </div>
     {#if type === 'Other'}<TextField label="What did you do?" bind:value={custom} maxlength={40} placeholder="e.g. Hiking" />{/if}
     <div class="two">
@@ -71,7 +77,7 @@
   {#snippet footer()}
     {#if workout}<span class="left"><Button variant="ghost" onclick={() => (confirmDelete = true)}>Delete</Button></span>{/if}
     <Button variant="ghost" onclick={() => (open = false)}>Cancel</Button>
-    <Button variant="primary" onclick={() => save()}>{workout ? 'Save' : 'Log workout'}</Button>
+    <Button variant="primary" loading={saving} onclick={() => save()}>{workout ? 'Save' : 'Log workout'}</Button>
   {/snippet}
 </Modal>
 

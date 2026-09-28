@@ -1,14 +1,14 @@
 <script lang="ts">
   // Round "complete" check used for tasks and habits: animated tick, announced as a checkbox.
-  interface Props { checked?: boolean; label: string; hideLabel?: boolean; color?: string; size?: number; onchange?: (v: boolean) => void }
-  let { checked = $bindable(false), label, hideLabel = true, color, size = 26, onchange }: Props = $props();
+  interface Props { checked?: boolean; label: string; hideLabel?: boolean; color?: string; size?: number; id?: string; onchange?: (v: boolean) => void }
+  let { checked = $bindable(false), label, hideLabel = true, color, size = 26, id, onchange }: Props = $props();
   function toggle() {
     checked = !checked;
     onchange?.(checked);
   }
 </script>
 
-<button type="button" role="checkbox" aria-checked={checked} class="cb" class:on={checked}
+<button type="button" {id} role="checkbox" aria-checked={checked} class="cb" class:on={checked}
   style="--c:{color ?? 'var(--accent)'};--s:{size}px" onclick={toggle} aria-label={hideLabel ? label : undefined}>
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" /></svg>
   {#if !hideLabel}<span>{label}</span>{/if}

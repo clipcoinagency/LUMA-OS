@@ -43,7 +43,12 @@ export interface HabitStats {
 
 export function habitStats(habit: Habit, doneDates: Set<string>, today: DateKey, weekStartsOn: 0 | 1 = 1, windowDays = 30): HabitStats {
   const f = habit.frequency;
-  const start = habit.createdOn > addDays(today, -3650) ? habit.createdOn : addDays(today, -3650);
+  // History can be back-filled (e.g. "I did it yesterday, before I created the habit"), so the
+  // streak window starts at the earlier of creation and the first logged day (capped at 10 years).
+  let first: DateKey = habit.createdOn;
+  for (const d of doneDates) if (d < first) first = d;
+  const floor = addDays(today, -3650);
+  const start = first > floor ? first : floor;
   const doneToday = doneDates.has(today);
   const wkStart = startOfWeek(today, weekStartsOn);
   let weekCount = 0;

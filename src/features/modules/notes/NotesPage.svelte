@@ -23,6 +23,7 @@
   let date = $state('');
   let saved = $state<'saved' | 'saving' | ''>('');
   let confirmDelete = $state(false);
+  let wasNew = $state(false); // only a just-created, never-had-content note is silently dropped when left empty
   let timer: ReturnType<typeof setTimeout> | undefined;
 
   $effect(() => { void changes.version; void getAll('notes').then((n) => { notes = n; }); });
@@ -34,23 +35,25 @@
   });
   const current = $derived(notes?.find((n) => n.id === selectedId) ?? null);
 
-  /** A new note left completely empty is removed instead of cluttering the list. */
+  /** A just-created note left completely empty is removed instead of cluttering the list.
+   *  An EXISTING note the user happens to clear out is saved as-is, never silently destroyed —
+   *  they can still delete it explicitly (with confirmation) if that's what they meant to do. */
   function leave() {
     flush();
     const n = current;
-    if (n && !title.trim() && !content.trim()) void deleteRecord('notes', n.id);
+    if (wasNew && n && !title.trim() && !content.trim()) void deleteRecord('notes', n.id);
   }
   function select(n: Note) {
     if (n.id === selectedId) return;
     leave();
-    selectedId = n.id; title = n.title; content = n.content; date = n.date; saved = '';
+    selectedId = n.id; title = n.title; content = n.content; date = n.date; saved = ''; wasNew = false;
   }
   async function create() {
     leave();
     const at = nowIso();
     const n: Note = { id: newId('note'), title: '', content: '', date: clock.today, pinned: false, tags: [], createdAt: at, updatedAt: at };
     await saveRecord('notes', n);
-    selectedId = n.id; title = ''; content = ''; date = n.date;
+    selectedId = n.id; title = ''; content = ''; date = n.date; wasNew = true;
     queueMicrotask(() => document.getElementById('note-title')?.focus());
   }
   function schedule() {
@@ -81,6 +84,15 @@
   }
   const preview = (n: Note) => n.content.replace(/\s+/g, ' ').trim().slice(0, 90);
   $effect(() => () => leave()); // save (or drop if empty) when leaving the page
+
+  // A pending 500ms debounce must not lose the last few keystrokes if the tab is closed,
+  // reloaded or backgrounded before it fires.
+  $effect(() => {
+    const onHide = () => { if (saved === 'saving') flush(); };
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pagehide', onHide);
+    return () => { document.removeEventListener('visibilitychange', onHide); window.removeEventListener('pagehide', onHide); };
+  });
 </script>
 
 <PageHeader module="notes">

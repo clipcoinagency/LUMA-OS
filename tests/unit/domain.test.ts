@@ -51,6 +51,13 @@ describe('habit streaks', () => {
     expect(habitStats(habit(f), done, today, 1).current).toBe(3);
   });
 
+  it('back-filled days before the habit was created still count', () => {
+    const done = new Set(['2026-09-24', '2026-09-25', today]);
+    const s = habitStats(habit({ kind: 'daily' }, today), done, today);
+    expect(s.current).toBe(3);
+    expect(s.best).toBe(3);
+  });
+
   it('completion rate ignores today until it is done', () => {
     const done = new Set(days('2026-09-17', 9)); // 17..25 → every due day before today
     expect(habitStats(habit({ kind: 'daily' }, '2026-09-17'), done, today).rate).toBe(1);

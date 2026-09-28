@@ -8,7 +8,7 @@
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import { createTask, deleteTask, restoreTask, updateTask } from '../../lib/domain/tasks';
-  import { addDays, today } from '../../lib/util/dates';
+  import { addDays, isDateKey, today } from '../../lib/util/dates';
   import type { Priority, Task } from '../../lib/db/schema';
 
   let { open = $bindable(false), task = null }: { open?: boolean; task?: Task | null } = $props();
@@ -38,6 +38,7 @@
   async function save(e?: Event) {
     e?.preventDefault();
     if (!title.trim()) { error = 'Give your task a name.'; return; }
+    if (when === 'date' && !isDateKey(date)) { error = 'Pick a date, or choose Someday.'; return; }
     saving = true;
     try {
       const due = when === 'today' ? today() : when === 'tomorrow' ? addDays(today(), 1) : when === 'date' ? date : null;

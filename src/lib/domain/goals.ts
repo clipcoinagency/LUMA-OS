@@ -75,7 +75,10 @@ export async function toggleMilestone(goalId: string, milestoneId: string, done:
 export async function setGoalStatus(goalId: string, status: Goal['status'], on: DateKey = today()): Promise<void> {
   const g = await get('goals', goalId);
   if (!g) return;
-  await put('goals', { ...g, status, completedOn: status === 'completed' ? (g.completedOn ?? on) : null, updatedAt: nowIso() });
+  // Completing stamps (or keeps) the date; reactivating a completed goal reopens it (clears the
+  // date); archiving/pausing otherwise leaves completedOn exactly as it was.
+  const completedOn = status === 'completed' ? (g.completedOn ?? on) : status === 'active' ? null : g.completedOn;
+  await put('goals', { ...g, status, completedOn, updatedAt: nowIso() });
   bump();
 }
 

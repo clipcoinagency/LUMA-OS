@@ -144,14 +144,24 @@ export function getRange<S extends StoreName>(store: S, index: string, from: str
   return getByIndex(store, index, IDBKeyRange.bound(from, to));
 }
 
+/**
+ * Plain-data copy. UI state can hand us Svelte reactive Proxies (or objects that contain them),
+ * which IndexedDB rejects with DataCloneError. Every record type is JSON-compatible by design,
+ * so a JSON round-trip is a safe, total guard.
+ */
+export function plain<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 export function put<S extends StoreName>(store: S, value: StoreRecordMap[S]): Promise<void> {
-  return transact<void>(store, 'readwrite', (t) => { t.objectStore(store).put(value); });
+  const row = plain(value);
+  return transact<void>(store, 'readwrite', (t) => { t.objectStore(store).put(row); });
 }
 
 export function putMany<S extends StoreName>(store: S, values: StoreRecordMap[S][]): Promise<void> {
   return transact<void>(store, 'readwrite', (t) => {
     const os = t.objectStore(store);
-    for (const v of values) os.put(v);
+    for (const v of values) os.put(plain(v));
   });
 }
 

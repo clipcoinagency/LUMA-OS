@@ -27,8 +27,10 @@ async function launch(viewport = { width: 1360, height: 900 }) {
   await page.goto(url);
   return { ctx, page };
 }
-const go = async (page, hash) => { await page.goto(`${base}#/${hash}`); await page.locator('main h1').first().waitFor(); };
+// fresh page per module so one failed step (e.g. a dialog left open) can't cascade into the next module
+const go = async (page, hash, ready = (p) => p.locator('main h1').first().waitFor()) => { await page.goto(`${base}#/${hash}`); await page.reload(); await ready(page); };
 const dlg = (page) => page.locator('dialog[open]').last();
+const closed = (page) => page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 5000 });
 const toastText = (page, re) => page.locator('.toast').filter({ hasText: re }).first().waitFor({ timeout: 5000 });
 const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
 
@@ -49,7 +51,7 @@ await soft('Tasks flow', async () => {
   await dlg(page).getByRole('radio', { name: 'High' }).click();
   await dlg(page).getByLabel('Tags (optional)').fill('work, #urgent');
   await dlg(page).getByRole('button', { name: 'Add task' }).click();
-  await page.getByRole('radio', { name: /^Upcoming/ }).click();
+  await page.locator('main').getByRole('radio', { name: /^Upcoming/ }).click();
   await page.getByRole('heading', { name: /^Tomorrow/ }).waitFor();
   check(await page.getByText('#work').isVisible() && await page.getByText('#urgent').isVisible(), 'Tasks: created with due date + tags, shown under Upcoming › Tomorrow');
   await page.getByRole('searchbox', { name: 'Search tasks' }).fill('#work');
@@ -62,17 +64,18 @@ await soft('Tasks flow', async () => {
   await dlg(page).getByLabel('Task', { exact: true }).fill('Prepare board slides');
   await dlg(page).getByRole('radio', { name: 'Today' }).click();
   await dlg(page).getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('radio', { name: /^Today/ }).click();
-  await page.getByText('Prepare board slides').waitFor();
+  await closed(page);
+  await page.locator('main').getByRole('radio', { name: /^Today/ }).click();
+  await page.locator('main').getByText('Prepare board slides').waitFor();
   check(true, 'Tasks: edit title + move to Today');
   // priority filter
-  await page.getByLabel('Priority').selectOption('low');
+  await page.locator('main').getByLabel('Priority').selectOption('low');
   check(await page.getByText('No matching tasks').isVisible(), 'Tasks: priority filter');
-  await page.getByLabel('Priority').selectOption('all');
+  await page.locator('main').getByLabel('Priority').selectOption('all');
   // complete → Completed view
   await page.getByRole('checkbox', { name: /Complete: Prepare board slides/ }).click();
-  await page.getByRole('radio', { name: 'Completed' }).click();
-  await page.getByText('Prepare board slides').waitFor();
+  await page.locator('main').getByRole('radio', { name: 'Completed' }).click();
+  await page.locator('main').getByText('Prepare board slides').waitFor();
   check(true, 'Tasks: completed task listed in Completed (by completion day)');
   // delete with confirmation, then undo
   await page.getByRole('button', { name: /Prepare board slides/ }).click();
@@ -80,10 +83,11 @@ await soft('Tasks flow', async () => {
   await dlg(page).getByRole('heading', { name: 'Delete this task?' }).waitFor();
   check(true, 'Tasks: delete asks for confirmation');
   await dlg(page).getByRole('button', { name: 'Delete task' }).click();
+  await closed(page);
   await toastText(page, /Task deleted/);
-  check(!(await page.getByText('Prepare board slides').count()), 'Tasks: deleted');
-  await page.getByRole('button', { name: 'Undo' }).click();
-  await page.getByText('Prepare board slides').waitFor();
+  check(!(await page.locator('main').getByText('Prepare board slides').count()), 'Tasks: deleted');
+  await page.getByRole('button', { name: 'Undo' }).last().click();
+  await page.locator('main').getByText('Prepare board slides').waitFor();
   check(true, 'Tasks: undo restores the deleted task');
 });
 
@@ -143,8 +147,8 @@ await soft('Goals flow', async () => {
   await page.getByRole('button', { name: 'New goal' }).click();
   await dlg(page).getByLabel('Goal', { exact: true }).fill('Launch website');
   await dlg(page).getByRole('radio', { name: 'Milestones' }).click();
-  await dlg(page).getByLabel('Milestone 1').fill('Design');
-  await dlg(page).getByLabel('Milestone 2').fill('Publish');
+  await dlg(page).getByLabel('Milestone 1', { exact: true }).fill('Design');
+  await dlg(page).getByLabel('Milestone 2', { exact: true }).fill('Publish');
   await dlg(page).getByRole('button', { name: 'Create goal' }).click();
   await page.getByRole('checkbox', { name: 'Milestone: Design' }).click();
   await page.getByText('1 of 2 milestones').waitFor();
@@ -154,7 +158,7 @@ await soft('Goals flow', async () => {
   await dlg(page).getByRole('button', { name: 'Delete' }).click();
   await dlg(page).getByRole('button', { name: 'Delete goal and history' }).click();
   await toastText(page, /Deleted "Launch website"/);
-  check(!(await page.getByText('Launch website').count()), 'Goals: delete (confirmed) removes goal');
+  check(!(await page.locator('.goal .title').getByText('Launch website').count()), 'Goals: delete (confirmed) removes goal');
 });
 
 // ---------------------------------------------------------------- Calendar
@@ -282,7 +286,7 @@ await go(page, 'wellness'); persisted.push((await page.getByLabel(/Sleep \(hours
 check(persisted.every(Boolean), 'Relaunch: notes, goal progress, finance, wellness all persisted', persisted.join(','));
 
 // sample data → screenshots + phone overflow per module
-await go(page, 'dev/data');
+await go(page, 'dev/data', (p) => p.getByRole('button', { name: /Add 90 days of sample data/ }).waitFor());
 await page.getByRole('button', { name: /Add 90 days of sample data/ }).click();
 await page.getByText(/Added sample history/).waitFor();
 const MODS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'];

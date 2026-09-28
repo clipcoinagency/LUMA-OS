@@ -69,10 +69,10 @@
   async function del() {
     if (!detail) return;
     confirmDelete = false;
-    const t = detail.title;
+    const { id, title } = detail; // read before clearing the selection (detail derives from detailId)
     detailId = null;
-    await deleteGoal(detail.id);
-    toast(`Deleted "${t}"`);
+    await deleteGoal(id);
+    toast(`Deleted "${title}"`);
   }
 </script>
 

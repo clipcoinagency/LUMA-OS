@@ -4,10 +4,12 @@
   import TextField from '../../lib/ui/TextField.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
-  import { saveHabit } from '../../lib/domain/habits';
-  import type { HabitFrequency } from '../../lib/db/schema';
+  import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
+  import { deleteHabit, saveHabit } from '../../lib/domain/habits';
+  import type { Habit, HabitFrequency } from '../../lib/db/schema';
 
-  let { open = $bindable(false) }: { open?: boolean } = $props();
+  let { open = $bindable(false), habit = null }: { open?: boolean; habit?: Habit | null } = $props();
+  let confirmDelete = $state(false);
   const COLORS = ['#4f8f75', '#a5546c', '#4f98a8', '#b0875c', '#6c78b8', '#7a6bb0', '#d0823c'];
   const DAYS = [{ i: 1, l: 'Mon' }, { i: 2, l: 'Tue' }, { i: 3, l: 'Wed' }, { i: 4, l: 'Thu' }, { i: 5, l: 'Fri' }, { i: 6, l: 'Sat' }, { i: 0, l: 'Sun' }];
   let name = $state('');
@@ -18,7 +20,31 @@
   let error = $state('');
   let saving = $state(false);
 
-  $effect(() => { if (!open) { name = ''; kind = 'daily'; error = ''; } });
+  $effect(() => {
+    if (!open) return;
+    error = '';
+    if (habit) {
+      name = habit.name; color = habit.color || COLORS[0]!;
+      const f = habit.frequency;
+      kind = f.kind === 'daily' ? 'daily' : f.kind === 'weekdays' ? 'weekdays' : 'times';
+      if (f.kind === 'weekdays') days = [...f.days];
+      if (f.kind === 'times-per-week') times = f.times;
+    } else { name = ''; kind = 'daily'; days = [1, 3, 5]; times = 3; color = COLORS[0]!; }
+  });
+
+  async function archive() {
+    if (!habit) return;
+    await saveHabit({ ...habit, archived: !habit.archived });
+    toast(habit.archived ? 'Habit restored' : 'Habit archived — its history is kept');
+    open = false;
+  }
+  async function del() {
+    if (!habit) return;
+    confirmDelete = false;
+    await deleteHabit(habit.id);
+    toast('Habit deleted');
+    open = false;
+  }
 
   function toggleDay(i: number) { days = days.includes(i) ? days.filter((d) => d !== i) : [...days, i]; }
 
@@ -29,14 +55,14 @@
     const frequency: HabitFrequency = kind === 'daily' ? { kind: 'daily' } : kind === 'weekdays' ? { kind: 'weekdays', days: [...days].sort() } : { kind: 'times-per-week', times };
     saving = true;
     try {
-      await saveHabit({ name: name.trim(), frequency, color });
-      toast('Habit created', { tone: 'success' });
+      await saveHabit({ ...(habit ?? {}), name: name.trim(), frequency, color });
+      toast(habit ? 'Habit updated' : 'Habit created', { tone: 'success' });
       open = false;
     } finally { saving = false; }
   }
 </script>
 
-<Modal bind:open title="New habit" size="sm">
+<Modal bind:open title={habit ? 'Edit habit' : 'New habit'} size="sm">
   <form class="form" onsubmit={save}>
     <TextField label="Habit" bind:value={name} placeholder="e.g. Read 20 minutes" maxlength={80} error={error} oninput={() => (error = '')} />
     <div class="field"><span class="lbl">How often</span>
@@ -65,13 +91,24 @@
     <button type="submit" hidden aria-hidden="true" tabindex="-1"></button>
   </form>
   {#snippet footer()}
+    {#if habit}
+      <span class="left">
+        <Button variant="ghost" onclick={archive}>{habit.archived ? 'Restore' : 'Archive'}</Button>
+        <Button variant="ghost" onclick={() => (confirmDelete = true)}>Delete</Button>
+      </span>
+    {/if}
     <Button variant="ghost" onclick={() => (open = false)}>Cancel</Button>
-    <Button variant="primary" loading={saving} onclick={() => save()}>Create habit</Button>
+    <Button variant="primary" loading={saving} onclick={() => save()}>{habit ? 'Save' : 'Create habit'}</Button>
   {/snippet}
 </Modal>
 
+<ConfirmDialog bind:open={confirmDelete} title="Delete this habit?" confirmLabel="Delete habit and history"
+  message={`"${habit?.name ?? ''}" and all of its check-in history will be permanently deleted. To keep the history, archive it instead.`} onconfirm={del} />
+
 <style>
   .form { display: grid; gap: var(--space-4); }
+  .left { margin-right: auto; display: flex; gap: var(--space-1); }
+  .left :global(.btn:last-child) { color: var(--danger); }
   .field { display: grid; gap: 8px; }
   .lbl { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }

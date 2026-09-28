@@ -54,3 +54,38 @@ export async function saveGoal(g: Goal): Promise<void> {
   await put('goals', { ...g, updatedAt: nowIso() });
   bump();
 }
+
+/** Ticks/unticks a milestone and records the new milestone count as a dated check-in. */
+export async function toggleMilestone(goalId: string, milestoneId: string, done: boolean, on: DateKey = today()): Promise<void> {
+  const g = await get('goals', goalId);
+  if (!g) return;
+  const milestones = g.milestones.map((m) => (m.id === milestoneId ? { ...m, done, doneOn: done ? on : null } : m));
+  const doneN = milestones.filter((m) => m.done).length;
+  const allDone = milestones.length > 0 && doneN === milestones.length && g.target === null;
+  const at = nowIso();
+  const next: Goal = { ...g, milestones, updatedAt: at, status: allDone ? 'completed' : g.status === 'completed' ? 'active' : g.status, completedOn: allDone ? (g.completedOn ?? on) : null };
+  const row: GoalProgress = { id: newId('gp'), goalId, date: on, value: doneN, note: `${done ? 'Completed' : 'Reopened'}: ${milestones.find((m) => m.id === milestoneId)?.title ?? ''}`, createdAt: at, updatedAt: at };
+  await transact<void>(['goals', 'goal_progress'], 'readwrite', (t) => {
+    t.objectStore('goals').put(next);
+    t.objectStore('goal_progress').put(row);
+  });
+  bump();
+}
+
+export async function setGoalStatus(goalId: string, status: Goal['status'], on: DateKey = today()): Promise<void> {
+  const g = await get('goals', goalId);
+  if (!g) return;
+  await put('goals', { ...g, status, completedOn: status === 'completed' ? (g.completedOn ?? on) : null, updatedAt: nowIso() });
+  bump();
+}
+
+/** Deletes a goal and its whole progress history in one transaction. */
+export async function deleteGoal(goalId: string): Promise<void> {
+  const rows = await getByIndex('goal_progress', 'by_goal', goalId);
+  await transact<void>(['goals', 'goal_progress'], 'readwrite', (t) => {
+    t.objectStore('goals').delete(goalId);
+    const gp = t.objectStore('goal_progress');
+    for (const r of rows) gp.delete(r.id);
+  });
+  bump();
+}

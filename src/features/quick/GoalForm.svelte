@@ -6,10 +6,11 @@
   import Segmented from '../../lib/ui/Segmented.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import { saveGoal } from '../../lib/domain/goals';
+  import type { Goal, Milestone } from '../../lib/db/schema';
   import { newId } from '../../lib/util/ids';
   import { nowIso, today } from '../../lib/util/dates';
 
-  let { open = $bindable(false) }: { open?: boolean } = $props();
+  let { open = $bindable(false), goal = null }: { open?: boolean; goal?: Goal | null } = $props();
   let title = $state('');
   let description = $state('');
   let kind = $state('number');
@@ -20,7 +21,15 @@
   let error = $state('');
   let saving = $state(false);
 
-  $effect(() => { if (!open) { title = ''; description = ''; kind = 'number'; target = ''; unit = ''; deadline = ''; milestones = ['', '']; error = ''; } });
+  $effect(() => {
+    if (!open) return;
+    error = '';
+    if (goal) {
+      title = goal.title; description = goal.description; kind = goal.target !== null ? 'number' : 'milestones';
+      target = goal.target !== null ? String(goal.target) : ''; unit = goal.unit; deadline = goal.deadline ?? '';
+      milestones = goal.milestones.length ? goal.milestones.map((m) => m.title) : ['', ''];
+    } else { title = ''; description = ''; kind = 'number'; target = ''; unit = ''; deadline = ''; milestones = ['', '']; }
+  });
 
   async function save(e?: Event) {
     e?.preventDefault();
@@ -32,18 +41,21 @@
     saving = true;
     try {
       const at = nowIso();
+      // keep done-state of milestones that still exist (matched by title)
+      const keep = new Map((goal?.milestones ?? []).map((m) => [m.title, m]));
+      const msRows: Milestone[] = kind === 'milestones' ? ms.map((m) => keep.get(m) ?? { id: newId('ms'), title: m, done: false, doneOn: null }) : [];
       await saveGoal({
-        id: newId('goal'), title: title.trim(), description: description.trim(), target: kind === 'number' ? t : null, unit: unit.trim(), current: 0,
-        deadline: deadline || null, status: 'active', milestones: kind === 'milestones' ? ms.map((m) => ({ id: newId('ms'), title: m, done: false, doneOn: null })) : [],
-        createdOn: today(), completedOn: null, createdAt: at, updatedAt: at,
+        id: goal?.id ?? newId('goal'), title: title.trim(), description: description.trim(), target: kind === 'number' ? t : null, unit: unit.trim(),
+        current: goal?.current ?? 0, deadline: deadline || null, status: goal?.status ?? 'active', milestones: msRows,
+        createdOn: goal?.createdOn ?? today(), completedOn: goal?.completedOn ?? null, createdAt: goal?.createdAt ?? at, updatedAt: at,
       });
-      toast('Goal created', { tone: 'success' });
+      toast(goal ? 'Goal updated' : 'Goal created', { tone: 'success' });
       open = false;
     } finally { saving = false; }
   }
 </script>
 
-<Modal bind:open title="New goal" size="sm">
+<Modal bind:open title={goal ? 'Edit goal' : 'New goal'} size="sm">
   <form class="form" onsubmit={save}>
     <TextField label="Goal" bind:value={title} placeholder="e.g. Read 12 books" maxlength={120} error={error} oninput={() => (error = '')} />
     <Segmented label="Track by" size="sm" bind:value={kind} options={[{ value: 'number', label: 'A number' }, { value: 'milestones', label: 'Milestones' }]} />
@@ -69,7 +81,7 @@
   </form>
   {#snippet footer()}
     <Button variant="ghost" onclick={() => (open = false)}>Cancel</Button>
-    <Button variant="primary" loading={saving} onclick={() => save()}>Create goal</Button>
+    <Button variant="primary" loading={saving} onclick={() => save()}>{goal ? 'Save' : 'Create goal'}</Button>
   {/snippet}
 </Modal>
 

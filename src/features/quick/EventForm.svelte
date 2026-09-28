@@ -4,12 +4,14 @@
   import TextField from '../../lib/ui/TextField.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
-  import { put } from '../../lib/db/idb';
-  import { bump } from '../../lib/db/changes.svelte';
+  import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
+  import { deleteRecord, restoreRecord, saveRecord } from '../../lib/domain/records';
+  import type { CalendarEvent } from '../../lib/db/schema';
   import { newId } from '../../lib/util/ids';
   import { isDateKey, nowIso, today } from '../../lib/util/dates';
 
-  let { open = $bindable(false), date: presetDate }: { open?: boolean; date?: string } = $props();
+  let { open = $bindable(false), date: presetDate, event = null }: { open?: boolean; date?: string; event?: CalendarEvent | null } = $props();
+  let confirmDelete = $state(false);
   let title = $state('');
   let date = $state(today());
   let allDay = $state(false);
@@ -19,7 +21,20 @@
   let error = $state('');
   let saving = $state(false);
 
-  $effect(() => { if (open) { title = ''; notes = ''; error = ''; allDay = false; start = '09:00'; end = ''; date = presetDate && isDateKey(presetDate) ? presetDate : today(); } });
+  $effect(() => {
+    if (!open) return;
+    error = '';
+    if (event) { title = event.title; notes = event.notes; allDay = event.allDay; start = event.startTime ?? '09:00'; end = event.endTime ?? ''; date = event.date; }
+    else { title = ''; notes = ''; allDay = false; start = '09:00'; end = ''; date = presetDate && isDateKey(presetDate) ? presetDate : today(); }
+  });
+
+  async function del() {
+    confirmDelete = false;
+    if (!event) return;
+    const old = await deleteRecord('events', event.id);
+    open = false;
+    toast('Event deleted', { action: old ? { label: 'Undo', run: () => void restoreRecord('events', old) } : undefined });
+  }
 
   async function save(e?: Event) {
     e?.preventDefault();
@@ -29,15 +44,14 @@
     saving = true;
     try {
       const at = nowIso();
-      await put('events', { id: newId('ev'), title: title.trim(), date, allDay, startTime: allDay ? null : start || null, endTime: allDay ? null : end || null, notes: notes.trim(), color: '#6c78b8', createdAt: at, updatedAt: at });
-      bump();
-      toast('Event added', { tone: 'success' });
+      await saveRecord('events', { id: event?.id ?? newId('ev'), title: title.trim(), date, allDay, startTime: allDay ? null : start || null, endTime: allDay ? null : end || null, notes: notes.trim(), color: event?.color ?? '#6c78b8', createdAt: event?.createdAt ?? at, updatedAt: at });
+      toast(event ? 'Event updated' : 'Event added', { tone: 'success' });
       open = false;
     } finally { saving = false; }
   }
 </script>
 
-<Modal bind:open title="New event" size="sm">
+<Modal bind:open title={event ? 'Edit event' : 'New event'} size="sm">
   <form class="form" onsubmit={save}>
     <TextField label="Event" bind:value={title} placeholder="e.g. Dinner with friends" maxlength={120} error={error} oninput={() => (error = '')} />
     <TextField label="Date" type="date" bind:value={date} />
@@ -52,12 +66,17 @@
     <button type="submit" hidden aria-hidden="true" tabindex="-1"></button>
   </form>
   {#snippet footer()}
+    {#if event}<span class="left"><Button variant="ghost" onclick={() => (confirmDelete = true)}>Delete</Button></span>{/if}
     <Button variant="ghost" onclick={() => (open = false)}>Cancel</Button>
-    <Button variant="primary" loading={saving} onclick={() => save()}>Add event</Button>
+    <Button variant="primary" loading={saving} onclick={() => save()}>{event ? 'Save' : 'Add event'}</Button>
   {/snippet}
 </Modal>
 
+<ConfirmDialog bind:open={confirmDelete} title="Delete this event?" message={`"${event?.title ?? ''}" will be removed from your calendar. You can undo right after.`} confirmLabel="Delete event" onconfirm={del} />
+
 <style>
   .form { display: grid; gap: var(--space-4); }
+  .left { margin-right: auto; }
+  .left :global(.btn) { color: var(--danger); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 </style>

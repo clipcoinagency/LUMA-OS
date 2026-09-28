@@ -1,28 +1,21 @@
 <script lang="ts">
-  // Phase 2 module frame; each module's real screens arrive in Phase 4.
-  import Card from '../../lib/ui/Card.svelte';
-  import EmptyState from '../../lib/ui/EmptyState.svelte';
-  import { MODULES } from '../../lib/modules';
+  // Routes a module id to its screen.
+  import TasksPage from './tasks/TasksPage.svelte';
+  import GoalsPage from './goals/GoalsPage.svelte';
+  import HabitsPage from './habits/HabitsPage.svelte';
+  import CalendarPage from './calendar/CalendarPage.svelte';
+  import NotesPage from './notes/NotesPage.svelte';
+  import WellnessPage from './wellness/WellnessPage.svelte';
+  import FinancePage from './finance/FinancePage.svelte';
   import type { ModuleId } from '../../lib/db/schema';
 
   let { module }: { module: ModuleId } = $props();
-  const m = $derived(MODULES[module]);
 </script>
 
-<header class="head" style="--c:{m.color}">
-  <span class="ico" aria-hidden="true"><m.icon size={24} /></span>
-  <div>
-    <h1>{m.name}</h1>
-    <p class="muted">{m.tagline}</p>
-  </div>
-</header>
-<Card>
-  <EmptyState title="{m.name} is being built" body="This module's screens arrive in the next build. Your workspace settings are already saved.">
-    {#snippet icon()}<m.icon />{/snippet}
-  </EmptyState>
-</Card>
-
-<style>
-  .head { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); }
-  .ico { width: 52px; height: 52px; border-radius: var(--radius-lg); display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); box-shadow: var(--glow); flex: none; }
-</style>
+{#if module === 'tasks'}<TasksPage />
+{:else if module === 'goals'}<GoalsPage />
+{:else if module === 'habits'}<HabitsPage />
+{:else if module === 'calendar'}<CalendarPage />
+{:else if module === 'notes'}<NotesPage />
+{:else if module === 'wellness'}<WellnessPage />
+{:else}<FinancePage />{/if}

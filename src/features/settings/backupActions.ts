@@ -1,6 +1,7 @@
 // Backup actions shared by Settings, onboarding and the backup reminder.
-import { get } from '../../lib/db/idb';
+import { get, transact } from '../../lib/db/idb';
 import { backupFileName, createBackup, latestSafetySnapshot, markBackupDone, restoreBackup, serializeBackup, validateBackupText } from '../../lib/backup/backup';
+import { nowIso } from '../../lib/util/dates';
 import { saveTextFile } from '../../lib/platform/platform';
 import { toast } from '../../lib/ui/toast.svelte';
 import { app } from '../../lib/app.svelte';
@@ -10,6 +11,7 @@ export async function backUpNow(): Promise<boolean> {
     const res = await saveTextFile(backupFileName(), serializeBackup(await createBackup()));
     if (res.cancelled) return false;
     await markBackupDone();
+    void app.refreshBackupReminder();
     toast(`Backup saved to ${res.where}`, { tone: 'success' });
     return true;
   } catch (e) {
@@ -37,4 +39,10 @@ export async function undoLastChange(): Promise<void> {
 
 export async function lastBackupAt(): Promise<string | null> {
   return ((await get('meta', 'lastBackupAt'))?.value as string | undefined) ?? null;
+}
+
+/** Dismissing the backup reminder snoozes it for the same interval, not forever. */
+export async function snoozeBackupReminder(): Promise<void> {
+  await transact<void>('meta', 'readwrite', (t) => { t.objectStore('meta').put({ key: 'backupReminderSnoozedAt', value: nowIso() }); });
+  app.showBackupReminder = false;
 }

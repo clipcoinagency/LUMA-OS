@@ -15,6 +15,23 @@
   import Settings from './features/settings/Settings.svelte';
   import DesignSystem from './dev/DesignSystem.svelte';
   import DataLab from './dev/DataLab.svelte';
+  import { backUpNow, snoozeBackupReminder } from './features/settings/backupActions';
+
+  let backingUp = $state(false);
+  async function backupNowFromBanner() {
+    backingUp = true;
+    await backUpNow();
+    backingUp = false;
+  }
+
+  // Both top banners share one fixed height (BANNER_H), so the desktop sidebar (position:fixed,
+  // viewport-relative — see AppShell.svelte) can offset itself by exactly that amount via a CSS
+  // variable, instead of being covered by whichever banner is showing.
+  const BANNER_H = '52px';
+  $effect(() => {
+    const showing = app.status === 'ready' && app.workspace?.onboarded && (app.staleWindow || app.showBackupReminder);
+    document.documentElement.style.setProperty('--banner-offset', showing ? BANNER_H : '0px');
+  });
 
   onMount(() => { void app.start(); });
 
@@ -56,6 +73,14 @@
 {:else}
   {#if app.staleWindow}
     <div class="stale" role="alert">Life OS was updated in another window. <button onclick={() => location.reload()}>Reload</button></div>
+  {:else if app.showBackupReminder}
+    <div class="reminder" role="status">
+      <span>Your data stays on this device only — back it up so you don't risk losing it.</span>
+      <span class="acts">
+        <button class="link" disabled={backingUp} onclick={backupNowFromBanner}>{backingUp ? 'Saving…' : 'Back up now'}</button>
+        <button class="link ghost" onclick={() => snoozeBackupReminder()}>Not now</button>
+      </span>
+    </div>
   {/if}
   <div in:fade={{ duration: dur(300) }}>
     <AppShell>
@@ -79,7 +104,18 @@
   @keyframes breathe { 50% { transform: scale(.92); opacity: .8; } }
   .center { min-height: 100dvh; display: grid; place-content: center; padding: var(--space-5); }
   .hint { text-align: center; }
-  .stale { position: sticky; top: 0; z-index: var(--z-overlay); background: var(--warning-soft); color: var(--warning); padding: var(--space-3) var(--space-4); font-weight: 600; text-align: center; }
+  /* min-height + box-sizing: a predictable, shared height so the --banner-offset set above
+     (read by AppShell's sidebar) always matches what's actually on screen. */
+  .stale { position: sticky; top: 0; z-index: var(--z-overlay); min-height: 52px; box-sizing: border-box; background: var(--warning-soft); color: var(--warning); padding: var(--space-3) var(--space-4); font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; }
   .stale button { margin-left: var(--space-2); font-weight: 700; text-decoration: underline; background: none; border: 0; color: inherit; cursor: pointer; }
+  .reminder {
+    position: sticky; top: 0; z-index: var(--z-overlay); min-height: 52px; box-sizing: border-box; background: var(--info-soft); color: var(--info);
+    padding: var(--space-3) var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4);
+    align-items: center; justify-content: center; text-align: center; font-weight: 550;
+  }
+  .reminder .acts { display: flex; gap: var(--space-3); flex: none; }
+  .reminder .link { background: none; border: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; padding: 2px; }
+  .reminder .link.ghost { font-weight: 600; opacity: .8; }
+  .reminder .link:disabled { opacity: .6; cursor: progress; text-decoration: none; }
   .page { min-width: 0; }
 </style>

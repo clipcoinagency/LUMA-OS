@@ -14,7 +14,7 @@ no tracking — **your data stays on your device**.
 | 3 · Dashboard (live widgets) | ✅ done |
 | 4 · The seven modules | ✅ done |
 | 5 · Calendar / history view | ✅ done |
-| 6 · Backup/restore | ✅ mostly done since Phase 1/2 (export/restore/reset, first-run "I have a backup") — a due backup *reminder* isn't wired up yet |
+| 6 · Backup/restore | ✅ done (export/restore/reset since Phase 1/2, first-run "I have a backup"; a dismissible "back up now" reminder banner added this phase) |
 | 7 · Polish, animation, responsive | ongoing throughout, no dedicated pass yet |
 | 8 · Platform packaging (real app → Windows/macOS/Android) | not started — Phase 0's Tauri/Capacitor shells wrap the storage PoC only, not this app |
 | 9 · Vercel demo | ✅ live at `/app/`, informal — no dedicated marketing/demo flow |

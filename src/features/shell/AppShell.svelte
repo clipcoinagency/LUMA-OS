@@ -110,7 +110,15 @@
     .bottom { display: none; }
     :global(.toaster) { --toast-offset: 0px; }
     .sidebar {
-      position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w); display: flex; flex-direction: column; gap: var(--space-4);
+      /* top (not the inset shorthand's implicit 0) so a banner rendered above <AppShell> in
+         App.svelte — which sets --banner-offset on <html> — pushes the sidebar down instead of
+         being covered by it. bottom:0 with an explicit top still auto-computes the height to
+         fill the rest of the viewport, exactly as the old `inset: 0 auto 0 0` did when the
+         offset is 0. (Earlier attempt used `contain: layout` on .shell to reparent this fixed
+         element — that also made it scroll away with the page instead of staying pinned; a
+         plain viewport-relative offset avoids that entirely.) */
+      position: fixed; top: var(--banner-offset, 0px); right: auto; bottom: 0; left: 0;
+      width: var(--sidebar-w); display: flex; flex-direction: column; gap: var(--space-4);
       padding: var(--space-5) var(--space-3); border-right: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 70%, transparent);
       backdrop-filter: blur(10px); overflow-y: auto;
     }

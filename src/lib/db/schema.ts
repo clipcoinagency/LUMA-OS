@@ -246,4 +246,4 @@ export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);
 export const CONFIG_STORES: StoreName[] = ['meta', 'settings', 'workspace', 'finance_categories'];
 
 /** meta keys that describe this device, not the user's workspace — never exported/restored. */
-export const DEVICE_META_KEYS = ['launches', 'installedAt', 'lastOpenedAt', 'persistRequested', 'lastBackupAt', 'lastRestoreAt', 'lastResetAt'];
+export const DEVICE_META_KEYS = ['launches', 'installedAt', 'lastOpenedAt', 'persistRequested', 'lastBackupAt', 'lastRestoreAt', 'lastResetAt', 'backupReminderSnoozedAt'];

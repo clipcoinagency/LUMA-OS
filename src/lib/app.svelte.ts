@@ -3,6 +3,7 @@ import { boot, loadState, saveSettings, saveWorkspace, type BootInfo } from './d
 import { setVersionChangeHandler, toStorageError, type StorageError } from './db/idb';
 import type { Settings, ThemeId, Workspace } from './db/schema';
 import { detectPlatform, requestPersistentStorage } from './platform/platform';
+import { checkBackupReminder } from './domain/backupReminder';
 
 type Status = 'loading' | 'ready' | 'error';
 
@@ -14,6 +15,7 @@ class AppState {
   firstRun = $state(false);
   launches = $state(0);
   staleWindow = $state(false);
+  showBackupReminder = $state(false);
   readonly platform = detectPlatform();
 
   async start() {
@@ -31,6 +33,7 @@ class AppState {
       this.status = 'ready';
       // Durable storage where the browser grants it silently; never blocks (Firefox prompts).
       if (this.platform !== 'file') void requestPersistentStorage();
+      void this.refreshBackupReminder();
     } catch (e) {
       this.error = toStorageError(e);
       this.status = 'error';
@@ -45,6 +48,14 @@ class AppState {
     this.firstRun = s.firstRun;
     applyTheme(s.settings.theme, true);
     applyMotion(s.settings.reduceMotion);
+    void this.refreshBackupReminder();
+  }
+
+  /** Re-checks whether the backup reminder banner should show. Call after anything that could
+   *  change the answer: boot, restore/reset, a fresh backup, or the reminder interval setting. */
+  async refreshBackupReminder() {
+    if (this.status !== 'ready' || !this.workspace?.onboarded) { this.showBackupReminder = false; return; }
+    this.showBackupReminder = await checkBackupReminder(this.settings?.backupReminderDays ?? 0);
   }
 
   // $state.snapshot: values coming from components may be reactive proxies, which IndexedDB
@@ -54,6 +65,7 @@ class AppState {
     if (patch.theme && patch.theme !== this.settings?.theme) applyTheme(patch.theme, true);
     if (patch.reduceMotion !== undefined) applyMotion(patch.reduceMotion);
     this.settings = await saveSettings(patch);
+    if (patch.backupReminderDays !== undefined) void this.refreshBackupReminder();
   }
 
   async updateWorkspace(patch: Partial<Omit<Workspace, 'id'>>) {

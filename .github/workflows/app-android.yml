@@ -22,18 +22,35 @@ jobs:
       - name: Bundle native bridge (Filesystem + Share) next to dist/index.html
         working-directory: packaging/android
         run: npm run bridge
-      - name: Generate Android project from the built app
+      - name: Sync the built app into the (committed) Android project
         working-directory: packaging/android
-        run: |
-          npx cap add android
-          npx cap sync android
+        run: npx cap sync android
       - name: Build debug APK
         working-directory: packaging/android/android
         run: ./gradlew assembleDebug --no-daemon
-      - name: Report size
+      - name: Decode release keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/lifeos-release.keystore"
+      - name: Build signed release APK
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/lifeos-release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         working-directory: packaging/android/android
-        run: ls -la app/build/outputs/apk/debug/
+        run: ./gradlew assembleRelease --no-daemon
+      - name: Report sizes
+        working-directory: packaging/android/android
+        run: |
+          ls -la app/build/outputs/apk/debug/
+          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "no release build (signing secrets not set)"
       - uses: actions/upload-artifact@v4
         with:
           name: LifeOS-android-debug-apk
           path: packaging/android/android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        with:
+          name: LifeOS-android-release-apk
+          path: packaging/android/android/app/build/outputs/apk/release/app-release.apk

@@ -20,9 +20,13 @@ poc/tests/results/
 tests/e2e/screenshots/
 .vercel-out/
 
+# Etsy delivery output (zips, PDFs, and the Android signing keystore) — never committed
+etsy-delivery/
+
 # Real app packaging artifacts (built from dist/, never committed)
 packaging/browser-edition/
-packaging/android/android/
+# packaging/android/android/ IS committed (holds the release-signing build.gradle customization —
+# see app-android.yml); its own nested .gitignore excludes the actual build output/web assets.
 packaging/android/node_modules/
 packaging/desktop-tauri/node_modules/
 packaging/desktop-tauri/src-tauri/target/

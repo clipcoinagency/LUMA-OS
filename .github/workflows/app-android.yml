@@ -8,6 +8,11 @@ on:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    # Secrets can't be referenced directly in `if:` conditionals (GitHub Actions rejects the
+    # workflow outright, before any job runs) — mirror the one we need into a job-level env var
+    # and gate on that instead.
+    env:
+      HAS_RELEASE_SIGNING: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,12 +34,12 @@ jobs:
         working-directory: packaging/android/android
         run: ./gradlew assembleDebug --no-daemon
       - name: Decode release keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.HAS_RELEASE_SIGNING == 'true' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/lifeos-release.keystore"
       - name: Build signed release APK
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.HAS_RELEASE_SIGNING == 'true' }}
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/lifeos-release.keystore
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -50,7 +55,7 @@ jobs:
           name: LifeOS-android-debug-apk
           path: packaging/android/android/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.HAS_RELEASE_SIGNING == 'true' }}
         with:
           name: LifeOS-android-release-apk
           path: packaging/android/android/app/build/outputs/apk/release/app-release.apk

@@ -18,7 +18,7 @@ no tracking — **your data stays on your device**.
 | 7 · Polish, animation, responsive | ✅ done (reduced-motion audit across all JS-driven transitions; accessibility fixes — MonthGrid screen-reader content, focus management in Notes/Tasks/MonthNav/Wellness day-nav, radiogroup arrow-key nav, SearchField label, workout double-submit guard, touch targets; 360px overflow sweep) |
 | 8 · Platform packaging (real app → Windows/macOS/Android) | 🟨 builds validated in CI · real-device tests pending — `packaging/` wraps the real `dist/index.html` (Android debug APK 3.95 MB, Windows NSIS 3.02 MB, macOS universal DMG 3.74 MB); desktop app not shipped until code-signed/notarized |
 | 9 · Vercel demo | ✅ live at the root URL, informal — no dedicated marketing/demo flow |
-| 10 · Full QA / customer-package testing | 🟨 automated QA as far as it goes without hardware — full e2e suite now runs cross-OS in CI (Windows + macOS runners, real Edge/Chrome) via `app-e2e.yml`; real-device tests (phones, tablets, actual installers on a human's machine) genuinely need a person with the hardware, see [`docs/DEVICE-TEST-PLAN.md`](docs/DEVICE-TEST-PLAN.md) |
+| 10 · Full QA / customer-package testing | 🟨 automated QA maxed out — full e2e suite (52 unit + 9 e2e files) passes cross-OS in CI (Windows + macOS runners, real Edge/Chrome) via `app-e2e.yml`, green as of commit `a78418f`; real-device tests (phones, tablets, actual installers on a human's machine) genuinely need a person with the hardware, see [`docs/DEVICE-TEST-PLAN.md`](docs/DEVICE-TEST-PLAN.md) |
 
 - 📄 Architecture & decisions: [`docs/PHASE-0-ARCHITECTURE.md`](docs/PHASE-0-ARCHITECTURE.md)
 - ✅ Validation evidence: [`docs/validation/`](docs/validation/)

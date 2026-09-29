@@ -23,7 +23,7 @@ describe('day history reconstruction', () => {
 
   it('reconstructs a day that touches every module from its dated rows only', async () => {
     const day = '2026-09-15';
-    const task: Task = { id: 't1', title: 'Report', notes: '', priority: 'medium', dueDate: day, tags: [], done: true, completedOn: day, createdOn: '2026-09-01', createdAt: at, updatedAt: at };
+    const task: Task = { id: 't1', title: 'Report', notes: '', priority: 'medium', dueDate: day, dueTime: null, reminder: false, remindedOn: null, tags: [], done: true, completedOn: day, createdOn: '2026-09-01', createdAt: at, updatedAt: at };
     const habit: Habit = { id: 'h1', name: 'Walk', frequency: { kind: 'daily' }, color: '#000', icon: '', archived: false, order: 0, createdOn: '2026-09-01', createdAt: at, updatedAt: at };
     const log: HabitLog = { id: 'h1|2026-09-15', habitId: 'h1', date: day, createdAt: at };
     const goal: Goal = { id: 'g1', title: 'Read', description: '', target: 10, unit: 'books', current: 3, deadline: null, status: 'active', milestones: [], createdOn: '2026-09-01', completedOn: null, createdAt: at, updatedAt: at };
@@ -85,7 +85,7 @@ describe('day history reconstruction', () => {
   });
 
   it('a task completed LATE shows undone on its due date but done on the day it was actually finished', async () => {
-    const task: Task = { id: 't1', title: 'Taxes', notes: '', priority: 'none', dueDate: '2026-09-10', tags: [], done: true, completedOn: '2026-09-12', createdOn: '2026-09-01', createdAt: at, updatedAt: at };
+    const task: Task = { id: 't1', title: 'Taxes', notes: '', priority: 'none', dueDate: '2026-09-10', dueTime: null, reminder: false, remindedOn: null, tags: [], done: true, completedOn: '2026-09-12', createdOn: '2026-09-01', createdAt: at, updatedAt: at };
     await put('tasks', task);
     const agg = await loadMonthAggregate('2026-09-01', '2026-09-30', ['tasks']);
     const dueDay = dayFromAggregate('2026-09-10', agg);
@@ -95,7 +95,7 @@ describe('day history reconstruction', () => {
   });
 
   it('a task due and completed the same day appears once, checked', async () => {
-    const task: Task = { id: 't1', title: 'Call bank', notes: '', priority: 'none', dueDate: '2026-09-10', tags: [], done: true, completedOn: '2026-09-10', createdOn: '2026-09-01', createdAt: at, updatedAt: at };
+    const task: Task = { id: 't1', title: 'Call bank', notes: '', priority: 'none', dueDate: '2026-09-10', dueTime: null, reminder: false, remindedOn: null, tags: [], done: true, completedOn: '2026-09-10', createdOn: '2026-09-01', createdAt: at, updatedAt: at };
     await put('tasks', task);
     const agg = await loadMonthAggregate('2026-09-01', '2026-09-30', ['tasks']);
     const day = dayFromAggregate('2026-09-10', agg);

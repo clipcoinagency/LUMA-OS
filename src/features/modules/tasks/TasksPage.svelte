@@ -1,7 +1,7 @@
 <script lang="ts">
   import { flip } from 'svelte/animate';
   import { fade } from 'svelte/transition';
-  import { Plus, CheckCircle2, Inbox, SearchX } from '@lucide/svelte';
+  import { Plus, CheckCircle2, Inbox, SearchX, BellRing } from '@lucide/svelte';
   import PageHeader from '../PageHeader.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import Segmented from '../../../lib/ui/Segmented.svelte';
@@ -82,6 +82,12 @@
     if (n === 1) return view === 'upcoming' ? null : { text: 'Tomorrow', tone: 'neutral' };
     return view === 'upcoming' ? null : { text: formatDateKey(t.dueDate, { day: 'numeric', month: 'short' }), tone: 'neutral' };
   }
+  function timeLabel(hm: string): string {
+    const [h, m] = hm.split(':').map(Number);
+    const period = h! < 12 ? 'AM' : 'PM';
+    const h12 = h! % 12 === 0 ? 12 : h! % 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+  }
   async function toggle(t: Task, v: boolean) {
     // Completing/reopening a task can move it out of its current group (e.g. Today → Done today)
     // or drop it from the view entirely (Upcoming/All only list open tasks) — either way the
@@ -150,7 +156,10 @@
               <li animate:flip={{ duration: dur(220) }} out:fade={{ duration: dur(140) }} class:done={t.done}>
                 <Checkbox id="task-check-{t.id}" label="{t.done ? 'Mark not done' : 'Complete'}: {t.title}" checked={t.done} size={22} onchange={(v) => toggle(t, v)} />
                 <button type="button" class="body" onclick={() => openQuick('task', { task: $state.snapshot(t) })}>
-                  <span class="title">{t.title}</span>
+                  <span class="titlerow">
+                    <span class="title">{t.title}</span>
+                    {#if t.dueTime}<span class="time" class:on={t.reminder}>{#if t.reminder}<BellRing size={12} aria-hidden="true" />{/if}{timeLabel(t.dueTime)}</span>{/if}
+                  </span>
                   {#if t.notes || t.tags.length}
                     <span class="sub">{#each t.tags as tag (tag)}<span class="tag">#{tag}</span>{/each}{#if t.notes}<span class="note">{t.notes}</span>{/if}</span>
                   {/if}
@@ -187,7 +196,10 @@
   li.done .title { text-decoration: line-through; color: var(--text-3); }
   .body { flex: 1; min-width: 0; display: grid; gap: 2px; text-align: left; background: none; border: 0; padding: var(--space-2) 0; cursor: pointer; color: var(--text); }
   .body:hover .title { color: var(--accent-ink); }
+  .titlerow { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
   .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+  .time { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-xs); color: var(--text-3); }
+  .time.on { color: var(--accent-ink); font-weight: 600; }
   .sub { display: flex; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-3); overflow: hidden; white-space: nowrap; }
   .tag { color: var(--accent-ink); font-weight: 600; }
   .note { overflow: hidden; text-overflow: ellipsis; }

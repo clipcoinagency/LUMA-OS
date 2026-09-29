@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { habitStats, isDueOn } from '../../src/lib/domain/habits';
-import { splitToday } from '../../src/lib/domain/tasks';
+import { isReminderDue, splitToday } from '../../src/lib/domain/tasks';
 import { summarize } from '../../src/lib/domain/finance';
 import { goalFraction, goalPace } from '../../src/lib/domain/goals';
 import { addDays } from '../../src/lib/util/dates';
@@ -65,7 +65,7 @@ describe('habit streaks', () => {
 });
 
 describe('today tasks', () => {
-  const t = (id: string, patch: Partial<Task>): Task => ({ id, title: id, notes: '', priority: 'none', dueDate: null, tags: [], done: false, completedOn: null, createdOn: '2026-09-20', createdAt: at, updatedAt: at, ...patch });
+  const t = (id: string, patch: Partial<Task>): Task => ({ id, title: id, notes: '', priority: 'none', dueDate: null, dueTime: null, reminder: false, remindedOn: null, tags: [], done: false, completedOn: null, createdOn: '2026-09-20', createdAt: at, updatedAt: at, ...patch });
   it('splits overdue, today and done-today, overdue sorted by date then priority', () => {
     const r = splitToday([
       t('late-low', { dueDate: '2026-09-20', priority: 'low' }),
@@ -80,6 +80,29 @@ describe('today tasks', () => {
     expect(r.overdue.map((x) => x.id)).toEqual(['older', 'late-high', 'late-low']);
     expect(r.today.map((x) => x.id).sort()).toEqual(['today', 'undated-new']);
     expect(r.doneToday.map((x) => x.id)).toEqual(['done']);
+  });
+});
+
+describe('task reminders', () => {
+  const t = (id: string, patch: Partial<Task>): Task => ({ id, title: id, notes: '', priority: 'none', dueDate: '2026-09-26', dueTime: '09:00', reminder: true, remindedOn: null, tags: [], done: false, completedOn: null, createdOn: '2026-09-20', createdAt: at, updatedAt: at, ...patch });
+  const day = '2026-09-26';
+  it('is due once the clock reaches the set time, on the due day', () => {
+    expect(isReminderDue(t('a'), day, '08:59')).toBe(false);
+    expect(isReminderDue(t('a'), day, '09:00')).toBe(true);
+    expect(isReminderDue(t('a'), day, '14:30')).toBe(true); // still due later the same day if never fired
+  });
+  it('is not due on a different day, even past the same clock time', () => {
+    expect(isReminderDue(t('a'), '2026-09-27', '09:00')).toBe(false);
+    expect(isReminderDue(t('a', { dueDate: '2026-09-27' }), day, '09:00')).toBe(false);
+  });
+  it('never fires when the reminder toggle is off, no time is set, the task is done, or it already fired today', () => {
+    expect(isReminderDue(t('a', { reminder: false }), day, '09:00')).toBe(false);
+    expect(isReminderDue(t('a', { dueTime: null }), day, '09:00')).toBe(false);
+    expect(isReminderDue(t('a', { done: true }), day, '09:00')).toBe(false);
+    expect(isReminderDue(t('a', { remindedOn: day }), day, '09:00')).toBe(false);
+  });
+  it('fires again on a later day once remindedOn is from a previous day', () => {
+    expect(isReminderDue(t('a', { remindedOn: '2026-09-25' }), day, '09:00')).toBe(true);
   });
 });
 

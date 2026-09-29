@@ -8,6 +8,7 @@
   import Button from './lib/ui/Button.svelte';
   import ErrorState from './lib/ui/ErrorState.svelte';
   import Toaster from './lib/ui/Toaster.svelte';
+  import ReminderAlert from './lib/ui/ReminderAlert.svelte';
   import Onboarding from './features/onboarding/Onboarding.svelte';
   import AppShell from './features/shell/AppShell.svelte';
   import Dashboard from './features/dashboard/Dashboard.svelte';
@@ -97,6 +98,7 @@
   </div>
 {/if}
 <Toaster />
+<ReminderAlert />
 
 <style>
   .boot { min-height: 100dvh; display: grid; place-items: center; }

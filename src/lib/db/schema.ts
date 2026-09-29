@@ -64,6 +64,9 @@ export interface Task extends Stamped {
   notes: string;
   priority: Priority;
   dueDate: DateKey | null;
+  dueTime: string | null;         // "HH:MM" 24h — only meaningful when dueDate is set
+  reminder: boolean;              // ring an alert at dueTime, once
+  remindedOn: DateKey | null;     // the day this reminder last fired (prevents re-firing same day)
   tags: string[];
   done: boolean;
   completedOn: DateKey | null;    // the day it was ticked off (history)

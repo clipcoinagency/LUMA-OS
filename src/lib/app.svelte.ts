@@ -4,6 +4,7 @@ import { setVersionChangeHandler, toStorageError, type StorageError } from './db
 import type { Settings, ThemeId, Workspace } from './db/schema';
 import { detectPlatform, requestPersistentStorage } from './platform/platform';
 import { checkBackupReminder } from './domain/backupReminder';
+import { initReminders } from './reminders.svelte';
 
 type Status = 'loading' | 'ready' | 'error';
 
@@ -34,6 +35,7 @@ class AppState {
       // Durable storage where the browser grants it silently; never blocks (Firefox prompts).
       if (this.platform !== 'file') void requestPersistentStorage();
       void this.refreshBackupReminder();
+      initReminders(); // harmless pre-onboarding (no tasks exist yet); idempotent, so reload()/retry can't double it up
     } catch (e) {
       this.error = toStorageError(e);
       this.status = 'error';

@@ -71,7 +71,7 @@ export async function seedSampleData(days = 90, seed = 7): Promise<Record<string
     for (let k = 0; k < nTasks; k++) {
       const age = days - 1 - i; // days before today
       const done = age === 0 ? r() < 0.3 : age < 7 ? r() < 0.85 : r() < 0.99;
-      tasks.push({ id: newId('task'), title: pick(taskTitles), notes: '', priority: pick(['none', 'low', 'medium', 'high'] as const), dueDate: d, tags: [], done, completedOn: done ? d : null, createdOn: addDays(d, -1) < start ? start : addDays(d, -1), ...stamp });
+      tasks.push({ id: newId('task'), title: pick(taskTitles), notes: '', priority: pick(['none', 'low', 'medium', 'high'] as const), dueDate: d, dueTime: null, reminder: false, remindedOn: null, tags: [], done, completedOn: done ? d : null, createdOn: addDays(d, -1) < start ? start : addDays(d, -1), ...stamp });
     }
 
     wellness.push({ id: d, date: d, water: 4 + Math.floor(r() * 5), sleepHours: Math.round((6 + r() * 2.5) * 2) / 2, mood: (2 + Math.floor(r() * 4)) as 2 | 3 | 4 | 5, steps: 3000 + Math.floor(r() * 9000), weight: Math.round((72 - i * 0.02 + r() * 0.6) * 10) / 10, note: '', updatedAt: at });

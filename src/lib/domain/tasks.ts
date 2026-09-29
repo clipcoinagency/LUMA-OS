@@ -36,11 +36,12 @@ export async function tasksCompletedOn(from: DateKey, to: DateKey): Promise<Task
   return getByIndex('tasks', 'by_completed', IDBKeyRange.bound(from, to));
 }
 
-export async function createTask(input: { title: string; dueDate?: DateKey | null; priority?: Priority; notes?: string; tags?: string[] }): Promise<Task> {
+export async function createTask(input: { title: string; dueDate?: DateKey | null; dueTime?: string | null; reminder?: boolean; priority?: Priority; notes?: string; tags?: string[] }): Promise<Task> {
   const at = nowIso();
   const task: Task = {
     id: newId('task'), title: input.title.trim(), notes: input.notes ?? '', priority: input.priority ?? 'none',
-    dueDate: input.dueDate === undefined ? today() : input.dueDate, tags: input.tags ?? [], done: false, completedOn: null,
+    dueDate: input.dueDate === undefined ? today() : input.dueDate, dueTime: input.dueTime ?? null, reminder: input.reminder ?? false, remindedOn: null,
+    tags: input.tags ?? [], done: false, completedOn: null,
     createdOn: today(), createdAt: at, updatedAt: at,
   };
   await put('tasks', task);
@@ -72,4 +73,22 @@ export async function deleteTask(id: string): Promise<Task | undefined> {
 export async function restoreTask(task: Task): Promise<void> {
   await put('tasks', task);
   bump();
+}
+
+/** Pure: whether a task's reminder should fire right now. `nowHM` is "HH:MM" 24h local time. */
+export function isReminderDue(task: Task, day: DateKey, nowHM: string): boolean {
+  return task.reminder && !task.done && task.dueDate === day && task.dueTime !== null && task.remindedOn !== day && task.dueTime <= nowHM;
+}
+
+/** Marks a reminder as fired for the given day, so it won't re-trigger until tomorrow. */
+export function markReminded(id: string, on: DateKey = today()) {
+  return updateTask(id, { remindedOn: on });
+}
+
+/** Re-arms the reminder to ring again in `minutes` from now, today. */
+export async function snoozeReminder(id: string, minutes: number): Promise<Task | undefined> {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + minutes);
+  const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  return updateTask(id, { dueTime: hm, remindedOn: null });
 }

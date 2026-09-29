@@ -10,7 +10,7 @@ import type { Task, Transaction } from '../../src/lib/db/schema';
 
 const now = '2026-09-26T10:00:00.000Z';
 const task = (id: string, createdOn = '2026-09-26'): Task => ({
-  id, title: 'Task ' + id, notes: '', priority: 'medium', dueDate: null, tags: [], done: false,
+  id, title: 'Task ' + id, notes: '', priority: 'medium', dueDate: null, dueTime: null, reminder: false, remindedOn: null, tags: [], done: false,
   completedOn: null, createdOn, createdAt: now, updatedAt: now,
 });
 const txn = (id: string, date: string, amountMinor: number): Transaction => ({

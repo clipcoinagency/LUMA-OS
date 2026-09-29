@@ -29,7 +29,9 @@
   .wc {
     background: var(--surface); border: var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1);
     padding: var(--space-5); min-width: 0; height: 100%; display: flex; flex-direction: column;
+    transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
   }
+  .wc:hover { transform: translateY(-2px); box-shadow: var(--shadow-2), var(--glow); border-color: var(--border-strong); }
   header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-4); min-height: 28px; }
   h2 { font-size: var(--text-md); }
   .acts { display: flex; align-items: center; gap: var(--space-1); }

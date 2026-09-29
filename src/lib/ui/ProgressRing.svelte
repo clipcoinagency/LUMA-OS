@@ -21,7 +21,7 @@
     <circle cx={size / 2} cy={size / 2} {r} stroke-width={stroke} class="bar" style="stroke:{color}"
       stroke-dasharray={c} stroke-dashoffset={c * (1 - tween.current)} />
   </svg>
-  {#if showValue}<span class="val num">{Math.round(pct * 100)}%</span>{/if}
+  {#if showValue}<span class="val num">{Math.round(tween.current * 100)}%</span>{/if}
 </div>
 
 <style>

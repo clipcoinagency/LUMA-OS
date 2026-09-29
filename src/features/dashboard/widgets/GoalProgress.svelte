@@ -2,6 +2,7 @@
   import { Target, Plus } from '@lucide/svelte';
   import WidgetCard from '../WidgetCard.svelte';
   import ProgressBar from '../../../lib/ui/ProgressBar.svelte';
+  import CountUp from '../../../lib/ui/CountUp.svelte';
   import Badge from '../../../lib/ui/Badge.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import Button from '../../../lib/ui/Button.svelte';
@@ -42,7 +43,7 @@
           <li>
             <div class="row">
               <span class="title">{g.title}</span>
-              <span class="pct num">{Math.round(goalFraction(g) * 100)}%</span>
+              <span class="pct"><CountUp value={Math.round(goalFraction(g) * 100)} suffix="%" /></span>
             </div>
             <ProgressBar value={goalFraction(g) * 100} label="{g.title} progress" color="var(--mod-goals)" />
             <div class="row meta"><span>{sub(g)}</span>{#if pace}<Badge tone={pace.tone}>{pace.label}</Badge>{/if}</div>

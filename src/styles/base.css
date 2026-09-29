@@ -12,11 +12,21 @@ body {
   font: 400 var(--text-base) / var(--leading) var(--font-body);
   color: var(--text);
   background: var(--bg-accent), var(--bg);
+  background-size: 160% 160%, auto;
+  background-position: 20% 0%, 0 0;
   background-attachment: fixed;
+  animation: drift 40s var(--ease-in-out) infinite alternate;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv11', 'ss01';
   transition: background-color var(--dur-slow) var(--ease-out), color var(--dur-slow) var(--ease-out);
+}
+/* A slow, near-subliminal drift of the ambient glow — the page should feel alive, not static,
+   without ever being distracting. Neutralised by the reduced-motion rule below like everything else. */
+@keyframes drift {
+  0%   { background-position: 10% 0%,  0 0; }
+  50%  { background-position: 85% 45%, 0 0; }
+  100% { background-position: 25% 90%, 0 0; }
 }
 
 h1, h2, h3, .display {

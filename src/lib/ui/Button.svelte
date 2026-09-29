@@ -35,7 +35,7 @@
   .lg { min-height: 52px; padding: 0 var(--space-7); font-size: var(--text-md); }
 
   .primary { background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-1), var(--glow); }
-  .primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-2), var(--glow); }
   .secondary { background: var(--surface); border-color: var(--border-strong); color: var(--text); }
   .secondary:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-2); }
   .ghost { background: transparent; color: var(--text-2); }

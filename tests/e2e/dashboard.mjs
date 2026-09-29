@@ -55,8 +55,9 @@ check(true, 'Inline add (Enter) creates a task for today');
 // complete + undo
 await page.getByRole('checkbox', { name: 'Complete Call the bank' }).click();
 await page.getByText('Done: Call the bank').waitFor();
-await page.waitForTimeout(300);
-check(!(await widget(page, "Today's tasks").getByText('Call the bank').count()) && (await widget(page, "Today's tasks").getByText('1/2').isVisible()), 'Ticking a task completes it (1/2 done)');
+await widget(page, "Today's tasks").getByText('Call the bank').waitFor({ state: 'detached' });
+await widget(page, "Today's tasks").getByText('1/2').waitFor();
+check(true, 'Ticking a task completes it (1/2 done)');
 await page.getByRole('button', { name: 'Undo' }).click();
 await widget(page, "Today's tasks").getByText('Call the bank').waitFor();
 check(true, 'Undo brings the task back');

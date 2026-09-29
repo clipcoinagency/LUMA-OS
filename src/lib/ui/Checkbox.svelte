@@ -16,11 +16,11 @@
 
 <style>
   .cb {
-    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); background: none; border: 0; padding: 0;
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); background: none; border: 0; padding: 0;
     cursor: pointer; min-height: var(--touch); min-width: var(--touch); color: var(--text);
   }
   svg {
-    width: var(--s); height: var(--s); border-radius: 50%; border: 2px solid var(--border-strong); padding: 3px; flex: none;
+    width: var(--s); height: var(--s); border-radius: 50%; border: 2px solid var(--border-strong); padding: 3px; flex: none; position: relative; z-index: 1;
     transition: background-color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out);
   }
   path {
@@ -30,6 +30,15 @@
   }
   .cb:hover svg { border-color: var(--c); }
   .cb:active svg { transform: scale(.9); }
-  .on svg { background: var(--c); border-color: var(--c); }
+  .on svg { background: var(--c); border-color: var(--c); animation: pop 420ms var(--ease-emphasis); }
   .on path { stroke: var(--on-accent); stroke-dashoffset: 0; }
+  @keyframes pop { 0% { transform: scale(.7); } 55% { transform: scale(1.16); } 100% { transform: scale(1); } }
+
+  /* a quick outward ring on the moment a task/habit is marked done — a small "nice" instead of a flat toggle */
+  .cb::after {
+    content: ''; position: absolute; inset: 0; margin: auto; width: var(--s); height: var(--s); border-radius: 50%;
+    border: 2px solid var(--c, var(--accent)); opacity: 0; pointer-events: none;
+  }
+  .on::after { animation: burst 550ms var(--ease-out); }
+  @keyframes burst { from { opacity: .6; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
 </style>

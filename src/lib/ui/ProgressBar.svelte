@@ -11,7 +11,14 @@
 
 <style>
   .track { width: 100%; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
-  .fill { height: 100%; border-radius: inherit; transition: width var(--dur-slow) var(--ease-out); box-shadow: var(--glow); }
+  .fill { position: relative; overflow: hidden; height: 100%; border-radius: inherit; transition: width var(--dur-slow) var(--ease-out); box-shadow: var(--glow); }
   .indeterminate { animation: slide 1.1s var(--ease-in-out) infinite; }
   @keyframes slide { from { transform: translateX(-110%); } to { transform: translateX(310%); } }
+  /* a slow, quiet light sweep — a still bar reads as "loading forever", this reads as "alive" */
+  .fill:not(.indeterminate)::after {
+    content: ''; position: absolute; inset: 0; transform: translateX(-120%);
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .35) 50%, transparent 70%);
+    animation: shimmer 3.2s ease-in-out infinite; animation-delay: 1s;
+  }
+  @keyframes shimmer { 0%, 35% { transform: translateX(-120%); } 65%, 100% { transform: translateX(120%); } }
 </style>

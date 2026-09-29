@@ -3,6 +3,7 @@
   // Plain counts — no points, no fake scores.
   import WidgetCard from '../WidgetCard.svelte';
   import BarChart from '../../../lib/ui/BarChart.svelte';
+  import CountUp from '../../../lib/ui/CountUp.svelte';
   import { changes } from '../../../lib/db/changes.svelte';
   import { clock } from '../../../lib/clock.svelte';
   import { app } from '../../../lib/app.svelte';
@@ -37,7 +38,7 @@
 
 <WidgetCard title="Your week" loaded={!!days}>
   {#if days}
-    <p class="summary"><strong class="num">{active} of 7</strong> <span class="muted">days with progress</span></p>
+    <p class="summary"><strong><CountUp value={active} suffix=" of 7" /></strong> <span class="muted">days with progress</span></p>
     <BarChart data={days} label="Things done per day, last 7 days" height={120} highlight={6} format={(v) => `${v} done`} />
     <ul class="legend">
       {#if app.workspace?.enabledModules.includes('tasks')}<li><span class="dot" style="background:var(--mod-tasks)"></span>{parts.tasks} tasks</li>{/if}

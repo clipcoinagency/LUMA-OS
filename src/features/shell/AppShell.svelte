@@ -135,7 +135,11 @@
   }
   .sidebar a:hover { background: var(--surface-2); color: var(--text); }
   .sidebar a.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-1), var(--glow); }
-  .sidebar a.active::before { content: ''; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c, var(--accent)); }
+  .sidebar a.active::before {
+    content: ''; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px;
+    background: var(--c, var(--accent)); transform-origin: center; animation: bar-in 260ms var(--ease-emphasis);
+  }
+  @keyframes bar-in { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
   .ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius-xs); color: var(--text-2); flex: none; }
   .ico.mod { color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
   .foot { margin-top: auto; border-top: 1px solid var(--border); padding-top: var(--space-3); }

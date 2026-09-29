@@ -48,6 +48,12 @@ async function toastAnimationDurationMs(page) {
   await page.getByRole('checkbox', { name: new RegExp(`Complete: ${title}`) }).click();
   const toast = page.locator('.toast').filter({ hasText: `Done: ${title}` });
   await toast.waitFor({ state: 'attached', timeout: 2000 });
+  // DOM attachment and the fly-in's element.animate() call both happen during the toast's mount,
+  // but not necessarily in the same tick under a loaded/slow runner — reading getAnimations()
+  // right after 'attached' can catch it before animate() has actually run yet (real, observed
+  // on GitHub's macOS runners; never locally). Poll for the Animation to actually exist first,
+  // same "wait for the real condition, not a fixed instant" fix as Gotcha #6 elsewhere in this repo.
+  await page.waitForFunction((sel) => (document.querySelector(sel)?.getAnimations().length ?? 0) > 0, '.toast', { timeout: 2000 }).catch(() => {});
   return page.evaluate((sel) => {
     const el = document.querySelector(sel);
     const anims = el ? el.getAnimations() : [];

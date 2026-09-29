@@ -14,10 +14,14 @@
 
   let day = $state<WellnessDay | null>(null);
   let sleepTrend = $state<(number | null)[]>([]);
+  // Rapid consecutive writes (e.g. two stepper clicks) each bump() via updateWellness(), re-running
+  // this effect once per write — their getWellness() reads can resolve out of order and an earlier
+  // fetch resolving last would otherwise clobber the optimistic update set() already applied for a
+  // later write. Guard by only applying a resolved fetch if nothing newer has been triggered since.
   $effect(() => {
-    void changes.version;
+    const v = changes.version;
     const d = clock.today;
-    void getWellness(d).then((w) => { day = w; });
+    void getWellness(d).then((w) => { if (changes.version === v) day = w; });
     void wellnessRange(addDays(d, -13), d).then((rows) => {
       const by = new Map(rows.map((r) => [r.date, r.sleepHours]));
       sleepTrend = eachDay(addDays(d, -13), d).map((k) => by.get(k) ?? null);

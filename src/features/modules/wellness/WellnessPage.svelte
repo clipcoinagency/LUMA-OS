@@ -33,7 +33,18 @@
     reclaimFocusIfLost(() => prevDayBtn);
   }
 
-  $effect(() => { void changes.version; const d = day; void getWellness(d).then((w) => { entry = w; }); });
+  // Rapid consecutive writes to the same day (e.g. two stepper clicks, then a sleep edit, then a
+  // mood pick — exactly what this page's own e2e test does) each call bump() via updateWellness(),
+  // re-triggering this effect once per write. Their getWellness() reads can resolve out of order:
+  // an earlier-triggered fetch that happens to resolve LAST would otherwise unconditionally
+  // overwrite `entry` with a stale snapshot, clobbering the optimistic update `set()` already
+  // applied for a later write. Guard by only applying a resolved fetch if nothing newer has been
+  // triggered (and the day hasn't changed) since it started.
+  $effect(() => {
+    const v = changes.version;
+    const d = day;
+    void getWellness(d).then((w) => { if (changes.version === v && day === d) entry = w; });
+  });
   $effect(() => {
     void changes.version;
     const end = clock.today;

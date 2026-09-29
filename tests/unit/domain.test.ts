@@ -84,7 +84,7 @@ describe('today tasks', () => {
 });
 
 describe('task reminders', () => {
-  const t = (id: string, patch: Partial<Task>): Task => ({ id, title: id, notes: '', priority: 'none', dueDate: '2026-09-26', dueTime: '09:00', reminder: true, remindedOn: null, tags: [], done: false, completedOn: null, createdOn: '2026-09-20', createdAt: at, updatedAt: at, ...patch });
+  const t = (id: string, patch: Partial<Task> = {}): Task => ({ id, title: id, notes: '', priority: 'none', dueDate: '2026-09-26', dueTime: '09:00', reminder: true, remindedOn: null, tags: [], done: false, completedOn: null, createdOn: '2026-09-20', createdAt: at, updatedAt: at, ...patch });
   const day = '2026-09-26';
   it('is due once the clock reaches the set time, on the due day', () => {
     expect(isReminderDue(t('a'), day, '08:59')).toBe(false);

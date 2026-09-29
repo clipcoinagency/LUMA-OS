@@ -92,7 +92,10 @@ for (const channel of channels) {
   await page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   await page.getByRole('checkbox', { name: /Finance/ }).click();
   await page.getByRole('checkbox', { name: /^Habits/ }).click();
-  await page.waitForTimeout(300);
+  await page.waitForFunction(() => {
+    const labels = [...document.querySelectorAll('aside.sidebar nav a')].map((a) => a.textContent ?? '').join();
+    return labels.includes('Finance') && !labels.includes('Habits');
+  }, null, { timeout: 3000 }).catch(() => {});
   nav = await navLabels(page);
   check(nav.join().includes('Finance') && !nav.join().includes('Habits'), 'Settings: enabling/disabling modules updates navigation', nav.map((s) => s.trim()).join(' | '));
   await page.getByRole('radio', { name: /^Soft/ }).click();

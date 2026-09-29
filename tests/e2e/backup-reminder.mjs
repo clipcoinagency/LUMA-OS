@@ -111,10 +111,10 @@ await page.goto(url.split('#')[0] + '#/settings');
 await page.reload();
 await page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
 await page.getByLabel('Backup reminder').selectOption('0');
-await page.waitForTimeout(300);
+await page.waitForFunction(() => !document.querySelector('.reminder'), null, { timeout: 3000 }).catch(() => {});
 check(!(await reminder(page).count()), '"Never remind me" hides an otherwise-overdue reminder immediately');
 await page.getByLabel('Backup reminder').selectOption('14');
-await page.waitForTimeout(300);
+await reminder(page).waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
 check(await reminder(page).isVisible(), 'Turning the reminder back on re-shows it (already overdue)');
 
 await ctx.close();

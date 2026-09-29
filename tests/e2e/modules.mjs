@@ -33,20 +33,23 @@ const dlg = (page) => page.locator('dialog[open]').last();
 const closed = (page) => page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 5000 });
 const toastText = (page, re) => page.locator('.toast').filter({ hasText: re }).first().waitFor({ timeout: 5000 });
 const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
-// Wellness's water/sleep fields load asynchronously per day (getWellness(day).then(...)), while the
-// "Today"/"Yesterday" heading updates synchronously off local state — on a slower machine (CI) there's
-// a real window where the heading has already flipped but the fields still show the previous day's
-// values. Poll instead of checking immediately after the heading appears.
-const waitInputValue = (locator, expected) => locator.evaluate((el, v) => new Promise((res) => {
-  let n = 0;
-  const tick = () => { if (el.value === v || ++n > 180) res(el.value === v); else requestAnimationFrame(tick); };
-  tick();
-}), expected);
-const waitText = (locator, expected) => locator.evaluate((el, v) => new Promise((res) => {
-  let n = 0;
-  const tick = () => { if (el.innerText.trim() === v || ++n > 180) res(el.innerText.trim() === v); else requestAnimationFrame(tick); };
-  tick();
-}), expected);
+// Several UI values are populated by an async re-fetch that isn't synchronous with the action that
+// triggers it (Wellness's water/sleep fields via getWellness(day).then(...); Finance's category
+// <select> via a changes.version-driven refetch; Goals' history dialog via goalHistory()) — a fixed
+// sleep or an unretried snapshot happened to always win the race on this dev machine, but not on
+// slower CI runners. Poll from the Node side on a real wall-clock timeout rather than in-page
+// requestAnimationFrame, which can be throttled unpredictably in a headless CI browser (no real
+// compositor/vsync driving it) and so isn't a reliable clock to bound a poll by.
+async function pollUntil(check, timeoutMs = 3000, intervalMs = 50) {
+  const start = Date.now();
+  for (;;) {
+    if (await check().catch(() => false)) return true;
+    if (Date.now() - start >= timeoutMs) return check().catch(() => false);
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+}
+const waitInputValue = (locator, expected) => pollUntil(async () => (await locator.inputValue()) === expected);
+const waitText = (locator, expected) => pollUntil(async () => (await locator.innerText()).trim() === expected);
 
 console.log(`▶ ${channel}`);
 let { ctx, page } = await launch();
@@ -288,7 +291,9 @@ await soft('Finance flow', async () => {
   await toastText(page, /Category added/);
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Record', exact: true }).click();
-  const opts = await dlg(page).getByLabel('Category').locator('option').allInnerTexts();
+  const catSelect = dlg(page).getByLabel('Category');
+  await pollUntil(async () => (await catSelect.locator('option').allInnerTexts()).includes('Pets'));
+  const opts = await catSelect.locator('option').allInnerTexts();
   check(opts.includes('Pets'), 'Finance: new category available when recording');
   await page.keyboard.press('Escape');
 });

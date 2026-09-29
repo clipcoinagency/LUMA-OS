@@ -62,7 +62,18 @@
     const n = Number(v.replace(',', '.'));
     return v.trim() === '' || !Number.isFinite(n) || n < 0 ? null : Math.min(n, max);
   }
-  const set = (patch: Partial<WellnessDay>) => updateWellness(day, patch);
+  // Update the local `entry` synchronously before the async DB round-trip (updateWellness does its
+  // own read-merge-write) resolves. Without this, two rapid clicks on the water stepper both read
+  // `entry?.water` before the first click's write has landed and its refetch re-rendered — the
+  // second click computes its "+1" from the same stale value as the first, silently dropping an
+  // increment. Optimistic local state also makes every field feel instant instead of waiting on a
+  // round-trip, and it's safe: `entry` is only readable once it's already loaded (fields are gated
+  // behind `{#if entry}`), and each patch here always carries the full intended value, not a delta,
+  // so even if updateWellness's own internal read is briefly stale, the write still lands correctly.
+  function set(patch: Partial<WellnessDay>) {
+    if (entry) entry = { ...entry, ...patch };
+    return updateWellness(day, patch);
+  }
   const dayLabel = $derived(day === clock.today ? 'Today' : day === addDays(clock.today, -1) ? 'Yesterday' : formatDateKey(day, { weekday: 'long', day: 'numeric', month: 'short' }));
 </script>
 

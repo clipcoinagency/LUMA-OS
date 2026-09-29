@@ -28,7 +28,13 @@
   const step = $derived(unit === 'ml' ? 250 : unit === 'oz' ? 8 : 1);
   const waterLabel = $derived(unit === 'glasses' ? 'glasses' : unit);
 
-  const set = (patch: Partial<WellnessDay>) => updateWellness(clock.today, patch);
+  // Optimistic local update before the async DB round-trip resolves — see WellnessPage.svelte's
+  // identical fix for why (two rapid stepper clicks would otherwise both read the same stale
+  // `day.water` and silently drop an increment).
+  function set(patch: Partial<WellnessDay>) {
+    if (day) day = { ...day, ...patch };
+    return updateWellness(clock.today, patch);
+  }
   function num(v: string, max: number): number | null {
     const n = Number(v.replace(',', '.'));
     return v.trim() === '' || !Number.isFinite(n) || n < 0 ? null : Math.min(n, max);

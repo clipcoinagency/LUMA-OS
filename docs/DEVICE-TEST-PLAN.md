@@ -27,7 +27,7 @@ version, browser or package version, pass/fail per step, screenshots if somethin
   from [`App · Desktop app (Tauri)`](https://github.com/clipcoinagency/LUMA-OS/actions/workflows/app-desktop.yml)
   (built by `packaging/desktop-tauri/`). Ship this only once code-signed (Windows) / notarized
   (macOS) — see `docs/PHASE-0-ARCHITECTURE.md` §5.
-- **iPhone/iPad**: the hosted build at https://luma-os-beta.vercel.app/app/.
+- **iPhone/iPad**: the hosted build at https://luma-os-beta.vercel.app/.
 
 The banner/UI language to expect:
 
@@ -90,7 +90,7 @@ For B1 also: move the file to another location and reopen → note whether the d
 
 ## C. iPhone / iPad
 
-Uses the hosted build: https://luma-os-beta.vercel.app/app/
+Uses the hosted build: https://luma-os-beta.vercel.app/
 
 | # | Workflow | Steps |
 |---|---|---|

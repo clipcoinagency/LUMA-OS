@@ -33,6 +33,20 @@ const dlg = (page) => page.locator('dialog[open]').last();
 const closed = (page) => page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 5000 });
 const toastText = (page, re) => page.locator('.toast').filter({ hasText: re }).first().waitFor({ timeout: 5000 });
 const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
+// Wellness's water/sleep fields load asynchronously per day (getWellness(day).then(...)), while the
+// "Today"/"Yesterday" heading updates synchronously off local state — on a slower machine (CI) there's
+// a real window where the heading has already flipped but the fields still show the previous day's
+// values. Poll instead of checking immediately after the heading appears.
+const waitInputValue = (locator, expected) => locator.evaluate((el, v) => new Promise((res) => {
+  let n = 0;
+  const tick = () => { if (el.value === v || ++n > 180) res(el.value === v); else requestAnimationFrame(tick); };
+  tick();
+}), expected);
+const waitText = (locator, expected) => locator.evaluate((el, v) => new Promise((res) => {
+  let n = 0;
+  const tick = () => { if (el.innerText.trim() === v || ++n > 180) res(el.innerText.trim() === v); else requestAnimationFrame(tick); };
+  tick();
+}), expected);
 
 console.log(`▶ ${channel}`);
 let { ctx, page } = await launch();
@@ -141,6 +155,9 @@ await soft('Goals flow', async () => {
   await page.getByText('4 / 10 books').waitFor();
   check(true, 'Goals: numeric goal + progress logged (4 / 10 books)');
   await page.getByRole('button', { name: 'History' }).click();
+  // goalHistory() is an async re-fetch triggered by the dialog opening (detailId change), not
+  // populated synchronously with the click — wait for it rather than checking immediately.
+  await dlg(page).getByText('Finished Dune').waitFor({ timeout: 3000 }).catch(() => {});
   check(await dlg(page).getByText('Finished Dune').isVisible(), 'Goals: dated progress history with note');
   await page.keyboard.press('Escape');
   // milestone goal
@@ -213,14 +230,15 @@ await soft('Wellness flow', async () => {
   await page.getByLabel(/Sleep \(hours\)/).fill('7.5');
   await page.getByLabel(/Sleep \(hours\)/).press('Tab');
   await page.getByRole('radio', { name: 'Good' }).click();
-  await page.waitForTimeout(300);
-  check((await page.locator('.stepper .big').innerText()).trim() === '2', 'Wellness: water logged (2)');
+  check(await waitText(page.locator('.stepper .big'), '2'), 'Wellness: water logged (2)');
   await page.getByRole('button', { name: 'Previous day' }).click();
   await page.getByRole('heading', { name: 'Yesterday' }).waitFor();
-  check((await page.locator('.stepper .big').innerText()).trim() === '0' && (await page.getByLabel(/Sleep \(hours\)/).inputValue()) === '', "Wellness: yesterday is its own day (today's values not copied)");
+  const yesterdaySleepEmpty = await waitInputValue(page.getByLabel(/Sleep \(hours\)/), '');
+  const yesterdayWaterEmpty = await waitText(page.locator('.stepper .big'), '0');
+  check(yesterdaySleepEmpty && yesterdayWaterEmpty, "Wellness: yesterday is its own day (today's values not copied)");
   await page.getByRole('button', { name: 'Next day' }).click();
   await page.getByRole('heading', { name: 'Today' }).waitFor();
-  check((await page.getByLabel(/Sleep \(hours\)/).inputValue()) === '7.5', 'Wellness: today kept its values');
+  check(await waitInputValue(page.getByLabel(/Sleep \(hours\)/), '7.5'), 'Wellness: today kept its values');
   await page.getByRole('button', { name: 'Log workout' }).first().click();
   await dlg(page).getByRole('radio', { name: 'Run' }).click();
   await dlg(page).getByLabel('Minutes').fill('35');

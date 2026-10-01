@@ -2,7 +2,7 @@
 // Strategy: the app is one HTML file, so the shell is cached on install and served instantly
 // (stale-while-revalidate: you get the cached copy now, and a fresh copy is fetched in the background
 // for next launch). Nothing the user types ever touches the network: their data lives in IndexedDB.
-const CACHE = 'lifeos-shell-v2';
+const CACHE = 'lifeos-shell-v3';
 const SHELL = ['./', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

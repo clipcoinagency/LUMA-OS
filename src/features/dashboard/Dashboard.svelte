@@ -7,6 +7,8 @@
   import { Settings2 } from '@lucide/svelte';
   import CommandCenter from './CommandCenter.svelte';
   import CustomizeHome from './CustomizeHome.svelte';
+  import PulseRow from './PulseRow.svelte';
+  import DailyLine from './DailyLine.svelte';
   import { SlidersHorizontal } from '@lucide/svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
@@ -62,6 +64,7 @@
 
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
   <CommandCenter />
+  <PulseRow />
 
   <div class="bar">
     <h2>Today at a glance</h2>
@@ -87,6 +90,8 @@
       {/each}
     </div>
   {/if}
+
+  <DailyLine />
 </div>
 
 <CustomizeHome bind:open={customizing} />
@@ -98,7 +103,7 @@
   .bar h2 { font-size: var(--text-lg); color: var(--text-2); }
   .quick { margin: 0 0 var(--space-4); }
   .cols { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
-  .dcol { display: grid; gap: var(--space-4); min-width: 0; align-content: start; }
+  .dcol { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-width: 0; align-content: start; }
   .compact .cols, .compact .dcol { gap: var(--space-3); }
   .cell { animation: rise var(--dur-slow) var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }

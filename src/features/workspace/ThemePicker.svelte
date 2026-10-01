@@ -4,14 +4,12 @@
   import { Check } from '@lucide/svelte';
   import { roveRadiogroup } from '../../lib/ui/roveRadiogroup';
   import type { ThemeId } from '../../lib/db/schema';
+  import { THEMES } from '../../lib/theme';
 
   interface Props { value: ThemeId; onchange: (t: ThemeId) => void }
   let { value, onchange }: Props = $props();
 
-  const options: { id: ThemeId; name: string; mood: string }[] = [
-    { id: 'soft', name: 'Soft', mood: 'Calm cream and dusty rose. Elegant and warm.' },
-    { id: 'dark', name: 'Dark', mood: 'Deep navy with cyan light. Focused and modern.' },
-  ];
+  const options = THEMES;
 </script>
 
 <div class="grid" role="radiogroup" aria-label="Theme" use:roveRadiogroup>
@@ -39,7 +37,7 @@
 </div>
 
 <style>
-  .grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
   .opt {
     position: relative; text-align: left; padding: var(--space-3); border-radius: var(--radius-xl); cursor: pointer;
     border: 2px solid var(--border); background: var(--surface); color: var(--text); box-shadow: var(--shadow-1);

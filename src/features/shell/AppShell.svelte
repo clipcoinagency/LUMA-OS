@@ -14,6 +14,8 @@
   import { palette } from '../../lib/palette.svelte';
   import { router, href } from '../../lib/router.svelte';
   import { navGroups, groupOfRoute, itemIsActive, type GroupId, type NavItem } from '../../lib/nav';
+  import Logo from '../../lib/ui/Logo.svelte';
+  import { themeName, nextTheme } from '../../lib/theme';
 
   let { children }: { children: Snippet } = $props();
   let more = $state(false);
@@ -85,7 +87,7 @@
 
 <div class="shell">
   <aside class="sidebar glass-strong" aria-label="Main navigation">
-    <a class="brand" href={href({ name: 'dashboard' })}><span class="mark" aria-hidden="true"></span>Life OS</a>
+    <a class="brand" href={href({ name: 'dashboard' })}><Logo size={34} />Life OS</a>
     <nav bind:this={navEl}>
       <span class="indicator" aria-hidden="true"></span>
       <a href={href({ name: 'dashboard' })} class:active={homeActive} aria-current={homeActive ? 'page' : undefined} style="--c:var(--accent)">
@@ -117,7 +119,7 @@
   <div class="main">
     <div class="sentinel" bind:this={sentinel} aria-hidden="true"></div>
     <header class="top" class:scrolled>
-      <a class="mbrand" href={href({ name: 'dashboard' })} aria-label="Life OS home"><span class="mark" aria-hidden="true"></span><span>Life OS</span></a>
+      <a class="mbrand" href={href({ name: 'dashboard' })} aria-label="Life OS home"><Logo size={28} /><span>Life OS</span></a>
       <span class="spacer"></span>
       <button type="button" class="tbtn icon" onclick={() => palette.show()} aria-label="Search or jump to…"><Search size={18} aria-hidden="true" /></button>
       <button type="button" class="tbtn newbtn" onclick={() => (creating = true)}><Plus size={17} aria-hidden="true" /><span>New</span></button>
@@ -157,8 +159,8 @@
   <div class="sheet-links">
     <a href={href({ name: 'settings' })} onclick={() => (more = false)}><span class="ico"><SettingsIcon size={20} /></span>Settings</a>
     <button type="button" onclick={() => { more = false; palette.show(); }}><span class="ico"><Search size={20} /></span>Search or jump to…</button>
-    <button type="button" onclick={() => void app.updateSettings({ theme: app.settings?.theme === 'dark' ? 'soft' : 'dark' })}>
-      <span class="ico"><Palette size={20} /></span>{app.settings?.theme === 'dark' ? 'Switch to Soft theme' : 'Switch to Dark theme'}
+    <button type="button" onclick={() => void app.updateSettings({ theme: nextTheme(app.settings?.theme ?? 'soft') })}>
+      <span class="ico"><Palette size={20} /></span>Switch to {themeName(nextTheme(app.settings?.theme ?? 'soft'))} theme
     </button>
   </div>
 </Modal>
@@ -166,7 +168,6 @@
 <style>
   .shell { min-height: 100dvh; }
   main:focus { outline: none; }
-  .mark { width: 28px; height: 28px; border-radius: 32%; flex: none; background: conic-gradient(from 210deg, var(--accent), var(--accent-2), var(--accent)); box-shadow: var(--glow), inset 0 0 0 1px rgba(255, 255, 255, .25); }
 
   /* ---- main column ---- */
   .main { padding: 0 var(--space-4) calc(104px + env(safe-area-inset-bottom)); max-width: var(--content-max); margin: 0 auto; }
@@ -192,7 +193,7 @@
   .tbtn:hover { border-color: var(--border-strong); }
   .tbtn:active { transform: scale(.95); }
   .newbtn { padding: 0 var(--space-4); background: var(--accent-grad); color: var(--on-accent); border-color: transparent; box-shadow: var(--shadow-1), var(--glow); }
-  :global([data-theme='soft']) .newbtn { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .newbtn { color: #fff; }
   .newbtn:hover { filter: brightness(1.06); border-color: transparent; }
 
   /* ---- phone: page pills for the current group ---- */

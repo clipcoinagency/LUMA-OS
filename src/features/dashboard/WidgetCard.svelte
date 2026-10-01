@@ -3,6 +3,7 @@
   import { ChevronRight } from '@lucide/svelte';
   import { MODULES } from '../../lib/modules';
   import Skeleton from '../../lib/ui/Skeleton.svelte';
+  import { spotlight } from '../../lib/ui/spotlight';
   import { href } from '../../lib/router.svelte';
   import type { ModuleId } from '../../lib/db/schema';
 
@@ -11,7 +12,7 @@
   const uid = `w-${Math.random().toString(36).slice(2, 8)}`;
 </script>
 
-<section class="wc" aria-labelledby={uid}>
+<section class="wc gcard lift" style={module ? `--c:${MODULES[module].color}` : undefined} use:spotlight aria-labelledby={uid}>
   <header>
     <div class="ttl">
       {#if module}{@const Icon = MODULES[module].icon}<span class="chip" style="--c:{MODULES[module].color}" aria-hidden="true"><Icon size={15} /></span>{/if}
@@ -30,14 +31,15 @@
 </section>
 
 <style>
-  .wc {
-    background: var(--surface); border: var(--card-border); border-radius: var(--radius-xl); box-shadow: var(--solid-highlight), var(--shadow-1);
-    padding: var(--space-5); min-width: 0; height: 100%; display: flex; flex-direction: column;
-    transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
-  }
-  .wc:hover { transform: translateY(-2px); box-shadow: var(--solid-highlight), var(--shadow-2); border-color: var(--border-strong); }
+  .wc { padding: var(--space-5); height: 100%; display: flex; flex-direction: column; }
   .ttl { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-  .chip { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex: none; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+  .chip {
+    width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; flex: none; color: var(--c);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--c) 30%, transparent), color-mix(in srgb, var(--c) 9%, transparent));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 35%, transparent), 0 4px 14px color-mix(in srgb, var(--c) 22%, transparent);
+    transition: transform .5s var(--ease-glide);
+  }
+  .wc:hover .chip { transform: rotate(-6deg) scale(1.08); }
   header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-4); min-height: 28px; }
   h2 { font-size: var(--text-md); }
   .acts { display: flex; align-items: center; gap: var(--space-1); }

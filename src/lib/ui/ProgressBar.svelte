@@ -6,12 +6,12 @@
 
 <div class="track" style="height:{height}px" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max}
   aria-valuenow={value ?? undefined} aria-busy={value === null || undefined}>
-  <div class="fill" class:indeterminate={pct === null} style="width:{pct ?? 35}%;background:{color}"></div>
+  <div class="fill" class:indeterminate={pct === null} style="width:{pct ?? 35}%;background:{color};--fillc:{color}"></div>
 </div>
 
 <style>
   .track { width: 100%; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
-  .fill { position: relative; overflow: hidden; --tip: color-mix(in srgb, #fff 55%, transparent); height: 100%; border-radius: inherit; transition: width var(--dur-slow) var(--ease-out); box-shadow: var(--glow); }
+  .fill { position: relative; overflow: hidden; --tip: color-mix(in srgb, #fff 55%, transparent); height: 100%; border-radius: inherit; transition: width .9s var(--ease-glide); box-shadow: 0 0 12px color-mix(in srgb, var(--fillc, var(--accent)) 38%, transparent); }
   .indeterminate { animation: slide 1.1s var(--ease-in-out) infinite; }
   @keyframes slide { from { transform: translateX(-110%); } to { transform: translateX(310%); } }
   /* a slow, quiet light sweep — a still bar reads as "loading forever", this reads as "alive" */

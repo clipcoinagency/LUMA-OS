@@ -142,7 +142,7 @@
   .date { color: var(--text-2); font-weight: 600; font-size: var(--text-sm); letter-spacing: .02em; }
   .greet { display: flex; align-items: center; gap: var(--space-3); font-size: clamp(var(--text-2xl), 4.2vw, var(--text-4xl)); margin-top: var(--space-2); line-height: 1.04; }
   .gi { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; flex: none; color: var(--on-accent); background: var(--accent-grad); box-shadow: var(--glow); animation: bob 6s var(--ease-in-out) infinite; }
-  :global([data-theme='soft']) .gi { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .gi { color: #fff; }
   @keyframes bob { 50% { transform: translateY(-3px) rotate(6deg); } }
   .headline { margin-top: var(--space-4); font-size: var(--text-lg); line-height: 1.35; color: var(--text); font-weight: 520; max-width: 34ch; text-wrap: balance; }
 
@@ -161,7 +161,7 @@
     color: var(--t); background: color-mix(in srgb, var(--t) 12%, transparent); border: 0; transition: background-color var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
   .ba:hover { background: color-mix(in srgb, var(--t) 22%, transparent); }
   .ba:active { transform: scale(.95); }
-  :global([data-theme='soft']) .b.warn { --t: #a8700f; } :global([data-theme='soft']) .b.info { --t: var(--accent-ink); }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .b.warn { --t: #a8700f; } :global(:is([data-theme='soft'], [data-theme='light'])) .b.info { --t: var(--accent-ink); }
 
   .skel { display: grid; gap: var(--space-3); margin-top: var(--space-5); }
   .skel span { height: 18px; border-radius: 9px; background: color-mix(in srgb, var(--text) 8%, transparent); animation: shimmer 1.4s var(--ease-in-out) infinite alternate; }

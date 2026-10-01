@@ -399,7 +399,7 @@
   .acts button, .days button, .chips button, .pause { height: 34px; padding: 0 var(--space-3); border-radius: 999px; cursor: pointer; font-weight: 650; font-size: var(--text-sm); color: var(--text-2);
     border: 1px solid var(--border-strong); background: color-mix(in srgb, var(--surface) 60%, transparent); transition: all var(--dur) var(--ease-out); }
   .acts button.on, .days button.on, .pause.on { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-  :global([data-theme='soft']) .acts button.on, :global([data-theme='soft']) .days button.on, :global([data-theme='soft']) .pause.on { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .acts button.on, :global(:is([data-theme='soft'], [data-theme='light'])) .days button.on, :global(:is([data-theme='soft'], [data-theme='light'])) .pause.on { color: #fff; }
   .acts button.drop.on { background: var(--danger); border-color: var(--danger); color: #fff; }
   .bigcheck { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; color: var(--on-accent); background: var(--accent-grad); box-shadow: var(--glow); animation: pop-in 560ms var(--ease-emphasis); }
   @keyframes pop-in { from { transform: scale(.4); opacity: 0; } }
@@ -425,7 +425,7 @@
   .picked { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
   .picked li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--glass-bg); border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent); }
   .pn { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: var(--text-sm); color: var(--on-accent); background: var(--accent-grad); }
-  :global([data-theme='soft']) .pn { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .pn { color: #fff; }
   .pt { font-weight: 650; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rm { width: 30px; height: 30px; border-radius: 50%; border: 0; background: none; color: var(--text-3); cursor: pointer; display: grid; place-items: center; } .rm:hover { color: var(--danger); }
   .picked .days { grid-column: 1 / -1; }
@@ -440,7 +440,7 @@
   .col.has { border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
   .cd { display: flex; align-items: baseline; justify-content: space-between; font-size: var(--text-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); } .cd small { font-size: var(--text-sm); color: var(--text-3); }
   .pill { font-size: 11px; line-height: 1.25; padding: 4px 6px; border-radius: 7px; background: color-mix(in srgb, var(--mod-calendar) 16%, transparent); color: var(--text); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; }
-  .pill.pr { background: var(--accent-grad); color: var(--on-accent); font-weight: 700; } :global([data-theme='soft']) .pill.pr { color: #fff; }
+  .pill.pr { background: var(--accent-grad); color: var(--on-accent); font-weight: 700; } :global(:is([data-theme='soft'], [data-theme='light'])) .pill.pr { color: #fff; }
   @media (max-width: 720px) { .week { grid-template-columns: 1fr; } .col { min-height: 0; grid-auto-flow: row; } }
   .reflect { display: grid; gap: 6px; font-size: var(--text-sm); font-weight: 650; color: var(--text-2); }
   textarea { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--border-strong); background: color-mix(in srgb, var(--surface) 70%, transparent); color: var(--text); resize: none; font-size: var(--text-base); }
@@ -448,7 +448,7 @@
   /* finale */
   .finale { position: relative; display: grid; justify-items: center; gap: var(--space-3); text-align: center; padding-top: var(--space-4); }
   .seal { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; color: var(--on-accent); background: var(--accent-grad); box-shadow: 0 0 40px color-mix(in srgb, var(--accent) 55%, transparent); animation: pop-in 700ms var(--ease-emphasis) both, bob 5s var(--ease-in-out) 700ms infinite; }
-  :global([data-theme='soft']) .seal { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .seal { color: #fff; }
   @keyframes bob { 50% { transform: translateY(-5px); } }
   .finale h1 { font-size: clamp(2.2rem, 7vw, 4rem); }
   .embers { position: absolute; inset: -20% 0 0; pointer-events: none; overflow: hidden; }

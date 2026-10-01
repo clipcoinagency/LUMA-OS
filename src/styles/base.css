@@ -101,3 +101,38 @@ img, svg { display: block; }
 
 /* thin, theme-aware scrollbars */
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+
+/* ---- glass card: the shared surface for Cards and dashboard widgets ---------------------------
+   Translucent, tinted by the card's own colour (--c), with a luminous hairline edge and a soft
+   pointer-following light (see lib/ui/spotlight.ts). Pseudo-elements sit at z-index -1 inside an
+   isolated stacking context, so they paint above the card's background but below its content. */
+.gcard {
+  --c: var(--accent);
+  position: relative; isolation: isolate; min-width: 0;
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--c) 13%, transparent), transparent 56%),
+    radial-gradient(90% 70% at 100% 100%, color-mix(in srgb, var(--accent-2) 7%, transparent), transparent 60%),
+    var(--card-bg);
+  -webkit-backdrop-filter: blur(var(--card-blur)) saturate(var(--glass-sat)); backdrop-filter: blur(var(--card-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--card-edge); border-radius: var(--radius-xl);
+  box-shadow: var(--glass-highlight), var(--shadow-1);
+  transition: transform .5s var(--ease-glide), box-shadow .5s var(--ease-glide), border-color .3s var(--ease-out);
+}
+.gcard::before {
+  content: ''; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--c) 70%, transparent), transparent 34%, transparent 64%, color-mix(in srgb, var(--accent-2) 45%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: .5; transition: opacity .4s var(--ease-out);
+}
+.gcard::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(280px circle at var(--sx, 50%) var(--sy, 0%), color-mix(in srgb, var(--c) 20%, transparent), transparent 68%);
+  transition: opacity .45s var(--ease-out);
+}
+.gcard.lift:hover { transform: translateY(-3px); box-shadow: var(--glass-highlight), var(--card-lift); border-color: color-mix(in srgb, var(--c) 30%, var(--card-edge)); }
+.gcard.lift:hover::before { opacity: 1; }
+.gcard.lift:hover::after { opacity: 1; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .gcard { background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--c) 13%, transparent), transparent 56%), var(--surface); } }
+@media (prefers-reduced-transparency: reduce) { .gcard { -webkit-backdrop-filter: none; backdrop-filter: none; background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--c) 13%, transparent), transparent 56%), var(--surface); } }
+@media (prefers-reduced-motion: reduce) { .gcard.lift:hover { transform: none; } }

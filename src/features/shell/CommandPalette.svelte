@@ -15,6 +15,7 @@
   import { listHabits } from '../../lib/domain/habits';
   import { getAll } from '../../lib/db/idb';
   import { CheckSquare, Target, Repeat, NotebookPen, RefreshCcw } from '@lucide/svelte';
+  import { themeName, nextTheme } from '../../lib/theme';
 
   interface Cmd { id: string; label: string; hint: string; icon: Component; color: string; run: () => void }
 
@@ -36,8 +37,8 @@
     for (const a of QUICK_ACTIONS) if (a.module === null || ws.enabledModules.includes(a.module)) out.push({ id: `a-${a.id}`, label: a.label, hint: 'Create', icon: a.icon, color: a.color, run: a.run });
     out.push({ id: 'a-reset', label: 'Start Weekly Reset', hint: 'Reflect', icon: RefreshCcw, color: 'var(--mod-reset)', run: () => void reset.begin() });
     out.push({
-      id: 'a-theme', label: app.settings?.theme === 'dark' ? 'Switch to Soft theme' : 'Switch to Dark theme', hint: 'Appearance', icon: Palette, color: 'var(--accent-2)',
-      run: () => void app.updateSettings({ theme: app.settings?.theme === 'dark' ? 'soft' : 'dark' }),
+      id: 'a-theme', label: `Switch to ${themeName(nextTheme(app.settings?.theme ?? 'soft'))} theme`, hint: 'Appearance', icon: Palette, color: 'var(--accent-2)',
+      run: () => void app.updateSettings({ theme: nextTheme(app.settings?.theme ?? 'soft') }),
     });
     return out;
   });

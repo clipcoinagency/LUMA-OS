@@ -80,7 +80,7 @@ class AppState {
 
 export const app = new AppState();
 
-const THEME_COLORS: Record<ThemeId, string> = { soft: '#fbf6f2', dark: '#060a13' };
+const THEME_COLORS: Record<ThemeId, string> = { soft: '#fbf6f2', light: '#f2f5fc', dark: '#04050d' };
 
 export function applyTheme(theme: ThemeId, animate: boolean) {
   const root = document.documentElement;

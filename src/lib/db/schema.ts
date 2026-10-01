@@ -18,7 +18,7 @@ export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wel
 export const DEFAULT_MODULES: readonly ModuleId[] = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'];
 export type ModuleId = (typeof MODULE_IDS)[number];
 
-export type ThemeId = 'soft' | 'dark';
+export type ThemeId = 'soft' | 'light' | 'dark';
 
 // ---------------------------------------------------------------- records
 

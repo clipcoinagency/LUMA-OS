@@ -3,6 +3,7 @@
   import { fade } from 'svelte/transition';
   import { Plus, CheckCircle2 } from '@lucide/svelte';
   import WidgetCard from '../WidgetCard.svelte';
+  import ProgressBar from '../../../lib/ui/ProgressBar.svelte';
   import Checkbox from '../../../lib/ui/Checkbox.svelte';
   import Badge from '../../../lib/ui/Badge.svelte';
   import FocusButton from '../../focus/FocusButton.svelte';
@@ -54,6 +55,7 @@
 <WidgetCard title="Today's tasks" module="tasks" loaded={!!data}>
   {#snippet actions()}{#if total}<span class="count num" aria-label="{data?.doneToday.length} of {total} of today's tasks done">{data?.doneToday.length}/{total}</span>{/if}{/snippet}
   {#if data}
+    {#if total}<div class="tprog"><ProgressBar value={data.doneToday.length} max={total} label="Today's tasks progress" color="var(--mod-tasks)" height={6} /></div>{/if}
     {#if open.length === 0}
       <EmptyState compact title={data.doneToday.length ? 'All done for today' : 'Nothing due today'} body={data.doneToday.length ? `You finished ${data.doneToday.length} task${data.doneToday.length === 1 ? '' : 's'}. Nice work.` : 'Add something below, or enjoy the free time.'}>
         {#snippet icon()}<CheckCircle2 />{/snippet}
@@ -83,6 +85,7 @@
 </WidgetCard>
 
 <style>
+  .tprog { margin: calc(var(--space-1) * -1) 0 var(--space-3); }
   .count { font-size: var(--text-sm); font-weight: 700; color: var(--text-2); background: var(--surface-2); padding: 2px 8px; border-radius: 999px; }
   .list { list-style: none; margin: 0; padding: 0; display: grid; }
   li { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; border-bottom: 1px solid var(--border); }

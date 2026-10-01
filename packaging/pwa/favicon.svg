@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#14204a"/><stop offset="1" stop-color="#04060f"/></radialGradient>
+    <radialGradient id="s" cx="36%" cy="30%" r="78%"><stop offset="0" stop-color="#f1fbff"/><stop offset=".22" stop-color="#8fdcff"/><stop offset=".58" stop-color="#4a6dff"/><stop offset="1" stop-color="#2a1b9c"/></radialGradient>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6fd6ff"/><stop offset="1" stop-color="#9a7bff"/></linearGradient>
+    <filter id="g" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter></defs><rect width="512" height="512" rx="116" fill="url(#bg)"/><rect x="1.5" y="1.5" width="509" height="509" rx="114.5" fill="none" stroke="#8fa6ff" stroke-opacity=".22" stroke-width="3"/>
+  <g stroke="url(#l)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="406,256 331,386 181,386 106,256 181,126 331,126" stroke-width="7" stroke-opacity=".75"/>
+    <circle cx="256" cy="256" r="92" stroke-width="6" stroke-opacity=".6"/>
+    <line x1="256" y1="256" x2="406" y2="256" stroke-width="4" stroke-opacity=".45"/><line x1="256" y1="256" x2="331" y2="386" stroke-width="4" stroke-opacity=".45"/><line x1="256" y1="256" x2="181" y2="386" stroke-width="4" stroke-opacity=".45"/><line x1="256" y1="256" x2="106" y2="256" stroke-width="4" stroke-opacity=".45"/><line x1="256" y1="256" x2="181" y2="126" stroke-width="4" stroke-opacity=".45"/><line x1="256" y1="256" x2="331" y2="126" stroke-width="4" stroke-opacity=".45"/>
+  </g>
+  <g filter="url(#g)" opacity=".85" fill="#5b7bff"><circle cx="256" cy="256" r="60"/><circle cx="406" cy="256" r="30"/><circle cx="331" cy="386" r="30"/><circle cx="181" cy="386" r="30"/><circle cx="106" cy="256" r="30"/><circle cx="181" cy="126" r="30"/><circle cx="331" cy="126" r="30"/></g>
+  <circle cx="406" cy="256" r="29" fill="url(#s)"/><circle cx="398" cy="247" r="7" fill="#fff" opacity=".7"/><circle cx="331" cy="386" r="29" fill="url(#s)"/><circle cx="323" cy="377" r="7" fill="#fff" opacity=".7"/><circle cx="181" cy="386" r="29" fill="url(#s)"/><circle cx="173" cy="377" r="7" fill="#fff" opacity=".7"/><circle cx="106" cy="256" r="29" fill="url(#s)"/><circle cx="98" cy="247" r="7" fill="#fff" opacity=".7"/><circle cx="181" cy="126" r="29" fill="url(#s)"/><circle cx="173" cy="117" r="7" fill="#fff" opacity=".7"/><circle cx="331" cy="126" r="29" fill="url(#s)"/><circle cx="323" cy="117" r="7" fill="#fff" opacity=".7"/>
+  <circle cx="256" cy="256" r="58" fill="url(#s)"/><circle cx="238" cy="236" r="15" fill="#fff" opacity=".65"/></svg>

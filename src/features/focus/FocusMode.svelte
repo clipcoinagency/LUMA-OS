@@ -247,7 +247,7 @@
   .round:hover { border-color: var(--accent); }
   .round:active { transform: scale(.92); }
   .round.big { width: 76px; height: 76px; background: var(--accent-grad); color: var(--on-accent); border-color: transparent; box-shadow: var(--shadow-2), var(--glow); }
-  :global([data-theme='soft']) .round.big { color: #fff; }
+  :global(:is([data-theme='soft'], [data-theme='light'])) .round.big { color: #fff; }
   .pillbtn { height: 48px; padding: 0 var(--space-5); border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: var(--text); border: 1px solid var(--glass-border); background: var(--glass-bg);
     -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
   .pillbtn:hover { border-color: var(--success); color: var(--success); }

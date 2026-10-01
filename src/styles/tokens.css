@@ -108,8 +108,76 @@
   --glass-sat: 1.5;
   --ring-track: rgba(120, 80, 95, .10);
   --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, .9);
+  /* glass cards (content surfaces with a little more life than plain solid) */
+  --card-bg: rgba(255, 255, 255, .70); --card-edge: rgba(150, 100, 120, .13); --card-blur: 14px; --card-lift: 0 14px 36px rgba(110, 60, 85, .14);
 
   --scrim: rgba(43, 25, 32, .35);
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------ Light · Daylight */
+[data-theme='light'] {
+  --font-display: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display-weight: 680;
+  --display-tracking: -0.03em;
+
+  --bg: #f2f5fc;
+  --bg-accent: none;
+  --surface: #ffffff;
+  --surface-2: #f4f6fc;
+  --surface-3: #e8ecf7;
+  --border: #e2e7f3;
+  --border-strong: #cdd5e8;
+  --text: #0e1330;
+  --text-2: #475072;   /* 7.6:1 on white */
+  --text-3: #76809f;
+
+  --accent: #4b4ced;       /* 6.3:1 with white text */
+  --accent-hover: #3d3ed4;
+  --accent-soft: #e7e8ff;
+  --accent-ink: #3738c2;
+  --on-accent: #ffffff;
+  --accent-2: #0fa2dc;
+  --accent-2-soft: #dcf2fb;
+  --accent-grad: linear-gradient(135deg, #5b55f6 0%, #1aa6e8 100%);
+
+  --success: #12805a; --success-soft: #dcf4ea;
+  --warning: #96600a; --warning-soft: #fbefd3;
+  --danger: #c43b3b;  --danger-soft: #fbe3e1;
+  --info: #2b62c9;    --info-soft: #e1ebfb;
+
+  --focus: 0 0 0 3px rgba(75, 76, 237, .38);
+  --shadow-1: 0 1px 2px rgba(25, 35, 90, .05), 0 2px 8px rgba(25, 35, 90, .04);
+  --shadow-2: 0 2px 6px rgba(25, 35, 90, .06), 0 14px 34px rgba(25, 35, 90, .09);
+  --shadow-3: 0 8px 22px rgba(25, 35, 90, .09), 0 32px 72px rgba(25, 35, 90, .16);
+  --glow: none;
+
+  --radius-xs: 7px; --radius-sm: 10px; --radius-md: 14px; --radius-lg: 18px; --radius-xl: 24px; --radius-2xl: 30px;
+  --radius-btn: 12px;
+  --card-border: 1px solid var(--border);
+
+  --mod-tasks: #4b4ced; --mod-goals: #c98a16; --mod-habits: #1f9d6b; --mod-calendar: #5b6ee0;
+  --mod-notes: #8a63d2; --mod-wellness: #e0527a; --mod-finance: #0e9f8f;
+  --mod-work: #2f7bd8; --mod-study: #e0692f; --mod-focus: #7a55e8; --mod-insights: #14a39a; --mod-reset: #c98a16;
+
+  /* aurora: faint cool light so the glass has something to refract on a white page */
+  --aurora-1: rgba(120, 150, 255, .34);
+  --aurora-2: rgba(188, 150, 255, .28);
+  --aurora-3: rgba(90, 205, 245, .26);
+
+  --glass-bg: rgba(255, 255, 255, .60);
+  --glass-bg-strong: rgba(255, 255, 255, .82);
+  --glass-border: rgba(255, 255, 255, .92);
+  --glass-edge: rgba(40, 60, 150, .13);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(255, 255, 255, .45);
+  --glass-shadow: 0 1px 2px rgba(25, 35, 90, .05), 0 18px 48px rgba(40, 55, 140, .13);
+  --glass-blur: 24px;
+  --glass-sat: 1.7;
+  --ring-track: rgba(60, 80, 160, .10);
+  --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, 1);
+  --card-bg: rgba(255, 255, 255, .74); --card-edge: rgba(40, 60, 150, .11); --card-blur: 14px; --card-lift: 0 16px 40px rgba(40, 55, 140, .16);
+
+  --scrim: rgba(14, 19, 48, .38);
   color-scheme: light;
 }
 
@@ -119,36 +187,36 @@
   --display-weight: 600;
   --display-tracking: -0.02em;
 
-  --bg: #05070f;
+  --bg: #04050d;
   --bg-accent: none;
-  --surface: #0c1426;
-  --surface-2: #111b32;
-  --surface-3: #18243f;
-  --border: #1b2845;
-  --border-strong: #2b3c63;
-  --text: #e8eef9;
-  --text-2: #a3b0c9;   /* 8.1:1 on surface */
-  --text-3: #6d7a96;
+  --surface: #0c1024;
+  --surface-2: #121734;
+  --surface-3: #1a2146;
+  --border: #1d2347;
+  --border-strong: #2f376a;
+  --text: #eceffd;
+  --text-2: #a9b0d2;   /* 8.2:1 on surface */
+  --text-3: #7079a3;
 
-  --accent: #4fd8f2;       /* cyan; dark ink on it = 11:1 */
-  --accent-hover: #7ae3f6;
-  --accent-soft: rgba(79, 216, 242, .12);
-  --accent-ink: #7ae3f6;
-  --on-accent: #03141b;
-  --accent-2: #8d9bff;
-  --accent-2-soft: rgba(141, 155, 255, .14);
-  --accent-grad: linear-gradient(135deg, #4fd8f2 0%, #8d7bff 100%);
+  --accent: #9a8cff;       /* violet; dark ink on it = 7.6:1 */
+  --accent-hover: #b3a8ff;
+  --accent-soft: rgba(154, 140, 255, .14);
+  --accent-ink: #bdb3ff;
+  --on-accent: #0b0722;
+  --accent-2: #5cd3ff;
+  --accent-2-soft: rgba(92, 211, 255, .14);
+  --accent-grad: linear-gradient(135deg, #5cd3ff 0%, #8f7dff 55%, #b08bff 100%);
 
   --success: #3ed69b; --success-soft: rgba(62, 214, 155, .12);
   --warning: #f2c35b; --warning-soft: rgba(242, 195, 91, .12);
   --danger: #ff7a73;  --danger-soft: rgba(255, 122, 115, .12);
   --info: #7fb0ff;    --info-soft: rgba(127, 176, 255, .12);
 
-  --focus: 0 0 0 3px rgba(79, 216, 242, .45);
+  --focus: 0 0 0 3px rgba(154, 140, 255, .5);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
   --shadow-2: 0 6px 24px rgba(0, 0, 0, .45);
   --shadow-3: 0 18px 60px rgba(0, 0, 0, .6);
-  --glow: 0 0 0 1px rgba(79, 216, 242, .18), 0 0 24px rgba(79, 216, 242, .10);
+  --glow: 0 0 0 1px rgba(154, 140, 255, .22), 0 0 26px rgba(130, 110, 255, .16);
 
   --radius-xs: 6px; --radius-sm: 9px; --radius-md: 13px; --radius-lg: 16px; --radius-xl: 20px; --radius-2xl: 26px;
   --radius-btn: 11px;
@@ -159,20 +227,21 @@
   --mod-work: #6fb1ff; --mod-study: #ff9f6b; --mod-focus: #a58bff; --mod-insights: #5ee0c6; --mod-reset: #f2c35b;
 
   /* aurora: cinematic cyan + violet with a faint ember for depth */
-  --aurora-1: rgba(60, 200, 235, .20);
-  --aurora-2: rgba(120, 96, 255, .22);
-  --aurora-3: rgba(255, 128, 84, .075);
+  --aurora-1: rgba(110, 90, 255, .30);
+  --aurora-2: rgba(70, 120, 255, .22);
+  --aurora-3: rgba(190, 90, 255, .12);
 
-  --glass-bg: rgba(14, 22, 42, .56);
-  --glass-bg-strong: rgba(13, 21, 40, .80);
-  --glass-border: rgba(255, 255, 255, .09);
+  --glass-bg: rgba(16, 20, 48, .52);
+  --glass-bg-strong: rgba(13, 17, 42, .78);
+  --glass-border: rgba(180, 170, 255, .16);
   --glass-edge: rgba(0, 0, 0, .35);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 0 0 1px rgba(255, 255, 255, .02);
   --glass-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 24px 60px rgba(0, 0, 0, .5);
   --glass-blur: 26px;
   --glass-sat: 1.6;
-  --ring-track: rgba(160, 190, 255, .09);
+  --ring-track: rgba(170, 170, 255, .10);
   --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, .045);
+  --card-bg: rgba(18, 23, 54, .52); --card-edge: rgba(170, 165, 255, .14); --card-blur: 16px; --card-lift: 0 18px 48px rgba(0, 0, 0, .55), 0 0 36px rgba(120, 100, 255, .12);
 
   --scrim: rgba(1, 4, 10, .62);
   color-scheme: dark;

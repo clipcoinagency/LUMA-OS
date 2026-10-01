@@ -30,6 +30,7 @@
 
 <div class="aurora" bind:this={host} aria-hidden="true">
   <i class="b b1"></i><i class="b b2"></i><i class="b b3"></i>
+  <i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i>
   <i class="grain"></i>
 </div>
 
@@ -62,6 +63,23 @@
   @keyframes a1 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(-9vw, 8vh, 0) scale(1.14); } }
   @keyframes a2 { from { transform: translate3d(0, 0, 0) scale(1.08); } to { transform: translate3d(10vw, -9vh, 0) scale(.94); } }
   @keyframes a3 { from { transform: translate3d(-6vw, 0, 0) scale(.92); } to { transform: translate3d(8vw, -6vh, 0) scale(1.12); } }
+  /* glass spheres: slow drifting accents (a nod to the product banner) — decorative, behind everything */
+  .orb {
+    position: absolute; display: block; border-radius: 50%; opacity: var(--orb-o, .5); will-change: transform;
+    background:
+      radial-gradient(circle at 30% 26%, rgba(255, 255, 255, .7), rgba(255, 255, 255, .12) 24%, transparent 34%),
+      radial-gradient(circle at 62% 72%, var(--orb-a), var(--orb-b) 74%);
+    box-shadow: inset -6px -8px 22px color-mix(in srgb, var(--orb-a) 40%, transparent), 0 0 46px var(--orb-glow);
+  }
+  .o1 { width: 84px; height: 84px; top: 21%; left: 5%; translate: calc(var(--px) * 40px) calc(var(--py) * 30px); animation: float1 18s var(--ease-in-out) infinite alternate; }
+  .o2 { width: 48px; height: 48px; top: 11%; right: 6%; translate: calc(var(--px) * -52px) calc(var(--py) * 36px); animation: float2 14s var(--ease-in-out) infinite alternate; }
+  .o3 { width: 30px; height: 30px; bottom: 16%; right: 17%; translate: calc(var(--px) * 60px) calc(var(--py) * -40px); animation: float1 11s var(--ease-in-out) infinite alternate-reverse; }
+  @keyframes float1 { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(10px, -22px, 0); } }
+  @keyframes float2 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(-14px, 18px, 0) scale(1.06); } }
+  :global([data-theme='dark']) .aurora { --orb-a: #7b6cff; --orb-b: #14164f; --orb-glow: rgba(120, 100, 255, .38); --orb-o: .6; }
+  :global([data-theme='light']) .aurora { --orb-a: #8ea0ff; --orb-b: #dde3ff; --orb-glow: rgba(110, 130, 255, .26); --orb-o: .62; }
+  :global([data-theme='soft']) .aurora { --orb-a: #eaa3bd; --orb-b: #fbe4dc; --orb-glow: rgba(222, 150, 172, .3); --orb-o: .62; }
+  @media (max-width: 720px) { .o1 { width: 56px; height: 56px; left: -10px; } .o3 { display: none; } }
   .grain {
     position: absolute; inset: 0; opacity: .05; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");

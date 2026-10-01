@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Target, Plus } from '@lucide/svelte';
   import WidgetCard from '../WidgetCard.svelte';
-  import ProgressBar from '../../../lib/ui/ProgressBar.svelte';
-  import CountUp from '../../../lib/ui/CountUp.svelte';
+  import ProgressRing from '../../../lib/ui/ProgressRing.svelte';
   import Badge from '../../../lib/ui/Badge.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import Button from '../../../lib/ui/Button.svelte';
@@ -41,12 +40,11 @@
         {#each goals as g (g.id)}
           {@const pace = PACE[goalPace(g, clock.today)]}
           <li>
-            <div class="row">
-              <span class="title">{g.title}</span>
-              <span class="pct"><CountUp value={Math.round(goalFraction(g) * 100)} suffix="%" /></span>
+            <ProgressRing value={goalFraction(g) * 100} size={56} stroke={6} label="{g.title} progress" color="var(--mod-goals)" />
+            <div class="info">
+              <div class="row"><span class="title">{g.title}</span>{#if pace}<Badge tone={pace.tone}>{pace.label}</Badge>{/if}</div>
+              <span class="sub">{sub(g)}</span>
             </div>
-            <ProgressBar value={goalFraction(g) * 100} label="{g.title} progress" color="var(--mod-goals)" />
-            <div class="row meta"><span>{sub(g)}</span>{#if pace}<Badge tone={pace.tone}>{pace.label}</Badge>{/if}</div>
           </li>
         {/each}
       </ul>
@@ -56,8 +54,9 @@
 
 <style>
   .list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
-  li { display: grid; gap: 6px; }
+  li { display: flex; align-items: center; gap: var(--space-4); }
+  .info { display: grid; gap: 3px; min-width: 0; flex: 1; }
+  .sub { font-size: var(--text-xs); color: var(--text-2); }
   .row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
   .title { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pct { font-weight: 700; color: var(--text-2); }
 </style>

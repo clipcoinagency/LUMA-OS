@@ -47,6 +47,8 @@ const hero = page.getByRole('region', { name: 'Today', exact: true });
 check(await hero.getByText(/Your workspace is empty/).isVisible(), 'Home briefing welcomes an empty workspace instead of showing nothing');
 check((await page.getByRole('list', { name: 'Today by area' }).getByRole('button').count()) === 4, 'Orbit legend shows Tasks, Habits, Focus and Wellness', '4 areas');
 check(!(await hero.getByText(/score/i).count()), 'No combined "life score" anywhere on Home');
+check((await page.getByRole('region', { name: 'Focus', exact: true }).isVisible()) && (await page.getByRole('region', { name: 'Progress', exact: true }).isVisible()), 'Home shows the Focus and Progress graph tiles');
+check(await page.getByRole('region', { name: 'Wellbeing', exact: true }).getByText('Not enough data yet').isVisible(), 'Wellbeing tile admits there is not enough data instead of drawing a made-up curve');
 await page.getByPlaceholder('Add a task for today…').fill('Write essay');
 await page.keyboard.press('Enter');
 await page.getByPlaceholder('Add a task for today…').fill('Read chapter');
@@ -145,6 +147,15 @@ await page.getByLabel('Note text').fill('A calm, productive day.');
 await page.getByText('Saved').waitFor();
 check((await page.getByRole('radio', { name: 'Good' }).getAttribute('aria-checked')) === 'true', 'A journal entry keeps its mood');
 check(await page.getByRole('radio', { name: 'Journal' }).first().isVisible(), 'Journal filter appears once an entry exists');
+
+// three themes
+await page.goto(url + '#/settings');
+await page.getByRole('heading', { level: 1, name: 'Settings' }).waitFor();
+check((await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio').count()) === 3, 'Settings offers three themes (Light, Soft, Dark)');
+await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Light/ }).click();
+check((await page.evaluate(() => document.documentElement.dataset.theme)) === 'light', 'Choosing Light applies the light theme');
+await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Soft/ }).click();
+check((await page.evaluate(() => document.documentElement.dataset.theme)) === 'soft', 'Choosing Soft applies the soft theme');
 
 check(errors.length === 0, 'No console/page errors', [...new Set(errors)].slice(0, 4).join(' | '));
 await ctx.close();

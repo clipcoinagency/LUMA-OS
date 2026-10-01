@@ -29,7 +29,7 @@
   svg { position: absolute; inset: 0; transform: rotate(-90deg); }
   circle { fill: none; }
   .track { stroke: var(--surface-3); }
-  .bar { stroke-linecap: round; filter: drop-shadow(var(--ring-glow, 0 0 0 transparent)); }
-  :global([data-theme='dark']) .ring { --ring-glow: 0 0 4px rgba(79, 216, 242, .45); }
+  .bar { stroke-linecap: round; filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 0%, transparent)); }
+  :global([data-theme='dark']) .bar { filter: drop-shadow(0 0 5px rgba(154, 140, 255, .5)); }
   .val { font-weight: 700; font-size: 0.8em; }
 </style>

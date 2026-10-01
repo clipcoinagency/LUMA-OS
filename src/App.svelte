@@ -24,6 +24,7 @@
   import DesignSystem from './dev/DesignSystem.svelte';
   import DataLab from './dev/DataLab.svelte';
   import { backUpNow, snoozeBackupReminder } from './features/settings/backupActions';
+  import Logo from './lib/ui/Logo.svelte';
 
   let backingUp = $state(false);
   async function backupNowFromBanner() {
@@ -73,7 +74,7 @@
 
 <Aurora />
 {#if app.status === 'loading'}
-  <div class="boot" aria-busy="true" aria-label="Opening Life OS"><div class="logo" aria-hidden="true"></div></div>
+  <div class="boot" aria-busy="true" aria-label="Opening Life OS"><div class="logo"><Logo size={72} /></div></div>
 {:else if app.status === 'error'}
   <main class="center">
     <ErrorState title="Life OS can't open its storage" message={app.error?.message ?? ''} details={String(app.error?.cause ?? '')}>
@@ -120,7 +121,7 @@
 
 <style>
   .boot { min-height: 100dvh; display: grid; place-items: center; }
-  .logo { width: 56px; height: 56px; border-radius: 30%; background: conic-gradient(from 210deg, var(--accent), var(--accent-2), var(--accent)); box-shadow: var(--glow); animation: breathe 1.6s var(--ease-in-out) infinite; }
+  .logo { filter: drop-shadow(0 8px 28px color-mix(in srgb, var(--accent) 45%, transparent)); animation: breathe 1.6s var(--ease-in-out) infinite; }
   @keyframes breathe { 50% { transform: scale(.92); opacity: .8; } }
   .center { min-height: 100dvh; display: grid; place-content: center; padding: var(--space-5); }
   .hint { text-align: center; }

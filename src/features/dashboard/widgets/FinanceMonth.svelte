@@ -26,6 +26,18 @@
 
   const money = (m: number) => formatMoney(m, currency);
   const top = $derived(sum ? sum.byCategory.slice(0, 4) : []);
+  // spending donut: one arc per top category (real shares of this month's spending)
+  const DR = 34, DC = 2 * Math.PI * DR;
+  const arcs = $derived.by(() => {
+    if (!sum || sum.expenseMinor <= 0) return [];
+    let acc = 0;
+    return sum.byCategory.slice(0, 5).map((c) => {
+      const frac = c.amountMinor / sum!.expenseMinor;
+      const a = { color: (c.categoryId ? cats.get(c.categoryId)?.color : undefined) ?? 'var(--text-3)', len: Math.max(0, frac * DC - 3), off: -acc * DC };
+      acc += frac;
+      return a;
+    });
+  });
   const month = $derived(formatDateKey(clock.today, { month: 'long' }));
 </script>
 
@@ -38,7 +50,15 @@
         {#snippet action()}<Button size="sm" variant="primary" onclick={() => openQuick('transaction')}>{#snippet icon()}<Plus />{/snippet}Record spending</Button>{/snippet}
       </EmptyState>
     {:else}
-      <div class="spent"><span class="lbl">Spent</span><span class="big num">{money(sum.expenseMinor)}</span></div>
+      <div class="hero">
+        {#if arcs.length}
+          <svg class="donut" viewBox="0 0 88 88" width="88" height="88" role="img" aria-label="Spending by category">
+            <circle cx="44" cy="44" r={DR} class="dtrack" />
+            {#each arcs as a, i (i)}<circle cx="44" cy="44" r={DR} class="darc" stroke={a.color} stroke-dasharray="{a.len} {DC}" stroke-dashoffset={a.off} style="animation-delay:{i * 90}ms" />{/each}
+          </svg>
+        {/if}
+        <div class="spent"><span class="lbl">Spent</span><span class="big num">{money(sum.expenseMinor)}</span></div>
+      </div>
       <div class="stats">
         <div><span class="lbl">Income</span><span class="num">{money(sum.incomeMinor)}</span></div>
         <div><span class="lbl">Saved</span><span class="num">{money(sum.savingMinor)}</span></div>
@@ -62,7 +82,12 @@
 </WidgetCard>
 
 <style>
-  .spent { display: grid; gap: 2px; margin-bottom: var(--space-3); }
+  .hero { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3); }
+  .donut { flex: none; transform: rotate(-90deg); overflow: visible; }
+  .dtrack { fill: none; stroke: var(--ring-track); stroke-width: 10; }
+  .darc { fill: none; stroke-width: 10; stroke-linecap: butt; animation: sweep .9s var(--ease-glide) both; filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 0%, transparent)); }
+  @keyframes sweep { from { opacity: 0; stroke-dasharray: 0 999; } }
+  .spent { display: grid; gap: 2px; min-width: 0; }
   .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
   .stats .num { overflow-wrap: anywhere; }
   .stats > div { display: grid; gap: 2px; }

@@ -22,6 +22,8 @@
   import { dur } from '../../lib/motion';
   import { withEnabledModules, widgetChoices } from '../../lib/workspace';
   import type { ModuleId, ThemeId, WidgetId, Workspace } from '../../lib/db/schema';
+  import { themeName } from '../../lib/theme';
+  import Logo from '../../lib/ui/Logo.svelte';
 
   const STEPS = ['welcome', 'persona', 'modules', 'theme', 'about', 'dashboard', 'done'] as const;
   type Step = (typeof STEPS)[number];
@@ -95,12 +97,12 @@
   }
 
   const has = (m: ModuleId) => ws.enabledModules.includes(m);
-  const summary = $derived(`${ws.enabledModules.length} module${ws.enabledModules.length === 1 ? '' : 's'} · ${theme === 'soft' ? 'Soft' : 'Dark'} theme · ${ws.dashboardLayout[0]!.toUpperCase() + ws.dashboardLayout.slice(1)} layout`);
+  const summary = $derived(`${ws.enabledModules.length} module${ws.enabledModules.length === 1 ? '' : 's'} · ${themeName(theme)} theme · ${ws.dashboardLayout[0]!.toUpperCase() + ws.dashboardLayout.slice(1)} layout`);
 </script>
 
 <div class="ob">
   <header class="bar">
-    <span class="brand"><span class="mark" aria-hidden="true"></span>Life OS</span>
+    <span class="brand"><Logo size={30} />Life OS</span>
     {#if step !== 'welcome'}
       <ol class="progress" aria-label="Setup progress">
         {#each ['Modules', 'Theme', 'Personalize', 'Create'] as label, i (label)}
@@ -148,7 +150,7 @@
 
         {:else if step === 'theme'}
           <h1 id="ob-heading" tabindex="-1">Pick your look</h1>
-          <p class="lead">Two themes, same great experience. Switch any time in Settings.</p>
+          <p class="lead">Three themes, same great experience. Switch any time in Settings.</p>
           <ThemePicker value={theme} onchange={setTheme} />
 
         {:else if step === 'about'}
@@ -221,7 +223,6 @@
   .ob { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; max-width: 980px; margin: 0 auto; padding: max(var(--space-4), env(safe-area-inset-top)) var(--space-4) 0; }
   .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 48px; }
   .brand { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-md); }
-  .mark { width: 26px; height: 26px; border-radius: 30%; background: conic-gradient(from 210deg, var(--accent), var(--accent-2), var(--accent)); box-shadow: var(--glow); }
   .progress { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; }
   .progress li { width: 28px; height: 6px; border-radius: 99px; background: var(--surface-3); transition: background-color var(--dur-slow) var(--ease-out), width var(--dur-slow) var(--ease-out); }
   .progress li.done { background: color-mix(in srgb, var(--accent) 55%, var(--surface-3)); }

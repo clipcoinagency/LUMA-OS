@@ -11,23 +11,13 @@ body {
   min-height: 100dvh;
   font: 400 var(--text-base) / var(--leading) var(--font-body);
   color: var(--text);
-  background: var(--bg-accent), var(--bg);
-  background-size: 160% 160%, auto;
-  background-position: 20% 0%, 0 0;
-  background-attachment: fixed;
-  animation: drift 40s var(--ease-in-out) infinite alternate;
+  background: transparent; /* the atmosphere lives in <Aurora /> (fixed, behind everything) */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv11', 'ss01';
-  transition: background-color var(--dur-slow) var(--ease-out), color var(--dur-slow) var(--ease-out);
+  font-optical-sizing: auto;
 }
-/* A slow, near-subliminal drift of the ambient glow — the page should feel alive, not static,
-   without ever being distracting. Neutralised by the reduced-motion rule below like everything else. */
-@keyframes drift {
-  0%   { background-position: 10% 0%,  0 0; }
-  50%  { background-position: 85% 45%, 0 0; }
-  100% { background-position: 25% 90%, 0 0; }
-}
+#app { position: relative; z-index: 0; }
 
 h1, h2, h3, .display {
   font-family: var(--font-display);
@@ -35,11 +25,12 @@ h1, h2, h3, .display {
   letter-spacing: var(--display-tracking);
   line-height: var(--leading-tight);
   margin: 0;
+  text-wrap: balance;
 }
 h1 { font-size: var(--text-2xl); }
 h2 { font-size: var(--text-lg); }
 h3 { font-size: var(--text-md); }
-p { margin: 0; }
+p { margin: 0; text-wrap: pretty; }
 
 a { color: var(--accent-ink); }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -58,6 +49,36 @@ img, svg { display: block; }
 .muted { color: var(--text-2); }
 .meta { color: var(--text-3); font-size: var(--text-sm); }
 .num { font-variant-numeric: tabular-nums; }
+.grad-text { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---- surfaces -------------------------------------------------------------------------
+   glass: floats above content (nav, hero, overlays). solid: holds content (lists, forms).
+   Use glass sparingly — it is the hierarchy signal, not a skin. */
+.glass {
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+.glass-strong {
+  background: var(--glass-bg-strong); border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(var(--glass-sat));
+  backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(var(--glass-sat));
+}
+.solid {
+  background: var(--surface); border: var(--card-border);
+  box-shadow: var(--solid-highlight), var(--shadow-1);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .glass-strong { background: var(--surface); backdrop-filter: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-strong { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+[data-reduce-transparency='true'] .glass, [data-reduce-transparency='true'] .glass-strong {
+  background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none;
+}
 
 /* Theme changes cross-fade surfaces; everything else keeps its own timing. */
 .theme-transition, .theme-transition * {

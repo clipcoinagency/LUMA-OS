@@ -12,6 +12,12 @@
   import Onboarding from './features/onboarding/Onboarding.svelte';
   import AppShell from './features/shell/AppShell.svelte';
   import Dashboard from './features/dashboard/Dashboard.svelte';
+  import InsightsPage from './features/insights/InsightsPage.svelte';
+  import ResetPage from './features/reset/ResetPage.svelte';
+  import Aurora from './lib/ui/Aurora.svelte';
+  import FocusMode from './features/focus/FocusMode.svelte';
+  import FocusPill from './features/focus/FocusPill.svelte';
+  import ResetFlow from './features/reset/ResetFlow.svelte';
   import ModulePage from './features/modules/ModulePage.svelte';
   import Settings from './features/settings/Settings.svelte';
   import DesignSystem from './dev/DesignSystem.svelte';
@@ -57,6 +63,7 @@
   });
 </script>
 
+<Aurora />
 {#if app.status === 'loading'}
   <div class="boot" aria-busy="true" aria-label="Opening Life OS"><div class="logo" aria-hidden="true"></div></div>
 {:else if app.status === 'error'}
@@ -89,6 +96,8 @@
         <div class="page" in:fly={{ y: 10, duration: dur(260), delay: dur(40) }}>
           {#if route.name === 'dashboard'}<Dashboard />
           {:else if route.name === 'module'}<ModulePage module={route.module} />
+          {:else if route.name === 'insights'}<InsightsPage />
+          {:else if route.name === 'reset'}<ResetPage />
           {:else if route.name === 'settings'}<Settings />
           {:else if route.page === 'design'}<DesignSystem />
           {:else}<DataLab />{/if}
@@ -97,6 +106,7 @@
     </AppShell>
   </div>
 {/if}
+{#if app.status === 'ready' && app.workspace?.onboarded}<FocusMode /><FocusPill /><ResetFlow />{/if}
 <Toaster />
 <ReminderAlert />
 

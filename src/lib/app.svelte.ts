@@ -5,6 +5,7 @@ import type { Settings, ThemeId, Workspace } from './db/schema';
 import { detectPlatform, requestPersistentStorage } from './platform/platform';
 import { checkBackupReminder } from './domain/backupReminder';
 import { initReminders } from './reminders.svelte';
+import { focus } from './focus.svelte';
 
 type Status = 'loading' | 'ready' | 'error';
 
@@ -35,6 +36,7 @@ class AppState {
       // Durable storage where the browser grants it silently; never blocks (Firefox prompts).
       if (this.platform !== 'file') void requestPersistentStorage();
       void this.refreshBackupReminder();
+      void focus.restore(); // a session that was running when the page closed picks up where it left off
       initReminders(); // harmless pre-onboarding (no tasks exist yet); idempotent, so reload()/retry can't double it up
     } catch (e) {
       this.error = toStorageError(e);

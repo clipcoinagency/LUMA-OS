@@ -1,4 +1,5 @@
-// Life OS data schema — version 1.
+// Life OS data schema — version 2 (v2 adds projects, focus_sessions and reviews; every v1 store is
+// untouched and every field added to a v1 record type is optional, so v1 data and v1 backups load as-is).
 //
 // Rules (from Phase 0):
 //  • History is never overwritten: every historical fact is its own dated row (habit log, goal
@@ -10,7 +11,7 @@
 import type { DateKey } from '../util/dates';
 
 export const DB_NAME = 'lifeos';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'] as const;
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -40,6 +41,7 @@ export interface Settings {
   units: { weight: 'kg' | 'lb'; water: 'ml' | 'oz' | 'glasses' };
   reduceMotion: boolean;          // in addition to the OS setting
   backupReminderDays: number;     // 0 = off
+  focusTargetMin?: number;        // daily focus goal in minutes (default 120)
   updatedAt: string;
 }
 
@@ -68,6 +70,7 @@ export interface Task extends Stamped {
   reminder: boolean;              // ring an alert at dueTime, once
   remindedOn: DateKey | null;     // the day this reminder last fired (prevents re-firing same day)
   tags: string[];
+  projectId?: string | null;      // v2: the project / subject this belongs to
   done: boolean;
   completedOn: DateKey | null;    // the day it was ticked off (history)
   createdOn: DateKey;
@@ -132,7 +135,11 @@ export interface CalendarEvent extends Stamped {
   endTime: string | null;
   notes: string;
   color: string;
+  kind?: EventKind;               // v2: meeting / exam / deadline are events with a purpose
+  projectId?: string | null;
 }
+
+export type EventKind = 'event' | 'meeting' | 'exam' | 'deadline';
 
 export interface Note extends Stamped {
   title: string;
@@ -140,6 +147,9 @@ export interface Note extends Stamped {
   date: DateKey;                  // the day it belongs to (defaults to created day)
   pinned: boolean;
   tags: string[];
+  kind?: 'note' | 'journal';       // v2: a journal entry is a dated note with a mood
+  mood?: 1 | 2 | 3 | 4 | 5 | null;
+  projectId?: string | null;
 }
 
 /** One row per day (id = date). */
@@ -151,6 +161,7 @@ export interface WellnessDay {
   mood: 1 | 2 | 3 | 4 | 5 | null;
   steps: number | null;
   weight: number | null;          // in settings.units.weight
+  calories?: number | null;       // v2
   note: string;
   updatedAt: string;
 }
@@ -181,6 +192,47 @@ export interface FinanceCategory extends Stamped {
   icon: string;
   order: number;
   archived: boolean;
+  budgetMinor?: number | null;    // v2: monthly budget for an expense category
+}
+
+// ---------------------------------------------------------------- v2 records
+
+/** A work project or a study subject — the container between a Goal and its Tasks. */
+export interface Project extends Stamped {
+  title: string;
+  kind: 'work' | 'study';
+  color: string;
+  client: string;                 // work: who it's for · study: the instructor / course code
+  deadline: DateKey | null;
+  status: 'active' | 'done' | 'archived';
+  goalId: string | null;          // the goal this serves
+  notes: string;
+  createdOn: DateKey;
+}
+
+/** One finished (or stopped) focus session. Recorded once, when it ends. */
+export interface FocusSession {
+  id: string;
+  date: DateKey;                  // local day it started
+  startedAt: string;
+  endedAt: string;
+  seconds: number;                // time actually focused (pauses excluded)
+  plannedMin: number;
+  taskId: string | null;
+  projectId: string | null;
+  label: string;                  // what it was for, kept even if the task is later deleted
+  createdAt: string;
+}
+
+/** A completed Weekly Reset. id = reviewed week's start date, so redoing a week replaces it. */
+export interface WeeklyReview extends Stamped {
+  date: DateKey;                  // start of the week that was reviewed
+  planWeek: DateKey;              // start of the week that was planned
+  priorities: { title: string; taskId: string | null; day: DateKey | null }[];
+  wins: string[];
+  reflection: string;
+  focusGoalMin: number;
+  snapshot: { tasksDone: number; habitRate: number | null; focusMin: number; spentMinor: number | null; moodAvg: number | null };
 }
 
 /** Automatic safety copies taken before restore/migration/reset (never exported). */
@@ -210,6 +262,9 @@ export interface StoreRecordMap {
   workouts: Workout;
   transactions: Transaction;
   finance_categories: FinanceCategory;
+  projects: Project;
+  focus_sessions: FocusSession;
+  reviews: WeeklyReview;
   safety: SafetySnapshot;
 }
 export type StoreName = keyof StoreRecordMap;
@@ -240,8 +295,14 @@ export const STORES: Record<StoreName, StoreDef> = {
   workouts: { keyPath: 'id', indexes: { by_date: 'date' }, dateField: 'date', module: 'wellness' },
   transactions: { keyPath: 'id', indexes: { by_date: 'date', by_category: 'categoryId' }, dateField: 'date', module: 'finance' },
   finance_categories: { keyPath: 'id', indexes: { by_order: 'order' }, module: 'finance' },
+  projects: { keyPath: 'id', indexes: { by_kind: 'kind', by_status: 'status' }, dateField: 'createdOn' },
+  focus_sessions: { keyPath: 'id', indexes: { by_date: 'date', by_task: 'taskId' }, dateField: 'date' },
+  reviews: { keyPath: 'id', indexes: { by_date: 'date' }, dateField: 'date' },
   safety: { keyPath: 'id', indexes: { by_created: 'createdAt' }, local: true },
 };
+
+/** Stores that exist since schema v2 (migration 2 creates exactly these). */
+export const V2_STORES: StoreName[] = ['projects', 'focus_sessions', 'reviews'];
 
 export const STORE_NAMES = Object.keys(STORES) as StoreName[];
 export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);
@@ -249,4 +310,4 @@ export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);
 export const CONFIG_STORES: StoreName[] = ['meta', 'settings', 'workspace', 'finance_categories'];
 
 /** meta keys that describe this device, not the user's workspace — never exported/restored. */
-export const DEVICE_META_KEYS = ['launches', 'installedAt', 'lastOpenedAt', 'persistRequested', 'lastBackupAt', 'lastRestoreAt', 'lastResetAt', 'backupReminderSnoozedAt'];
+export const DEVICE_META_KEYS = ['launches', 'installedAt', 'lastOpenedAt', 'persistRequested', 'lastBackupAt', 'lastRestoreAt', 'lastResetAt', 'backupReminderSnoozedAt', 'activeFocus'];

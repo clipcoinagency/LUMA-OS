@@ -8,6 +8,7 @@
   import SearchField from '../../../lib/ui/SearchField.svelte';
   import Select from '../../../lib/ui/Select.svelte';
   import Checkbox from '../../../lib/ui/Checkbox.svelte';
+  import FocusButton from '../../focus/FocusButton.svelte';
   import Badge from '../../../lib/ui/Badge.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import { toast } from '../../../lib/ui/toast.svelte';
@@ -164,6 +165,7 @@
                     <span class="sub">{#each t.tags as tag (tag)}<span class="tag">#{tag}</span>{/each}{#if t.notes}<span class="note">{t.notes}</span>{/if}</span>
                   {/if}
                 </button>
+                {#if !t.done}<FocusButton task={t} />{/if}
                 <span class="badges">
                   {#if t.priority === 'high' && !t.done}<Badge tone="warning">High</Badge>{:else if t.priority === 'medium' && !t.done}<Badge>Medium</Badge>{/if}
                   {#if due}<Badge tone={due.tone}>{due.text}</Badge>{/if}

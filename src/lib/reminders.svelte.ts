@@ -5,6 +5,7 @@
 import { isReminderDue, listTasks, markReminded } from './domain/tasks';
 import { today } from './util/dates';
 import { changes } from './db/changes.svelte';
+import { playChime } from './sound';
 import type { Task } from './db/schema';
 
 export const dueReminders = $state<Task[]>([]);
@@ -14,34 +15,6 @@ let started = false;
 function nowHM(): string {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
-// A short two-note chime via the Web Audio API — no external asset, so it stays inside the
-// single-file build. Browsers block audio before any user gesture on the page; by the time a
-// reminder can fire the user has always already interacted with the app (added the task, at
-// least), so this reliably plays. If it's still blocked for some reason, the visual popup alone
-// is a fine fallback — never let a sound failure stop the reminder from showing.
-function playChime() {
-  try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const start = ctx.currentTime;
-    for (const [i, freq] of [660, 880].entries()) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const t0 = start + i * 0.18;
-      gain.gain.setValueAtTime(0, t0);
-      gain.gain.linearRampToValueAtTime(0.22, t0 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.4);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + 0.42);
-    }
-    setTimeout(() => void ctx.close(), 900);
-  } catch { /* audio unavailable/blocked — the visual popup still shows */ }
 }
 
 async function check() {

@@ -1,0 +1,3 @@
+// Icons used by the app shell and new features, re-exported in one place so the bundle only pulls
+// the glyphs we actually use.
+export { Layers, HeartPulse, Orbit, ChartLine as LineChart, RefreshCcw, House, Search, Plus, Settings, Command, Focus, Play, Pause, Square, Check, X, Sparkles, Sunrise, Sun, Sunset, Moon, ChevronRight, ChevronLeft, ArrowRight, ArrowLeft, Ellipsis, Flame, Trophy, Timer, Lightbulb, Palette, Zap, Compass, Briefcase, GraduationCap, Hourglass, Volume2, VolumeX, Maximize, Minimize, TrendingUp, TrendingDown, PartyPopper, Sprout, Clock, Activity, ListChecks } from '@lucide/svelte';

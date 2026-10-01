@@ -78,8 +78,12 @@ export function serializeBackup(b: Backup): string {
   return JSON.stringify(b);
 }
 
-/** Older backups are upgraded here, one schema step at a time. (None yet: v1 is the first.) */
-const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {};
+/** Older backups are upgraded here, one schema step at a time. */
+const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {
+  // v2 only ADDED stores (projects, focus_sessions, reviews) and optional fields: a v1 backup is already
+  // valid v2 data, the new stores are simply empty.
+  2: (data) => data,
+};
 
 function fail(reason: string): ValidationResult {
   return { ok: false, reason };

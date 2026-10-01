@@ -4,13 +4,12 @@
   // by estimated height) — preserves reading order and never leaves grid gaps. Column count
   // follows the chosen layout, the screen width and how many widgets there are.
   import type { Component } from 'svelte';
-  import { Settings2, Sunrise, Sun, Sunset, Moon } from '@lucide/svelte';
+  import { Settings2 } from '@lucide/svelte';
+  import CommandCenter from './CommandCenter.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
-  import { clock } from '../../lib/clock.svelte';
   import { router } from '../../lib/router.svelte';
   import { visibleWidgets } from '../../lib/workspace';
-  import { formatDateKey } from '../../lib/util/dates';
   import type { WidgetId } from '../../lib/db/schema';
   import QuickActions from './widgets/QuickActions.svelte';
   import TodayTasks from './widgets/TodayTasks.svelte';
@@ -53,19 +52,10 @@
     return out;
   });
 
-  const name = $derived(app.settings!.displayName);
-  const greeting = $derived(clock.hour < 5 ? 'Good night' : clock.hour < 12 ? 'Good morning' : clock.hour < 18 ? 'Good afternoon' : 'Good evening');
-  const GreetIcon = $derived(clock.hour < 5 ? Moon : clock.hour < 8 ? Sunrise : clock.hour < 17 ? Sun : clock.hour < 20 ? Sunset : Moon);
 </script>
 
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
-  <header class="hello">
-    <p class="date">{formatDateKey(clock.today)}</p>
-    <h1 class="greet">
-      <span class="greet-ico" aria-hidden="true"><GreetIcon size={28} /></span>
-      {greeting}{name ? `, ${name}` : ''}
-    </h1>
-  </header>
+  <CommandCenter />
 
   {#if showQuick}<div class="quick"><QuickActions /></div>{/if}
 
@@ -91,21 +81,7 @@
 <style>
   .dash { max-width: 1180px; }
   .dash.focus { max-width: 720px; }
-  .hello { display: grid; gap: var(--space-1); margin-bottom: var(--space-5); }
-  .date { color: var(--text-2); font-weight: 600; }
-  h1 { font-size: clamp(var(--text-2xl), 5vw, var(--text-3xl)); }
-  .greet { display: flex; align-items: center; gap: var(--space-3); }
-  .greet-ico {
-    position: relative; display: inline-flex; padding: 7px; border-radius: 50%; flex: none;
-    color: var(--accent-ink); background: var(--accent-soft); box-shadow: var(--glow);
-  }
-  .greet-ico::before {
-    content: ''; position: absolute; inset: -7px; border-radius: 50%; z-index: -1;
-    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 72%);
-    animation: glow-pulse 3.6s var(--ease-in-out) infinite;
-  }
-  @keyframes glow-pulse { 0%, 100% { opacity: .55; transform: scale(.88); } 50% { opacity: 1; transform: scale(1.18); } }
-  .quick { margin-bottom: var(--space-4); }
+  .quick { margin: var(--space-5) 0 var(--space-4); }
   .cols { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
   .dcol { display: grid; gap: var(--space-4); min-width: 0; align-content: start; }
   .compact .cols, .compact .dcol { gap: var(--space-3); }

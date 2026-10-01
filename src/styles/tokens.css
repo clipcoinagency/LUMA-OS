@@ -1,7 +1,12 @@
-/* Life OS design tokens.
+/* Life OS 2 design tokens — "Aurora Glass".
    One shared system (spacing, type scale, motion, component anatomy); two themes with distinct
-   personalities — Soft (warm cream + dusty rose, serif display, generous radii, diffuse shadows)
-   and Dark (navy/near-black + cyan, geometric display, crisp radii, faint glow). Not an inversion. */
+   personalities, not an inversion:
+     Soft ("Pearl")     — warm pearl light, dusty rose + champagne, serif display, luminous peach/lilac aurora.
+     Dark ("Midnight")  — near-black navy, cyan + violet light, geometric display, cinematic aurora.
+   Surfaces come in two families, used on purpose:
+     • glass  — frosted + translucent, for things that FLOAT or demand attention (nav, hero, overlays).
+     • solid  — opaque with a hairline + soft top highlight, for CONTENT (lists, forms, tables).
+   Glass degrades to solid when the browser lacks backdrop-filter or the user prefers reduced transparency. */
 
 :root {
   /* spacing — 4px grid */
@@ -17,51 +22,58 @@
   --text-xl: 1.5rem;    /* 24 */
   --text-2xl: 1.875rem; /* 30 */
   --text-3xl: 2.375rem; /* 38 */
-  --leading-tight: 1.2; --leading: 1.5;
+  --text-4xl: 3.25rem;  /* 52 */
+  --leading-tight: 1.15; --leading: 1.5;
   --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 
   /* motion — short, purposeful */
-  --dur-fast: 120ms; --dur: 200ms; --dur-slow: 320ms;
+  --dur-fast: 120ms; --dur: 200ms; --dur-slow: 320ms; --dur-xslow: 560ms;
   --ease-out: cubic-bezier(.2, .8, .2, 1);
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
   --ease-emphasis: cubic-bezier(.3, 1.25, .5, 1); /* tiny overshoot, used sparingly */
+  --ease-glide: cubic-bezier(.22, 1, .36, 1);
 
   /* layout */
   --touch: 44px;
   --sidebar-w: 248px;
+  --sidebar-gap: 14px;
   --content-max: 1180px;
   --z-nav: 20; --z-overlay: 40; --z-toast: 60;
+
+  /* time-of-day atmosphere (set from JS, see lib/atmosphere.ts) */
+  --tod-hue: 0deg;
+  --tod-strength: 1;
 }
 
-/* ------------------------------------------------------------------ Soft */
+/* ------------------------------------------------------------------ Soft · Pearl */
 :root, [data-theme='soft'] {
   --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
-  --display-weight: 560;
-  --display-tracking: -0.015em;
+  --display-weight: 540;
+  --display-tracking: -0.02em;
 
-  --bg: #fbf6f2;
-  --bg-accent: radial-gradient(1200px 500px at 85% -10%, #f6e3e3 0%, transparent 60%),
-               radial-gradient(900px 420px at -10% 0%, #f7ece2 0%, transparent 55%);
+  --bg: #f8f3ef;
+  --bg-accent: none;
   --surface: #ffffff;
-  --surface-2: #f8f0ec;
-  --surface-3: #f1e5e0;
-  --border: #ecdfd9;
-  --border-strong: #dcc8c0;
-  --text: #2b2126;
-  --text-2: #685860;   /* 6.9:1 on surface */
-  --text-3: #8f7c83;   /* 3.9:1 — decorative/meta only, never body copy */
+  --surface-2: #f8f1ed;
+  --surface-3: #f0e4df;
+  --border: #ebdcd6;
+  --border-strong: #dac4bc;
+  --text: #2a2025;
+  --text-2: #655560;   /* 6.9:1 on surface */
+  --text-3: #8d7a83;   /* 3.9:1 — decorative/meta only, never body copy */
 
-  --accent: #a5546c;       /* 5.2:1 with white text */
-  --accent-hover: #93465e;
-  --accent-soft: #f6e1e6;
-  --accent-ink: #7d3a4f;   /* accent text on light surfaces */
+  --accent: #a24f69;       /* 5.4:1 with white text */
+  --accent-hover: #8f4259;
+  --accent-soft: #f6e0e6;
+  --accent-ink: #7a3649;   /* accent text on light surfaces */
   --on-accent: #ffffff;
-  --accent-2: #b0875c;     /* champagne */
-  --accent-2-soft: #f5ebdf;
+  --accent-2: #8a6fd1;     /* soft violet — pairs with the rose in gradients */
+  --accent-2-soft: #ece6f8;
+  --accent-grad: linear-gradient(135deg, #b3566f 0%, #9a5fc4 100%);
 
-  --success: #2f7d58; --success-soft: #e2f1e8;
-  --warning: #99620f; --warning-soft: #f8ecd6;
+  --success: #2c7a55; --success-soft: #e0f1e7;
+  --warning: #94600f; --warning-soft: #f8ecd6;
   --danger: #b23c3c;  --danger-soft: #f8e1df;
   --info: #3f6ea8;    --info-soft: #e3ecf7;
 
@@ -71,31 +83,48 @@
   --shadow-3: 0 8px 20px rgba(70, 35, 45, .08), 0 30px 70px rgba(70, 35, 45, .14);
   --glow: none;
 
-  --radius-xs: 8px; --radius-sm: 12px; --radius-md: 16px; --radius-lg: 22px; --radius-xl: 28px;
+  --radius-xs: 8px; --radius-sm: 12px; --radius-md: 16px; --radius-lg: 22px; --radius-xl: 28px; --radius-2xl: 34px;
   --radius-btn: 999px;
   --card-border: 1px solid var(--border);
 
   /* module identity colours (icons, chart series) */
-  --mod-tasks: #a5546c; --mod-goals: #b0875c; --mod-habits: #4f8f75; --mod-calendar: #6c78b8;
+  --mod-tasks: #a24f69; --mod-goals: #b0875c; --mod-habits: #4f8f75; --mod-calendar: #6c78b8;
   --mod-notes: #9a7a5a; --mod-wellness: #4f98a8; --mod-finance: #7a6bb0;
+  --mod-work: #5b7fb5; --mod-study: #c0764e; --mod-focus: #8a6fd1; --mod-insights: #3f8f8a; --mod-reset: #b0875c;
+
+  /* aurora: three luminous fields on a pearl base */
+  --aurora-1: rgba(255, 190, 168, .62);
+  --aurora-2: rgba(236, 174, 206, .50);
+  --aurora-3: rgba(190, 196, 255, .50);
+
+  /* glass */
+  --glass-bg: rgba(255, 255, 255, .58);
+  --glass-bg-strong: rgba(255, 255, 255, .78);
+  --glass-border: rgba(255, 255, 255, .85);
+  --glass-edge: rgba(150, 100, 120, .14);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 0 0 1px rgba(255, 255, 255, .35);
+  --glass-shadow: 0 1px 2px rgba(90, 50, 65, .05), 0 18px 48px rgba(110, 60, 85, .13);
+  --glass-blur: 22px;
+  --glass-sat: 1.5;
+  --ring-track: rgba(120, 80, 95, .10);
+  --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, .9);
 
   --scrim: rgba(43, 25, 32, .35);
   color-scheme: light;
 }
 
-/* ------------------------------------------------------------------ Dark */
+/* ------------------------------------------------------------------ Dark · Midnight */
 [data-theme='dark'] {
   --font-display: 'Space Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
   --display-weight: 600;
   --display-tracking: -0.02em;
 
-  --bg: #060a13;
-  --bg-accent: radial-gradient(1100px 480px at 80% -12%, rgba(79, 216, 242, .10) 0%, transparent 60%),
-               radial-gradient(900px 420px at -10% 10%, rgba(124, 140, 255, .08) 0%, transparent 55%);
-  --surface: #0d1526;
-  --surface-2: #121c32;
+  --bg: #05070f;
+  --bg-accent: none;
+  --surface: #0c1426;
+  --surface-2: #111b32;
   --surface-3: #18243f;
-  --border: #1d2a47;
+  --border: #1b2845;
   --border-strong: #2b3c63;
   --text: #e8eef9;
   --text-2: #a3b0c9;   /* 8.1:1 on surface */
@@ -108,6 +137,7 @@
   --on-accent: #03141b;
   --accent-2: #8d9bff;
   --accent-2-soft: rgba(141, 155, 255, .14);
+  --accent-grad: linear-gradient(135deg, #4fd8f2 0%, #8d7bff 100%);
 
   --success: #3ed69b; --success-soft: rgba(62, 214, 155, .12);
   --warning: #f2c35b; --warning-soft: rgba(242, 195, 91, .12);
@@ -120,13 +150,30 @@
   --shadow-3: 0 18px 60px rgba(0, 0, 0, .6);
   --glow: 0 0 0 1px rgba(79, 216, 242, .18), 0 0 24px rgba(79, 216, 242, .10);
 
-  --radius-xs: 6px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 14px; --radius-xl: 18px;
-  --radius-btn: 10px;
+  --radius-xs: 6px; --radius-sm: 9px; --radius-md: 13px; --radius-lg: 16px; --radius-xl: 20px; --radius-2xl: 26px;
+  --radius-btn: 11px;
   --card-border: 1px solid var(--border);
 
-  --mod-tasks: #4fd8f2; --mod-goals: #f2c35b; --mod-habits: #3ed69b; --mod-calendar: #8d9bff;
-  --mod-notes: #c7a6ff; --mod-wellness: #5ee0c6; --mod-finance: #ff9ec4;
+  --mod-tasks: #4fd8f2; --mod-goals: #f2c35b; --mod-habits: #9be564; --mod-calendar: #8d9bff;
+  --mod-notes: #c7a6ff; --mod-wellness: #ff8a9b; --mod-finance: #38d9b0;
+  --mod-work: #6fb1ff; --mod-study: #ff9f6b; --mod-focus: #a58bff; --mod-insights: #5ee0c6; --mod-reset: #f2c35b;
 
-  --scrim: rgba(1, 4, 10, .6);
+  /* aurora: cinematic cyan + violet with a faint ember for depth */
+  --aurora-1: rgba(60, 200, 235, .20);
+  --aurora-2: rgba(120, 96, 255, .22);
+  --aurora-3: rgba(255, 128, 84, .075);
+
+  --glass-bg: rgba(14, 22, 42, .56);
+  --glass-bg-strong: rgba(13, 21, 40, .80);
+  --glass-border: rgba(255, 255, 255, .09);
+  --glass-edge: rgba(0, 0, 0, .35);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 0 0 1px rgba(255, 255, 255, .02);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 24px 60px rgba(0, 0, 0, .5);
+  --glass-blur: 26px;
+  --glass-sat: 1.6;
+  --ring-track: rgba(160, 190, 255, .09);
+  --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, .045);
+
+  --scrim: rgba(1, 4, 10, .62);
   color-scheme: dark;
 }

@@ -83,6 +83,8 @@ const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {
   // v2 only ADDED stores (projects, focus_sessions, reviews) and optional fields: a v1 backup is already
   // valid v2 data, the new stores are simply empty.
   2: (data) => data,
+  // v3 only ADDED stores (books, reading_logs, decks, cards, card_reviews): older backups are valid as-is.
+  3: (data) => data,
 };
 
 function fail(reason: string): ValidationResult {
@@ -195,6 +197,11 @@ export async function resetModule(module: ModuleId): Promise<void> {
     await takeSafetySnapshot('before-reset');
     const { listProjects, deleteProject } = await import('../domain/projects');
     for (const p of await listProjects(module)) await deleteProject(p.id);
+    if (module === 'study') {
+      // Study & Read also owns the library and the flashcards — clear those stores outright
+      const own = (Object.keys(STORES) as StoreName[]).filter((s) => STORES[s].module === 'study');
+      await transact<void>(own, 'readwrite', (t) => { for (const s of own) t.objectStore(s).clear(); });
+    }
     return;
   }
   const stores = (Object.keys(STORES) as StoreName[]).filter((s) => STORES[s].module === module);

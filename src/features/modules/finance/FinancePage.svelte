@@ -3,6 +3,7 @@
   // Browse back to any previous month — nothing is overwritten.
   import { Plus, Wallet, Tags, SearchX, TrendingDown, TrendingUp } from '@lucide/svelte';
   import PageHeader from '../PageHeader.svelte';
+  import CurrencyPicker from '../../../lib/ui/CurrencyPicker.svelte';
   import CategoriesManager from './CategoriesManager.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import MonthNav from '../../../lib/ui/MonthNav.svelte';
@@ -72,6 +73,7 @@
 
 <PageHeader module="finance">
   {#snippet actions()}
+    <CurrencyPicker variant="pill" label="Currency" value={currency} onchange={(v) => app.updateSettings({ currency: v })} />
     <Button onclick={() => (manage = true)}>{#snippet icon()}<Tags />{/snippet}Categories</Button>
     <Button variant="primary" onclick={() => openQuick('transaction')}>{#snippet icon()}<Plus />{/snippet}Record</Button>
   {/snippet}

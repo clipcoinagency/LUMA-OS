@@ -1,5 +1,5 @@
 // Opens a create/edit form from anywhere (dashboard quick actions, empty states, module pages).
-export type QuickKind = 'task' | 'transaction' | 'habit' | 'goal' | 'event' | 'note' | 'workout' | 'project';
+export type QuickKind = 'task' | 'transaction' | 'habit' | 'goal' | 'event' | 'note' | 'workout' | 'project' | 'book' | 'deck';
 
 class Quick {
   kind = $state<QuickKind | null>(null);

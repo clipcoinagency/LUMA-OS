@@ -48,7 +48,7 @@ export const MODULE_WIDGETS: Record<ModuleId, WidgetId[]> = {
   finance: ['finance-summary'],
   notes: ['recent-notes'],
   work: ['work-projects'],
-  study: ['study-subjects'],
+  study: ['study-subjects', 'reading-now'],
 };
 
 export function defaultWorkspace(): Workspace {

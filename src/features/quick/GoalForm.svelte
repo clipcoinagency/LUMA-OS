@@ -3,6 +3,7 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import { saveGoal } from '../../lib/domain/goals';
@@ -75,7 +76,7 @@
         <Button size="sm" variant="ghost" onclick={() => (milestones = [...milestones, ''])}>{#snippet icon()}<Plus />{/snippet}Add milestone</Button>
       </div>
     {/if}
-    <TextField label="Deadline (optional)" type="date" bind:value={deadline} />
+    <DateField label="Deadline (optional)" optional bind:value={deadline} />
     <TextField label="Why it matters (optional)" bind:value={description} multiline rows={2} maxlength={400} />
     <button type="submit" hidden aria-hidden="true" tabindex="-1"></button>
   </form>

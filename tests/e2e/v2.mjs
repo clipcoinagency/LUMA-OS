@@ -40,7 +40,7 @@ await nextBtn('Create workspace').click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /, Sam$/ }).waitFor();
 const links = await sidebar.locator('nav a').allInnerTexts();
-check(links[1]?.trim() === 'Study', 'Study comes first in the navigation for a student', links.map((s) => s.trim()).join(' | '));
+check(links[1]?.trim() === 'Study & Read', 'Study comes first in the navigation for a student', links.map((s) => s.trim()).join(' | '));
 
 // ---------------------------------------------------------------- command center
 const hero = page.getByRole('region', { name: 'Today', exact: true });
@@ -123,8 +123,8 @@ await page.getByRole('heading', { level: 1, name: 'Insights' }).waitFor();
 check(await page.getByText("We're still learning your patterns.").isVisible(), 'Insights never fabricate: a new workspace says it is still learning');
 
 // ---------------------------------------------------------------- study subjects
-await sidebar.getByRole('link', { name: 'Study' }).click();
-await page.getByRole('heading', { level: 1, name: 'Study' }).waitFor();
+await sidebar.getByRole('link', { name: 'Study & Read' }).click();
+await page.getByRole('heading', { level: 1, name: 'Study & Read' }).waitFor();
 await page.getByRole('button', { name: 'New subject' }).first().click();
 await page.getByLabel('Subject', { exact: true }).fill('Biology');
 await page.getByRole('button', { name: 'Create subject' }).click();

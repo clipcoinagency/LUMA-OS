@@ -1,6 +1,6 @@
 // The 7 modules of Life OS V1: one registry used by onboarding, navigation, settings and dashboard.
 import type { Component } from 'svelte';
-import { CheckSquare, Target, Repeat, CalendarDays, NotebookPen, HeartPulse, Wallet, Briefcase, GraduationCap } from '@lucide/svelte';
+import { CheckSquare, Target, Repeat, CalendarDays, NotebookPen, HeartPulse, Wallet, Briefcase, BookOpen } from '@lucide/svelte';
 import type { ModuleId } from './db/schema';
 export { WIDGETS, availableWidgets } from './widgets';
 
@@ -21,6 +21,6 @@ export const MODULES: Record<ModuleId, ModuleInfo> = {
   wellness: { id: 'wellness', name: 'Fitness & Wellness', tagline: 'Workouts, sleep, water, mood and more', icon: HeartPulse, color: 'var(--mod-wellness)' },
   finance: { id: 'finance', name: 'Finance', tagline: 'Income, spending and savings', icon: Wallet, color: 'var(--mod-finance)' },
   work: { id: 'work', name: 'Work', tagline: 'Projects, clients, meetings and deadlines', icon: Briefcase, color: 'var(--mod-work)' },
-  study: { id: 'study', name: 'Study', tagline: 'Subjects, assignments, exams and study time', icon: GraduationCap, color: 'var(--mod-study)' },
+  study: { id: 'study', name: 'Study & Read', tagline: 'Subjects, your reading list and flashcards', icon: BookOpen, color: 'var(--mod-study)' },
 };
 

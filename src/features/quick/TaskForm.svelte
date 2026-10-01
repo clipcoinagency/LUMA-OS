@@ -4,6 +4,8 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
+  import TimeField from '../../lib/ui/TimeField.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
   import Select from '../../lib/ui/Select.svelte';
@@ -90,9 +92,9 @@
     <div class="field"><span class="lbl">When</span>
       <Segmented label="When" size="sm" bind:value={when} options={[{ value: 'today', label: 'Today' }, { value: 'tomorrow', label: 'Tomorrow' }, { value: 'date', label: 'Pick date' }, { value: 'none', label: 'Someday' }]} />
     </div>
-    {#if when === 'date'}<TextField label="Due date" type="date" bind:value={date} />{/if}
+    {#if when === 'date'}<DateField label="Due date" bind:value={date} />{/if}
     {#if when !== 'none'}
-      <TextField label="Time (optional)" type="time" bind:value={time} />
+      <TimeField label="Time (optional)" optional bind:value={time} />
       {#if time}<Switch label="Remind me" description="Ring an alert with a sound at that time." checked={reminder} onchange={toggleReminder} />{/if}
     {/if}
     <div class="field"><span class="lbl">Priority</span>

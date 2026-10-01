@@ -4,6 +4,7 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
   import Select from '../../lib/ui/Select.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
@@ -67,7 +68,7 @@
         {/each}
       </div>
     </div>
-    <TextField label="Deadline (optional)" type="date" bind:value={deadline} />
+    <DateField label="Deadline (optional)" optional bind:value={deadline} />
     {#if goals.length}
       <Select label="Serves a goal (optional)" bind:value={goalId} options={[{ value: '', label: 'No goal' }, ...goals.map((g) => ({ value: g.id, label: g.title }))]} />
     {/if}

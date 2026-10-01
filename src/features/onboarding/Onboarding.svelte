@@ -18,7 +18,7 @@
   import { app, applyTheme } from '../../lib/app.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import { MODULES, WIDGETS } from '../../lib/modules';
-  import { currencyOptions as makeCurrencyOptions } from '../../lib/util/money';
+  import CurrencyPicker from '../../lib/ui/CurrencyPicker.svelte';
   import { dur } from '../../lib/motion';
   import { withEnabledModules, widgetChoices } from '../../lib/workspace';
   import type { ModuleId, ThemeId, WidgetId, Workspace } from '../../lib/db/schema';
@@ -47,7 +47,6 @@
   });
   function pickPersona(p: Persona) { ws = { ...ws, ...workspaceForPersona(p) }; }
 
-  const currencyOptions = makeCurrencyOptions();
 
   function go(next: Step) {
     direction = STEPS.indexOf(next) >= STEPS.indexOf(step) ? 1 : -1;
@@ -159,7 +158,7 @@
           <div class="form">
             <TextField label="What should we call you?" bind:value={name} placeholder="Your first name" maxlength={40} autocomplete="given-name" hint="Used for your greeting. Optional." />
             {#if has('finance')}
-              <Select label="Currency for Finance" bind:value={currency} options={currencyOptions} />
+              <CurrencyPicker label="Currency for Finance" bind:value={currency} />
             {/if}
             <div class="field">
               <span class="flabel" id="ws-l">Week starts on</span>

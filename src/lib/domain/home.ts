@@ -13,6 +13,8 @@ import { focusMinutesToday, formatMinutes } from './focus';
 import { getWellness, upcomingEvents, workoutsRange } from './daily';
 import { monthSummary } from './finance';
 import { resetNudge, type ResetNudge } from './review';
+import { studySnapshot } from './flashcards';
+import { readingSnapshot } from './reading';
 import type { Route } from '../router.svelte';
 
 export const DEFAULT_FOCUS_TARGET_MIN = 120;
@@ -34,10 +36,11 @@ export interface HomeSnapshot {
   wellness: { logged: number; total: number } | null;
   finance: { spentMinor: number; incomeMinor: number; currency: string; count: number } | null;
   reset: ResetNudge;
+  study?: { cardsDue: number; readingStreak: number; readToday: boolean } | null;   // Study & Read, when enabled
 }
 
 export type BriefTone = 'warn' | 'info' | 'good' | 'nudge';
-export type BriefIcon = 'alert' | 'clock' | 'flame' | 'focus' | 'target' | 'wallet' | 'droplet' | 'refresh' | 'check' | 'sparkles' | 'calendar';
+export type BriefIcon = 'alert' | 'clock' | 'flame' | 'focus' | 'target' | 'wallet' | 'droplet' | 'refresh' | 'check' | 'sparkles' | 'calendar' | 'book';
 export type BriefAction = { label: string; route: Route } | { label: string; focus: true };
 
 export interface BriefLine {
@@ -65,7 +68,8 @@ export async function loadHomeSnapshot(o: LoadOptions): Promise<HomeSnapshot> {
   const day = todayKey();
   const on = (m: ModuleId) => o.enabled.includes(m);
 
-  const [allTasks, habitRows, goalRows, events, focusMin, wellnessDay, workouts, fin, reviews] = await Promise.all([
+  const [studyBits, allTasks, habitRows, goalRows, events, focusMin, wellnessDay, workouts, fin, reviews] = await Promise.all([
+    on('study') ? Promise.all([studySnapshot(day), readingSnapshot(day)]) : Promise.resolve(null),
     on('tasks') ? listTasks() : Promise.resolve([] as Task[]),
     on('habits') ? listHabits() : Promise.resolve([]),
     on('goals') ? listGoals() : Promise.resolve([]),
@@ -101,6 +105,7 @@ export async function loadHomeSnapshot(o: LoadOptions): Promise<HomeSnapshot> {
     wellness,
     finance: fin ? { spentMinor: fin.expenseMinor, incomeMinor: fin.incomeMinor, currency: o.currency, count: fin.count } : null,
     reset: on('tasks') || on('habits') || on('goals') ? resetNudge(day, o.weekStartsOn, new Set(reviews.map((r) => r.date))) : null,
+    study: studyBits ? { cardsDue: studyBits[0].due, readingStreak: studyBits[1].streak, readToday: studyBits[1].loggedToday } : null,
   };
 }
 
@@ -196,6 +201,12 @@ export function buildBriefing(s: HomeSnapshot, max = 4): BriefLine[] {
   // wellness
   if (on('wellness') && s.wellness && s.wellness.logged === 0 && s.minutes >= 12 * 60) {
     out.push({ id: 'wellness', tone: 'nudge', icon: 'droplet', rank: 45, text: 'Nothing logged for wellness today — water, sleep or mood takes a few seconds.', action: { label: 'Wellness', route: { name: 'module', module: 'wellness' } } });
+  }
+
+  // Study & Read: cards that are due, a reading streak that today's pages protect
+  if (on('study') && s.study) {
+    if (s.study.cardsDue > 0) out.push({ id: 'cards', tone: 'nudge', icon: 'book', rank: s.study.cardsDue >= 20 ? 22 : 28, text: `${plural(s.study.cardsDue, 'flashcard is', 'flashcards are')} due for review.`, action: { label: 'Review', route: { name: 'module', module: 'study' } } });
+    if (s.study.readingStreak >= 2 && !s.study.readToday && evening) out.push({ id: 'reading-streak', tone: 'nudge', icon: 'flame', rank: 27, text: `Your ${s.study.readingStreak}-day reading streak needs a few pages today.`, action: { label: 'Library', route: { name: 'module', module: 'study' } } });
   }
 
   // all clear

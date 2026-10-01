@@ -1,6 +1,7 @@
 <script lang="ts">
   // Notes: list + search on the left (or on its own on phones), editor with autosave.
   import { Plus, NotebookPen, Pin, PinOff, Trash2, ArrowLeft, SearchX, BookHeart } from '@lucide/svelte';
+  import DateField from '../../../lib/ui/DateField.svelte';
   import Segmented from '../../../lib/ui/Segmented.svelte';
   import Select from '../../../lib/ui/Select.svelte';
   import { MOODS } from '../../../lib/moods';
@@ -157,7 +158,7 @@
           <input id="note-title" class="title" bind:value={title} oninput={schedule} placeholder="Title" maxlength="160" aria-label="Note title" />
           <div class="emeta">
             <Segmented label="Type" size="sm" bind:value={kind} options={[{ value: 'note', label: 'Note' }, { value: 'journal', label: 'Journal' }]} onchange={schedule} />
-            <label class="date meta">Belongs to <input type="date" bind:value={date} onchange={schedule} aria-label="Note date" /></label>
+            <span class="date meta">Belongs to <DateField label="Note date" compact bind:value={date} oninput={schedule} /></span>
           </div>
           {#if kind === 'journal'}
             <div class="moods" role="radiogroup" aria-label="How are you feeling?">
@@ -203,7 +204,6 @@
   .ic.danger:hover { color: var(--danger); }
   .title { border: 0; background: none; font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-xl); color: var(--text); padding: var(--space-1) 0; outline: none; }
   .date { display: flex; align-items: center; gap: var(--space-2); }
-  .date input { border: 0; background: var(--surface-2); color: var(--text-2); border-radius: var(--radius-xs); padding: 4px 8px; font-size: var(--text-sm); }
   .body { flex: 1; min-height: 45dvh; border: 0; background: none; resize: none; outline: none; color: var(--text); font-size: var(--text-md); line-height: 1.7; padding-top: var(--space-3); }
   .title:focus-visible, .body:focus-visible { box-shadow: none; }
   .pick { display: grid; place-items: center; flex: 1; }

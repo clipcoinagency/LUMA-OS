@@ -13,6 +13,7 @@ export const WIDGETS: Record<WidgetId, { name: string; description: string; modu
   'week-stats': { name: 'Your week', description: 'Consistency across your modules', module: null },
   'work-projects': { name: 'Projects', description: 'Active projects and what is due next', module: 'work' },
   'study-subjects': { name: 'Study', description: 'Subjects, assignments and exams coming up', module: 'study' },
+  'reading-now': { name: 'Reading now', description: 'What you are reading, with one-tap progress', module: 'study' },
 };
 
 /** Widgets that can be shown given the enabled modules. */

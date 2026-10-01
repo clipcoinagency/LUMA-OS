@@ -5,10 +5,36 @@ export interface Money {
   currency: string;
 }
 
+/** The most-used currencies, shown first in the picker. */
+export const POPULAR_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'JPY', 'CAD', 'AUD', 'AED'] as const;
+
 export const CURRENCIES = [
-  'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NZD', 'INR', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'ZAR',
-  'SGD', 'HKD', 'AED', 'SAR', 'PKR', 'BRL', 'MXN', 'PHP', 'IDR', 'MYR', 'THB', 'NGN', 'KES', 'TRY',
+  // popular
+  'USD', 'EUR', 'GBP', 'INR', 'JPY', 'CAD', 'AUD', 'AED',
+  // Americas
+  'MXN', 'BRL', 'ARS', 'CLP', 'COP', 'PEN', 'UYU', 'BOB', 'CRC', 'DOP', 'JMD',
+  // Europe
+  'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RSD', 'UAH', 'RUB', 'TRY', 'GEL',
+  // Middle East & Africa
+  'SAR', 'QAR', 'KWD', 'BHD', 'OMR', 'JOD', 'ILS', 'EGP', 'MAD', 'TND', 'DZD', 'NGN', 'KES', 'GHS', 'TZS', 'UGX', 'ETB', 'ZAR',
+  // Asia & Pacific
+  'CNY', 'HKD', 'TWD', 'KRW', 'SGD', 'MYR', 'THB', 'VND', 'IDR', 'PHP', 'PKR', 'BDT', 'LKR', 'NPR', 'KZT', 'NZD',
 ] as const;
+
+/** The symbol people write for a currency ("₹", "€", "£", "$"), or the code when the platform has none. */
+export function currencySymbol(code: string, locale?: string): string {
+  try {
+    const part = new Intl.NumberFormat(locale, { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(0).find((p) => p.type === 'currency');
+    return part?.value ?? code;
+  } catch {
+    return code;
+  }
+}
+
+/** "Indian Rupee" (localized where the platform supports it), or the code itself. */
+export function currencyName(code: string, locale?: string): string {
+  try { return new Intl.DisplayNames(locale, { type: 'currency' }).of(code) ?? code; } catch { return code; }
+}
 
 export function minorDigits(currency: string): number {
   try {

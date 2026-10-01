@@ -8,9 +8,11 @@
   import NoteForm from './NoteForm.svelte';
   import WorkoutForm from './WorkoutForm.svelte';
   import ProjectForm from './ProjectForm.svelte';
+  import BookForm from './BookForm.svelte';
+  import DeckForm from './DeckForm.svelte';
   import type { ProjectKind } from '../../lib/domain/projects';
   import { quick, type QuickKind } from './quick.svelte';
-  import type { CalendarEvent, Goal, Habit, Project, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
+  import type { Book, BookStatus, CalendarEvent, Deck, Goal, Habit, Project, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
   const pre = <T,>(k: string) => (quick.preset[k] as T | undefined) ?? null;
 
   // function bindings: each form is "open" while the controller points at it; closing clears it
@@ -26,3 +28,5 @@
 <NoteForm bind:open={is('note'), set('note')} kind={(quick.preset.kind as string | undefined) ?? 'note'} />
 <WorkoutForm bind:open={is('workout'), set('workout')} date={quick.preset.date as string | undefined} workout={pre<Workout>('workout')} />
 <ProjectForm bind:open={is('project'), set('project')} kind={(quick.preset.kind as ProjectKind) ?? 'work'} project={pre<Project>('project')} />
+<BookForm bind:open={is('book'), set('book')} book={pre<Book>('book')} status={(quick.preset.status as BookStatus | undefined) ?? 'want'} />
+<DeckForm bind:open={is('deck'), set('deck')} deck={pre<Deck>('deck')} />

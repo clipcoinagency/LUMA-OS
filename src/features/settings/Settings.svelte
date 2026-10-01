@@ -18,7 +18,7 @@
   import { toast } from '../../lib/ui/toast.svelte';
   import { app } from '../../lib/app.svelte';
   import { MODULES, WIDGETS } from '../../lib/modules';
-  import { currencyOptions as makeCurrencyOptions } from '../../lib/util/money';
+  import CurrencyPicker from '../../lib/ui/CurrencyPicker.svelte';
   import { withEnabledModules, widgetChoices } from '../../lib/workspace';
   import { latestSafetySnapshot, resetModule, resetWorkspace } from '../../lib/backup/backup';
   import { APP_VERSION } from '../../lib/db/defaults';
@@ -34,7 +34,6 @@
     nameTimer = setTimeout(() => void app.updateSettings({ displayName: v.trim() }), 400);
   }
 
-  const currencyOptions = makeCurrencyOptions();
 
   const moduleItems = $derived(w.moduleOrder.filter((m) => w.enabledModules.includes(m)).map((m) => ({ id: m, label: MODULES[m].name, color: MODULES[m].color })));
   const moduleIcons = Object.fromEntries(Object.values(MODULES).map((m) => [m.id, m.icon]));
@@ -120,7 +119,7 @@
   <Card title="Preferences">
     <div class="form">
       {#if w.enabledModules.includes('finance')}
-        <Select label="Currency" value={s.currency} options={currencyOptions} onchange={(v) => app.updateSettings({ currency: v })} hint="Used for new transactions. Existing ones keep their currency." />
+        <CurrencyPicker label="Currency" value={s.currency} onchange={(v) => app.updateSettings({ currency: v })} hint="Used for new transactions. Existing ones keep their currency." />
       {/if}
       <div class="field">
         <span class="flabel">Week starts on</span>

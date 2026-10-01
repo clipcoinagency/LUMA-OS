@@ -26,15 +26,16 @@
   import WeekStats from './widgets/WeekStats.svelte';
   import WorkProjects from './widgets/WorkProjects.svelte';
   import StudySubjects from './widgets/StudySubjects.svelte';
+  import ReadingNow from './widgets/ReadingNow.svelte';
 
   const COMPONENTS: Partial<Record<WidgetId, Component>> = {
     'today-tasks': TodayTasks, 'habit-progress': HabitCheckin, 'goal-progress': GoalProgress, 'upcoming-events': Upcoming,
     'wellness-summary': WellnessToday, 'finance-summary': FinanceMonth, 'recent-notes': RecentNotes, 'week-stats': WeekStats,
-    'work-projects': WorkProjects, 'study-subjects': StudySubjects,
+    'work-projects': WorkProjects, 'study-subjects': StudySubjects, 'reading-now': ReadingNow,
   };
   const WEIGHT: Partial<Record<WidgetId, number>> = {
     'today-tasks': 6, 'habit-progress': 6, 'goal-progress': 5, 'upcoming-events': 4, 'wellness-summary': 6,
-    'finance-summary': 5, 'recent-notes': 5, 'week-stats': 5, 'work-projects': 5, 'study-subjects': 5,
+    'finance-summary': 5, 'recent-notes': 5, 'week-stats': 5, 'work-projects': 5, 'study-subjects': 5, 'reading-now': 5,
   };
 
   let width = $state(800);

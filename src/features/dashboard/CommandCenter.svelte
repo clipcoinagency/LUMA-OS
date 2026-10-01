@@ -3,7 +3,7 @@
   // all computed from your own data (domain/home.ts). A frosted glass panel with a soft specular
   // highlight that follows the pointer; the Orbit ring on the right shows each area's progress.
   import type { Component } from 'svelte';
-  import { AlertTriangle, Clock, Flame, Focus, Target, Wallet, Droplet, RefreshCcw, CheckCircle2, Sparkles, CalendarClock, ChevronRight, Sunrise, Sun, Sunset, Moon } from '@lucide/svelte';
+  import { AlertTriangle, Clock, Flame, Focus, Target, Wallet, Droplet, RefreshCcw, CheckCircle2, Sparkles, CalendarClock, BookOpen, ChevronRight, Sunrise, Sun, Sunset, Moon } from '@lucide/svelte';
   import DayRing, { type RingSegment } from '../../lib/ui/DayRing.svelte';
   import { app } from '../../lib/app.svelte';
   import { clock } from '../../lib/clock.svelte';
@@ -31,7 +31,7 @@
     });
   });
 
-  const ICONS: Record<BriefIcon, Component> = { alert: AlertTriangle, clock: Clock, flame: Flame, focus: Focus, target: Target, wallet: Wallet, droplet: Droplet, refresh: RefreshCcw, check: CheckCircle2, sparkles: Sparkles, calendar: CalendarClock };
+  const ICONS: Record<BriefIcon, Component> = { alert: AlertTriangle, clock: Clock, flame: Flame, focus: Focus, target: Target, wallet: Wallet, droplet: Droplet, refresh: RefreshCcw, check: CheckCircle2, sparkles: Sparkles, calendar: CalendarClock, book: BookOpen };
   const GreetIcon = $derived(clock.hour < 5 ? Moon : clock.hour < 8 ? Sunrise : clock.hour < 17 ? Sun : clock.hour < 20 ? Sunset : Moon);
 
   const brief = $derived(snap ? buildBriefing(snap, 3) : []);

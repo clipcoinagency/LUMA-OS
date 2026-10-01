@@ -2,6 +2,7 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
@@ -66,7 +67,7 @@
     {#if type === 'Other'}<TextField label="What did you do?" bind:value={custom} maxlength={40} placeholder="e.g. Hiking" />{/if}
     <div class="two">
       <TextField label="Minutes" bind:value={minutes} inputmode="numeric" error={error} oninput={() => (error = '')} />
-      <TextField label="Date" type="date" bind:value={date} />
+      <DateField label="Date" bind:value={date} />
     </div>
     <div class="field"><span class="lbl">How hard?</span>
       <Segmented label="Intensity" size="sm" bind:value={intensity} options={[{ value: 'easy', label: 'Easy' }, { value: 'moderate', label: 'Moderate' }, { value: 'hard', label: 'Hard' }]} />

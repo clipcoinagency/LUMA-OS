@@ -24,7 +24,7 @@
   import { toast } from '../../../lib/ui/toast.svelte';
   import type { Goal } from '../../../lib/db/schema';
 
-  let { kind }: { kind: ProjectKind } = $props();
+  let { kind, embedded = false }: { kind: ProjectKind; embedded?: boolean } = $props();
   const v = $derived(VOCAB[kind]);
   const mod = $derived(kind);
 
@@ -131,9 +131,11 @@
     </div>
   </div>
 {:else}
-  <PageHeader module={mod} subtitle={v.empty}>
-    {#snippet actions()}<Button variant="primary" onclick={() => openQuick('project', { kind })}>{#snippet icon()}<Plus />{/snippet}New {v.one}</Button>{/snippet}
-  </PageHeader>
+  {#if !embedded}
+    <PageHeader module={mod} subtitle={v.empty}>
+      {#snippet actions()}<Button variant="primary" onclick={() => openQuick('project', { kind })}>{#snippet icon()}<Plus />{/snippet}New {v.one}</Button>{/snippet}
+    </PageHeader>
+  {/if}
 
   {#if rows === null}
     <Skeleton lines={4} />

@@ -1,5 +1,6 @@
-// Life OS data schema — version 2 (v2 adds projects, focus_sessions and reviews; every v1 store is
-// untouched and every field added to a v1 record type is optional, so v1 data and v1 backups load as-is).
+// Life OS data schema — version 3 (v2 added projects, focus_sessions and reviews; v3 adds the Study & Read
+// stores: books, reading_logs, decks, cards, card_reviews). Every earlier store is untouched and every field
+// added to an older record type is optional, so v1/v2 data and backups load as-is.
 //
 // Rules (from Phase 0):
 //  • History is never overwritten: every historical fact is its own dated row (habit log, goal
@@ -11,7 +12,7 @@
 import type { DateKey } from '../util/dates';
 
 export const DB_NAME = 'lifeos';
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance', 'work', 'study'] as const;
 /** The areas switched on for a brand-new workspace (Work and Study are opt-in). */
@@ -44,12 +45,13 @@ export interface Settings {
   reduceMotion: boolean;          // in addition to the OS setting
   backupReminderDays: number;     // 0 = off
   focusTargetMin?: number;        // daily focus goal in minutes (default 120)
+  readingGoal?: number;           // books to finish this year (0/undefined = no goal)
   updatedAt: string;
 }
 
 export type WidgetId =
   | 'today-tasks' | 'habit-progress' | 'goal-progress' | 'upcoming-events'
-  | 'wellness-summary' | 'finance-summary' | 'recent-notes' | 'quick-actions' | 'week-stats' | 'work-projects' | 'study-subjects';
+  | 'wellness-summary' | 'finance-summary' | 'recent-notes' | 'quick-actions' | 'week-stats' | 'work-projects' | 'study-subjects' | 'reading-now';
 
 export interface Workspace {
   id: 'workspace';
@@ -227,6 +229,64 @@ export interface FocusSession {
   createdAt: string;
 }
 
+// ---------------------------------------------------------------- Study & Read (v3)
+
+export type BookKind = 'book' | 'article' | 'paper' | 'course' | 'other';
+export type BookStatus = 'want' | 'reading' | 'finished' | 'paused';
+export interface Highlight { id: string; text: string; page: number | null; at: string }
+
+/** Something to read: a book, article, paper or course. Progress is in pages (or % when there is no page count). */
+export interface Book extends Stamped {
+  title: string;
+  author: string;
+  kind: BookKind;
+  status: BookStatus;
+  total: number | null;           // total pages; null = track as a percentage
+  progress: number;               // pages read so far (0–100 when total is null)
+  rating: 1 | 2 | 3 | 4 | 5 | null;
+  startedOn: DateKey | null;
+  finishedOn: DateKey | null;
+  subjectId: string | null;       // a Study subject this reading belongs to
+  color: string;                  // cover colour
+  notes: string;
+  highlights: Highlight[];
+  createdOn: DateKey;
+}
+
+/** One reading session's worth of progress. Dated rows, like every other history in Life OS. */
+export interface ReadingLog {
+  id: string;
+  bookId: string;
+  date: DateKey;
+  amount: number;                 // pages (or percentage points) added
+  createdAt: string;
+}
+
+export interface Deck extends Stamped {
+  title: string;
+  color: string;
+  subjectId: string | null;
+  description: string;
+  createdOn: DateKey;
+}
+
+/** A flashcard with spaced-repetition state (a simplified SM-2). */
+export interface Card extends Stamped {
+  deckId: string;
+  front: string;
+  back: string;
+  due: DateKey;                   // next review day (new cards are due today)
+  interval: number;               // days
+  ease: number;                   // 1.3 – 3.0
+  reps: number;                   // successful reviews in a row
+  lapses: number;
+  lastReviewed: DateKey | null;
+  createdOn: DateKey;
+}
+
+export type CardRating = 'again' | 'hard' | 'good' | 'easy';
+export interface CardReview { id: string; cardId: string; deckId: string; date: DateKey; rating: CardRating; createdAt: string }
+
 /** A completed Weekly Reset. id = reviewed week's start date, so redoing a week replaces it. */
 export interface WeeklyReview extends Stamped {
   date: DateKey;                  // start of the week that was reviewed
@@ -268,6 +328,11 @@ export interface StoreRecordMap {
   projects: Project;
   focus_sessions: FocusSession;
   reviews: WeeklyReview;
+  books: Book;
+  reading_logs: ReadingLog;
+  decks: Deck;
+  cards: Card;
+  card_reviews: CardReview;
   safety: SafetySnapshot;
 }
 export type StoreName = keyof StoreRecordMap;
@@ -301,11 +366,18 @@ export const STORES: Record<StoreName, StoreDef> = {
   projects: { keyPath: 'id', indexes: { by_kind: 'kind', by_status: 'status' }, dateField: 'createdOn' },
   focus_sessions: { keyPath: 'id', indexes: { by_date: 'date', by_task: 'taskId' }, dateField: 'date' },
   reviews: { keyPath: 'id', indexes: { by_date: 'date' }, dateField: 'date' },
+  books: { keyPath: 'id', indexes: { by_status: 'status', by_updated: 'updatedAt' }, dateField: 'createdOn', module: 'study' },
+  reading_logs: { keyPath: 'id', indexes: { by_book: 'bookId', by_date: 'date' }, dateField: 'date', module: 'study' },
+  decks: { keyPath: 'id', indexes: { by_updated: 'updatedAt' }, dateField: 'createdOn', module: 'study' },
+  cards: { keyPath: 'id', indexes: { by_deck: 'deckId', by_due: 'due' }, dateField: 'createdOn', module: 'study' },
+  card_reviews: { keyPath: 'id', indexes: { by_card: 'cardId', by_date: 'date' }, dateField: 'date', module: 'study' },
   safety: { keyPath: 'id', indexes: { by_created: 'createdAt' }, local: true },
 };
 
 /** Stores that exist since schema v2 (migration 2 creates exactly these). */
 export const V2_STORES: StoreName[] = ['projects', 'focus_sessions', 'reviews'];
+/** Stores that exist since schema v3 (Study & Read). */
+export const V3_STORES: StoreName[] = ['books', 'reading_logs', 'decks', 'cards', 'card_reviews'];
 
 export const STORE_NAMES = Object.keys(STORES) as StoreName[];
 export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);

@@ -2,6 +2,7 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
   import Select from '../../lib/ui/Select.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
@@ -88,7 +89,7 @@
     <Segmented label="Type" bind:value={type} options={[{ value: 'expense', label: 'Expense' }, { value: 'income', label: 'Income' }, { value: 'saving', label: 'Saving' }]} />
     <TextField label="Amount ({currency})" bind:value={amount} inputmode="decimal" placeholder="0.00" error={error} hint={preview} oninput={() => (error = '')} />
     {#if catOptions.length}<Select label="Category" bind:value={categoryId} options={catOptions} />{/if}
-    <TextField label="Date" type="date" bind:value={date} error={dateError} oninput={() => (dateError = '')} />
+    <DateField label="Date" bind:value={date} error={dateError} oninput={() => (dateError = '')} />
     <TextField label="Note (optional)" bind:value={note} maxlength={140} placeholder="e.g. Lunch with Sam" />
     <button type="submit" hidden aria-hidden="true" tabindex="-1"></button>
   </form>

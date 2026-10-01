@@ -2,6 +2,8 @@
   import Modal from '../../lib/ui/Modal.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
+  import DateField from '../../lib/ui/DateField.svelte';
+  import TimeField from '../../lib/ui/TimeField.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
   import Select from '../../lib/ui/Select.svelte';
   import { app } from '../../lib/app.svelte';
@@ -70,12 +72,12 @@
       <Select label="Type" bind:value={kindSel} options={kindOptions} />
       {#if projects.length}<Select label="Project or subject" bind:value={project} options={[{ value: '', label: 'None' }, ...projects.map((p) => ({ value: p.id, label: p.title }))]} />{/if}
     {/if}
-    <TextField label="Date" type="date" bind:value={date} />
+    <DateField label="Date" bind:value={date} />
     <Switch label="All day" bind:checked={allDay} />
     {#if !allDay}
       <div class="two">
-        <TextField label="Starts" type="time" bind:value={start} />
-        <TextField label="Ends (optional)" type="time" bind:value={end} />
+        <TimeField label="Starts" bind:value={start} />
+        <TimeField label="Ends (optional)" optional bind:value={end} />
       </div>
     {/if}
     <TextField label="Notes (optional)" bind:value={notes} multiline rows={2} maxlength={500} />

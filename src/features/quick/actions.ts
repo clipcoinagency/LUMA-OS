@@ -1,6 +1,6 @@
 // The one-tap actions shared by the dashboard, the "New" sheet and the command palette.
 import type { Component } from 'svelte';
-import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus, Briefcase, GraduationCap, BookHeart } from '@lucide/svelte';
+import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus, Briefcase, GraduationCap, BookHeart, BookOpen, Layers } from '@lucide/svelte';
 import { focus } from '../../lib/focus.svelte';
 import { app } from '../../lib/app.svelte';
 import { clock } from '../../lib/clock.svelte';
@@ -39,6 +39,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { id: 'note', module: 'notes', label: 'New note', icon: NotebookPen, color: 'var(--mod-notes)', run: () => openQuick('note') },
   { id: 'project', module: 'work', label: 'New project', icon: Briefcase, color: 'var(--mod-work)', run: () => openQuick('project', { kind: 'work' }) },
   { id: 'subject', module: 'study', label: 'New subject', icon: GraduationCap, color: 'var(--mod-study)', run: () => openQuick('project', { kind: 'study' }) },
+  { id: 'book', module: 'study', label: 'Add book', icon: BookOpen, color: 'var(--mod-study)', run: () => openQuick('book', { status: 'reading' }) },
+  { id: 'deck', module: 'study', label: 'New deck', icon: Layers, color: 'var(--mod-study)', run: () => openQuick('deck') },
   { id: 'goal', module: 'goals', label: 'New goal', icon: Target, color: 'var(--mod-goals)', run: () => openQuick('goal') },
 ];
 

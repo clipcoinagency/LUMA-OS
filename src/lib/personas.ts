@@ -1,7 +1,7 @@
 // Starting points for onboarding. A persona is just a pre-chosen, pre-ordered set of areas — nothing
 // is locked in; the next step lets people add or remove any area, and Settings can change it any time.
 import type { Component } from 'svelte';
-import { GraduationCap, Rocket, Briefcase, HeartPulse, House, Sprout } from '@lucide/svelte';
+import { GraduationCap, Rocket, Briefcase, HeartPulse, House, Sprout, BookOpen } from '@lucide/svelte';
 import { MODULE_WIDGETS } from './db/defaults';
 import type { ModuleId, WidgetId, Workspace } from './db/schema';
 
@@ -16,6 +16,7 @@ export interface Persona {
 
 export const PERSONAS: Persona[] = [
   { id: 'student', name: 'Student', tagline: 'Classes, assignments, exams and study time', icon: GraduationCap, color: 'var(--mod-study)', modules: ['study', 'tasks', 'calendar', 'goals', 'habits', 'wellness', 'notes'] },
+  { id: 'reader', name: 'Reader & learner', tagline: 'Books, courses, flashcards and daily study', icon: BookOpen, color: 'var(--mod-study)', modules: ['study', 'notes', 'habits', 'goals', 'tasks', 'calendar'] },
   { id: 'founder', name: 'Founder', tagline: 'Projects, clients, meetings and money', icon: Rocket, color: 'var(--mod-work)', modules: ['work', 'tasks', 'calendar', 'goals', 'finance', 'habits', 'notes'] },
   { id: 'professional', name: 'Professional', tagline: 'Work, deadlines and focused time', icon: Briefcase, color: 'var(--mod-calendar)', modules: ['work', 'tasks', 'calendar', 'goals', 'habits', 'notes'] },
   { id: 'health', name: 'Health first', tagline: 'Fitness, sleep, habits and daily planning', icon: HeartPulse, color: 'var(--mod-wellness)', modules: ['wellness', 'habits', 'goals', 'tasks', 'calendar', 'notes'] },

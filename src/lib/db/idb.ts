@@ -3,7 +3,7 @@
 //  • Writes use durability "strict": the promise resolves only after the data is on disk.
 //  • Promises resolve when the TRANSACTION commits, not when a request succeeds.
 
-import { DB_NAME, SCHEMA_VERSION, STORES, V2_STORES, type StoreName, type StoreRecordMap } from './schema';
+import { DB_NAME, SCHEMA_VERSION, STORES, V2_STORES, V3_STORES, type StoreName, type StoreRecordMap } from './schema';
 
 export type StorageErrorKind = 'unavailable' | 'blocked' | 'quota' | 'newer-version' | 'unknown';
 
@@ -36,11 +36,15 @@ export const MIGRATIONS: Record<number, Migration> = {
   1: (db) => {
     // v1 stores only — later stores are created by the migration that introduced them, so a fresh
     // install (which runs 1 then 2) and an upgrade from v1 (which runs just 2) end up identical.
-    for (const name of Object.keys(STORES) as StoreName[]) if (!V2_STORES.includes(name)) createStore(db, name);
+    for (const name of Object.keys(STORES) as StoreName[]) if (!V2_STORES.includes(name) && !V3_STORES.includes(name)) createStore(db, name);
   },
   // v2: projects, focus sessions, weekly reviews. Purely additive — no v1 row is read or changed.
   2: (db) => {
     for (const name of V2_STORES) if (!db.objectStoreNames.contains(name)) createStore(db, name);
+  },
+  // v3: Study & Read (books, reading logs, flashcard decks/cards/reviews). Purely additive.
+  3: (db) => {
+    for (const name of V3_STORES) if (!db.objectStoreNames.contains(name)) createStore(db, name);
   },
 };
 

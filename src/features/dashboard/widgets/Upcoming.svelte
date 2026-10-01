@@ -39,7 +39,7 @@
         {#each events as e (e.id)}
           <li>
             <span class="when"><span class="day">{dayLabel(e.date)}</span><span class="meta">{e.allDay ? 'All day' : time(e.startTime)}</span></span>
-            <span class="bar" aria-hidden="true"></span>
+            <span class="node" aria-hidden="true"></span>
             <span class="title">{e.title}</span>
           </li>
         {/each}
@@ -53,6 +53,10 @@
   li { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; }
   .when { display: grid; width: 92px; flex: none; line-height: 1.3; }
   .day { font-weight: 650; font-size: var(--text-sm); }
-  .bar { width: 3px; align-self: stretch; border-radius: 3px; background: var(--mod-calendar); }
+  .list { position: relative; }
+  .node { position: relative; width: 12px; align-self: stretch; flex: none; display: grid; place-items: center; }
+  .node::before { content: ''; position: absolute; top: -14px; bottom: -14px; width: 2px; background: color-mix(in srgb, var(--mod-calendar) 30%, transparent); }
+  li:first-child .node::before { top: 50%; } li:last-child .node::before { bottom: 50%; }
+  .node::after { content: ''; position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--mod-calendar); box-shadow: 0 0 8px color-mix(in srgb, var(--mod-calendar) 50%, transparent); }
   .title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>

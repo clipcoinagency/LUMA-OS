@@ -7,6 +7,7 @@
   import NotesPage from './notes/NotesPage.svelte';
   import WellnessPage from './wellness/WellnessPage.svelte';
   import FinancePage from './finance/FinancePage.svelte';
+  import ProjectsPage from './projects/ProjectsPage.svelte';
   import type { ModuleId } from '../../lib/db/schema';
 
   let { module }: { module: ModuleId } = $props();
@@ -18,4 +19,5 @@
 {:else if module === 'calendar'}<CalendarPage />
 {:else if module === 'notes'}<NotesPage />
 {:else if module === 'wellness'}<WellnessPage />
+{:else if module === 'work' || module === 'study'}<ProjectsPage kind={module} />
 {:else}<FinancePage />{/if}

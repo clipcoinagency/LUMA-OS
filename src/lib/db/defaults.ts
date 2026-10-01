@@ -1,9 +1,9 @@
 import { newId } from '../util/ids';
 import { nowIso, today } from '../util/dates';
-import { MODULE_IDS, type FinanceCategory, type ModuleId, type Settings, type WidgetId, type Workspace } from './schema';
+import { DEFAULT_MODULES, type FinanceCategory, type ModuleId, type Settings, type WidgetId, type Workspace } from './schema';
 import { get, getAll, put, putMany, transact } from './idb';
 
-export const APP_VERSION = '1.0.0-alpha.1';
+export const APP_VERSION = '2.0.0-beta.1';
 
 export function defaultCurrency(): string {
   try {
@@ -47,10 +47,12 @@ export const MODULE_WIDGETS: Record<ModuleId, WidgetId[]> = {
   wellness: ['wellness-summary'],
   finance: ['finance-summary'],
   notes: ['recent-notes'],
+  work: ['work-projects'],
+  study: ['study-subjects'],
 };
 
 export function defaultWorkspace(): Workspace {
-  const modules = [...MODULE_IDS];
+  const modules = [...DEFAULT_MODULES];
   return {
     id: 'workspace',
     onboarded: false,

@@ -57,3 +57,41 @@ export async function addTransaction(input: { type: TransactionType; amountMinor
   bump();
   return t;
 }
+
+// ---------------------------------------------------------------- budgets & trends (v2)
+
+export interface BudgetRow {
+  category: FinanceCategory;
+  spentMinor: number;
+  budgetMinor: number;
+  /** spent ÷ budget (can exceed 1) */
+  ratio: number;
+  status: 'ok' | 'near' | 'over';
+}
+
+/** Budgets are per expense category, per month. 'near' = 80% or more used. */
+export function budgetStatus(summary: Pick<PeriodSummary, 'byCategory'>, categories: FinanceCategory[]): BudgetRow[] {
+  const spent = new Map(summary.byCategory.map((c) => [c.categoryId, c.amountMinor]));
+  return categories
+    .filter((c) => c.type === 'expense' && !c.archived && typeof c.budgetMinor === 'number' && c.budgetMinor > 0)
+    .map((category) => {
+      const budgetMinor = category.budgetMinor as number;
+      const spentMinor = spent.get(category.id) ?? 0;
+      const ratio = spentMinor / budgetMinor;
+      return { category, spentMinor, budgetMinor, ratio, status: ratio > 1 ? 'over' as const : ratio >= 0.8 ? 'near' as const : 'ok' as const };
+    })
+    .sort((a, b) => b.ratio - a.ratio);
+}
+
+/** Expense totals for each of the last `months` months (ending with the month of `day`), oldest first. */
+export function monthlyExpenseSeries(txns: Transaction[], currency: string, months: number, day: DateKey = today()): { month: DateKey; expenseMinor: number }[] {
+  const out: { month: DateKey; expenseMinor: number }[] = [];
+  const [y, m] = day.split('-').map(Number) as [number, number];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(y, m - 1 - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const total = txns.filter((t) => t.type === 'expense' && t.currency === currency && t.date.startsWith(key)).reduce((n, t) => n + t.amountMinor, 0);
+    out.push({ month: `${key}-01` as DateKey, expenseMinor: total });
+  }
+  return out;
+}

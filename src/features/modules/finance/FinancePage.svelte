@@ -14,7 +14,7 @@
   import { clock } from '../../../lib/clock.svelte';
   import { app } from '../../../lib/app.svelte';
   import { openQuick } from '../../quick/quick.svelte';
-  import { summarize, transactionsInRange } from '../../../lib/domain/finance';
+  import { budgetStatus, monthlyExpenseSeries, summarize, transactionsInRange } from '../../../lib/domain/finance';
   import { getAll } from '../../../lib/db/idb';
   import { formatMoney, minorDigits } from '../../../lib/util/money';
   import { addMonths, diffDays, eachDay, endOfMonth, formatDateKey, startOfMonth } from '../../../lib/util/dates';
@@ -23,6 +23,7 @@
   let month = $state(startOfMonth(clock.today));
   let txns = $state.raw<Transaction[] | null>(null);
   let prevTxns = $state.raw<Transaction[]>([]);
+  let history = $state.raw<Transaction[]>([]);
   let cats = $state.raw<Map<string, FinanceCategory>>(new Map());
   let filter = $state('all');
   let q = $state('');
@@ -34,11 +35,15 @@
     const m = month;
     void transactionsInRange(m, endOfMonth(m)).then((t) => { txns = t; });
     void transactionsInRange(addMonths(m, -1), endOfMonth(addMonths(m, -1))).then((t) => { prevTxns = t; });
+    void transactionsInRange(addMonths(m, -5), endOfMonth(m)).then((t) => { history = t; });
     void getAll('finance_categories').then((c) => { cats = new Map(c.map((x) => [x.id, x])); });
   });
 
   const sum = $derived(txns ? summarize(txns, currency) : null);
   const prev = $derived(summarize(prevTxns, currency));
+  const budgets = $derived(sum ? budgetStatus(sum, [...cats.values()]) : []);
+  const trend = $derived(monthlyExpenseSeries(history, currency, 6, month).map((x) => ({ label: formatDateKey(x.month, { month: 'short' }), value: x.expenseMinor / 10 ** minorDigits(currency) })));
+  const hasTrend = $derived(trend.filter((t) => t.value > 0).length >= 2);
   const money = (m: number) => formatMoney(m, currency);
   const spendChange = $derived(sum && prev.expenseMinor > 0 ? (sum.expenseMinor - prev.expenseMinor) / prev.expenseMinor : null);
   const daily = $derived.by(() => {
@@ -108,6 +113,26 @@
           </ul>
         {/if}
       </section>
+      {#if budgets.length}
+        <section class="card" aria-labelledby="bud-h">
+          <h2 id="bud-h">Budgets</h2>
+          <ul class="buds">
+            {#each budgets as b (b.category.id)}
+              <li class={b.status}>
+                <div class="bh"><span class="name"><span class="sw" style="background:{b.category.color}"></span>{b.category.name}</span><span class="num">{money(b.spentMinor)} <span class="of">of {money(b.budgetMinor)}</span></span></div>
+                <div class="gauge" role="progressbar" aria-label="{b.category.name} budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.min(100, Math.round(b.ratio * 100))}><span style="width:{Math.min(100, b.ratio * 100)}%"></span></div>
+                <span class="bs">{b.status === 'over' ? `${money(b.spentMinor - b.budgetMinor)} over` : `${money(b.budgetMinor - b.spentMinor)} left`}</span>
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {/if}
+      {#if hasTrend}
+        <section class="card" aria-labelledby="trend-h">
+          <h2 id="trend-h">Spending trend</h2>
+          <BarChart data={trend} label="Spending per month, last 6 months" height={150} format={(v) => formatMoney(Math.round(v * 10 ** minorDigits(currency)), currency)} highlight={trend.length - 1} />
+        </section>
+      {/if}
       <section class="card" aria-labelledby="daily-h">
         <h2 id="daily-h">Daily spending</h2>
         <BarChart data={daily} label="Spending per day in {formatDateKey(month, { month: 'long' })}" height={150} format={(v) => formatMoney(Math.round(v * 10 ** minorDigits(currency)), currency)} highlight={daily.length - 1} />
@@ -178,4 +203,12 @@
   .what .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .amt.income { color: var(--success); }
   .amt.saving { color: var(--info); }
+  .buds { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+  .buds li { display: grid; gap: 6px; }
+  .bh { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--text-sm); font-weight: 600; }
+  .of { color: var(--text-3); font-weight: 500; }
+  .gauge { height: 10px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+  .gauge span { display: block; height: 100%; border-radius: inherit; background: var(--success); transition: width var(--dur-xslow) var(--ease-glide); }
+  .near .gauge span { background: var(--warning); } .over .gauge span { background: var(--danger); }
+  .bs { font-size: var(--text-xs); color: var(--text-3); font-weight: 600; } .over .bs { color: var(--danger); } .near .bs { color: var(--warning); }
 </style>

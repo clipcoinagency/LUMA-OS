@@ -9,7 +9,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const url = pathToFileURL(path.join(ROOT, 'dist', 'index.html')).href;
-const SHOTS = path.join(ROOT, 'tests', 'e2e', 'screenshots');
+const SHOTS = process.env.LIFEOS_SHOTS ?? path.join(ROOT, 'tests', 'e2e', 'screenshots');
 const channels = (process.argv.find((a) => a.startsWith('--only='))?.slice(7) ?? 'msedge,chrome').split(',');
 await fs.mkdir(SHOTS, { recursive: true });
 
@@ -40,10 +40,14 @@ for (const channel of channels) {
   if (snap) { await page.waitForTimeout(700); await shot(page, 'ob-1-welcome-soft'); }
   await page.getByRole('button', { name: /Set up my workspace/ }).click();
 
-  await page.getByRole('heading', { name: 'What do you want to organize?' }).waitFor();
+  await page.getByRole('heading', { name: 'Where would you like to start?' }).waitFor();
+  if (snap) { await page.waitForTimeout(600); await shot(page, 'ob-2a-persona'); }
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('heading', { name: 'Fine-tune your areas' }).waitFor();
   await page.getByRole('checkbox', { name: /Finance/ }).click();
   await page.getByRole('checkbox', { name: /^Notes/ }).click();
   check((await page.getByRole('checkbox', { checked: true }).count()) === 5, 'Modules: Finance + Notes switched off (5 on)');
+  check((await page.getByRole('checkbox', { name: /^Work/ }).getAttribute('aria-checked')) === 'false' && (await page.getByRole('checkbox', { name: /^Study/ }).getAttribute('aria-checked')) === 'false', 'Work and Study are opt-in (off for a general persona)');
   if (snap) await shot(page, 'ob-2-modules');
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -102,7 +106,7 @@ for (const channel of channels) {
   await page.waitForTimeout(450);
   check((await theme(page)) === 'soft', 'Settings: theme switch');
   if (snap) await page.screenshot({ path: path.join(SHOTS, 'app-settings-soft.png'), fullPage: true });
-  await page.locator('aside.sidebar').getByRole('link', { name: 'Dashboard' }).click();
+  await page.locator('aside.sidebar').getByRole('link', { name: 'Home' }).click();
   await page.getByRole('heading', { name: 'This month' }).waitFor();
   check(!(await page.getByRole('heading', { name: 'Habit check-in' }).count()), 'Dashboard adapts: Finance widget shown, Habits widget hidden');
   if (snap) await shot(page, 'app-dashboard-soft');
@@ -150,7 +154,7 @@ for (const channel of channels) {
   const bottom = page.locator('nav.bottom');
   check(await bottom.isVisible() && !(await page.locator('aside.sidebar').isVisible()), 'Phone: bottom navigation instead of sidebar');
   const items = await bottom.locator('a, button').allInnerTexts();
-  check(items.length === 5 && items[0]?.includes('Home') && items.at(-1)?.includes('More'), 'Phone: Home + 3 modules + More', items.map((s) => s.trim()).join(' | '));
+  check(items.length === 5 && items[0]?.includes('Home') && items[1]?.includes('Plan') && items[2]?.includes('Life') && items[3]?.includes('Reflect') && items.at(-1)?.includes('More'), 'Phone: Home | Plan | Life | Reflect | More', items.map((s) => s.trim()).join(' | '));
   check(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)), 'Phone: no horizontal scrolling');
   if (snap) await shot(page, 'phone-dashboard-soft');
   await bottom.getByRole('button', { name: 'More' }).click();

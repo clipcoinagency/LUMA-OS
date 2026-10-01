@@ -10,6 +10,8 @@
   import Segmented from '../../lib/ui/Segmented.svelte';
   import ReorderList from '../../lib/ui/ReorderList.svelte';
   import ModulePicker from '../workspace/ModulePicker.svelte';
+  import PersonaPicker from '../workspace/PersonaPicker.svelte';
+  import { workspaceForPersona, type Persona } from '../../lib/personas';
   import ThemePicker from '../workspace/ThemePicker.svelte';
   import LayoutPicker from '../workspace/LayoutPicker.svelte';
   import RestoreFlow from '../settings/RestoreFlow.svelte';
@@ -21,9 +23,9 @@
   import { withEnabledModules, widgetChoices } from '../../lib/workspace';
   import type { ModuleId, ThemeId, WidgetId, Workspace } from '../../lib/db/schema';
 
-  const STEPS = ['welcome', 'modules', 'theme', 'about', 'dashboard', 'done'] as const;
+  const STEPS = ['welcome', 'persona', 'modules', 'theme', 'about', 'dashboard', 'done'] as const;
   type Step = (typeof STEPS)[number];
-  const PROGRESS: Record<Step, number> = { welcome: 0, modules: 1, theme: 2, about: 3, dashboard: 3, done: 4 };
+  const PROGRESS: Record<Step, number> = { welcome: 0, persona: 1, modules: 1, theme: 2, about: 3, dashboard: 3, done: 4 };
 
   let step = $state<Step>('welcome');
   let direction = $state(1);
@@ -38,9 +40,10 @@
   let weekStart = $state(String(s.weekStartsOn));
   let weight = $state<string>(s.units.weight);
   let water = $state<string>(s.units.water);
-  let ws = $state<Pick<Workspace, 'enabledModules' | 'moduleOrder' | 'widgets' | 'dashboardLayout'>>({
-    enabledModules: [...w.enabledModules], moduleOrder: [...w.moduleOrder], widgets: [...w.widgets], dashboardLayout: w.dashboardLayout,
+  let ws = $state<Pick<Workspace, 'enabledModules' | 'moduleOrder' | 'widgets' | 'dashboardLayout' | 'persona'>>({
+    enabledModules: [...w.enabledModules], moduleOrder: [...w.moduleOrder], widgets: [...w.widgets], dashboardLayout: w.dashboardLayout, persona: w.persona ?? null,
   });
+  function pickPersona(p: Persona) { ws = { ...ws, ...workspaceForPersona(p) }; }
 
   const currencyOptions = makeCurrencyOptions();
 
@@ -121,21 +124,26 @@
               <span class="core"></span>
             </div>
             <h1 id="ob-heading" tabindex="-1" class="hero">Your life.<br />Your system.</h1>
-            <p class="lead">Build a personal workspace for your tasks, goals, habits, calendar, notes, wellness and money — arranged the way you like it.</p>
+            <p class="lead">Your entire life, one system. Tasks, goals, habits, focus, money and wellbeing in one calm, private workspace — arranged the way you actually live.</p>
             <ul class="promises">
               <li><ShieldCheck size={18} aria-hidden="true" /> Your data stays on your device</li>
               <li><WifiOff size={18} aria-hidden="true" /> Works offline, no account needed</li>
             </ul>
             <div class="cta">
-              <Button variant="primary" size="lg" onclick={() => go('modules')}>Set up my workspace {#snippet icon()}<Sparkles />{/snippet}</Button>
+              <Button variant="primary" size="lg" onclick={() => go('persona')}>Set up my workspace {#snippet icon()}<Sparkles />{/snippet}</Button>
               <Button variant="ghost" onclick={() => (restoring = true)}>{#snippet icon()}<Upload />{/snippet}I have a backup</Button>
             </div>
             <p class="meta">Takes about a minute. You can change everything later.</p>
           </div>
 
+        {:else if step === 'persona'}
+          <h1 id="ob-heading" tabindex="-1">Where would you like to start?</h1>
+          <p class="lead">Pick the one that sounds most like you. Next you can add or remove any area.</p>
+          <PersonaPicker value={ws.persona ?? null} onchange={pickPersona} />
+
         {:else if step === 'modules'}
-          <h1 id="ob-heading" tabindex="-1">What do you want to organize?</h1>
-          <p class="lead">Turn on the areas of your life you want in your workspace.</p>
+          <h1 id="ob-heading" tabindex="-1">Fine-tune your areas</h1>
+          <p class="lead">Turn on the parts of your life you want Life OS to manage. Change this any time.</p>
           <ModulePicker selected={ws.enabledModules} onchange={setModules} />
 
         {:else if step === 'theme'}

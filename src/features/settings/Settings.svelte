@@ -1,6 +1,7 @@
 <script lang="ts">
   // Everything chosen in onboarding stays editable here, applied instantly.
-  import { Download, Upload, RotateCcw, Trash2, ShieldCheck, Eraser } from '@lucide/svelte';
+  import { Download, Upload, RotateCcw, Trash2, ShieldCheck, Eraser, Smartphone, Share } from '@lucide/svelte';
+  import { pwa } from '../../lib/pwa.svelte';
   import Card from '../../lib/ui/Card.svelte';
   import Button from '../../lib/ui/Button.svelte';
   import TextField from '../../lib/ui/TextField.svelte';
@@ -131,9 +132,20 @@
           <Select label="Water unit" value={s.units.water} options={[{ value: 'glasses', label: 'Glasses' }, { value: 'ml', label: 'Millilitres (ml)' }, { value: 'oz', label: 'Fluid ounces (oz)' }]} onchange={(v) => app.updateSettings({ units: { ...s.units, water: v as 'ml' | 'oz' | 'glasses' } })} />
         </div>
       {/if}
+      <Select label="Daily focus goal" value={String(s.focusTargetMin ?? 120)} options={[{ value: '30', label: '30 minutes' }, { value: '60', label: '1 hour' }, { value: '90', label: '1½ hours' }, { value: '120', label: '2 hours' }, { value: '180', label: '3 hours' }, { value: '240', label: '4 hours' }]} onchange={(v) => app.updateSettings({ focusTargetMin: Number(v) })} hint="Shown as the Focus arc on Home." />
       <Select label="Backup reminder" value={String(s.backupReminderDays)} options={[{ value: '7', label: 'Every week' }, { value: '14', label: 'Every 2 weeks' }, { value: '30', label: 'Every month' }, { value: '0', label: 'Never remind me' }]} onchange={(v) => app.updateSettings({ backupReminderDays: Number(v) })} />
     </div>
   </Card>
+
+  {#if pwa.hosted && !pwa.installed && (pwa.canInstall || pwa.iosHint)}
+    <Card title="Install Life OS" subtitle="Put it on your home screen or desktop and it opens like a real app — full screen, fully offline.">
+      {#if pwa.canInstall}
+        <Button variant="primary" onclick={() => void pwa.install()}>{#snippet icon()}<Smartphone />{/snippet}Install app</Button>
+      {:else}
+        <p class="privacy"><Share size={18} aria-hidden="true" /><span>In Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</span></p>
+      {/if}
+    </Card>
+  {/if}
 
   <Card title="Data & backup" subtitle={lastBackup ? `Last backup: ${fmt(lastBackup)}` : 'You have not made a backup on this device yet.'}>
     <p class="privacy"><ShieldCheck size={18} aria-hidden="true" /><span>Your data stays on your device. It is stored {where}</span></p>

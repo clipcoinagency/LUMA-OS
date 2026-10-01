@@ -31,7 +31,8 @@ async function addReminderTask(page, title, minutesAgo = 2) {
   await dlg(page).getByLabel('Time (optional)').fill(pastTimeHM(minutesAgo));
   await dlg(page).getByRole('switch', { name: 'Remind me' }).click();
   await dlg(page).getByRole('button', { name: 'Add task' }).click();
-  await closed(page);
+  // the reminder popup can open in the same frame the form closes, so wait for the form specifically
+  await page.locator('dialog[open]').filter({ has: page.getByLabel('Time (optional)') }).waitFor({ state: 'hidden' });
   await page.locator('main').getByText(title).first().waitFor();
 }
 
@@ -47,7 +48,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 await page.goto(url);
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 await go(page, 'tasks');

@@ -8,7 +8,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const url = pathToFileURL(path.join(ROOT, 'dist', 'index.html')).href;
-const SHOTS = path.join(ROOT, 'tests', 'e2e', 'screenshots');
+const SHOTS = process.env.LIFEOS_SHOTS ?? path.join(ROOT, 'tests', 'e2e', 'screenshots');
 const channel = process.argv.find((a) => a.startsWith('--only='))?.slice(7) ?? 'msedge';
 await fs.mkdir(SHOTS, { recursive: true });
 
@@ -30,7 +30,7 @@ console.log(`▶ ${channel}`);
 let { ctx, page } = await launch();
 // fast onboarding with defaults
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 

@@ -11,6 +11,8 @@ export const WIDGETS: Record<WidgetId, { name: string; description: string; modu
   'finance-summary': { name: 'This month', description: 'Spending, income and balance', module: 'finance' },
   'recent-notes': { name: 'Recent notes', description: 'Your latest notes', module: 'notes' },
   'week-stats': { name: 'Your week', description: 'Consistency across your modules', module: null },
+  'work-projects': { name: 'Projects', description: 'Active projects and what is due next', module: 'work' },
+  'study-subjects': { name: 'Study', description: 'Subjects, assignments and exams coming up', module: 'study' },
 };
 
 /** Widgets that can be shown given the enabled modules. */

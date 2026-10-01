@@ -6,6 +6,8 @@
   import type { Component } from 'svelte';
   import { Settings2 } from '@lucide/svelte';
   import CommandCenter from './CommandCenter.svelte';
+  import CustomizeHome from './CustomizeHome.svelte';
+  import { SlidersHorizontal } from '@lucide/svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
   import { router } from '../../lib/router.svelte';
@@ -20,17 +22,21 @@
   import FinanceMonth from './widgets/FinanceMonth.svelte';
   import RecentNotes from './widgets/RecentNotes.svelte';
   import WeekStats from './widgets/WeekStats.svelte';
+  import WorkProjects from './widgets/WorkProjects.svelte';
+  import StudySubjects from './widgets/StudySubjects.svelte';
 
   const COMPONENTS: Partial<Record<WidgetId, Component>> = {
     'today-tasks': TodayTasks, 'habit-progress': HabitCheckin, 'goal-progress': GoalProgress, 'upcoming-events': Upcoming,
     'wellness-summary': WellnessToday, 'finance-summary': FinanceMonth, 'recent-notes': RecentNotes, 'week-stats': WeekStats,
+    'work-projects': WorkProjects, 'study-subjects': StudySubjects,
   };
   const WEIGHT: Partial<Record<WidgetId, number>> = {
     'today-tasks': 6, 'habit-progress': 6, 'goal-progress': 5, 'upcoming-events': 4, 'wellness-summary': 6,
-    'finance-summary': 5, 'recent-notes': 5, 'week-stats': 5,
+    'finance-summary': 5, 'recent-notes': 5, 'week-stats': 5, 'work-projects': 5, 'study-subjects': 5,
   };
 
   let width = $state(800);
+  let customizing = $state(false);
   const ws = $derived(app.workspace!);
   const all = $derived(visibleWidgets(ws));
   const showQuick = $derived(all.includes('quick-actions'));
@@ -57,6 +63,11 @@
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
   <CommandCenter />
 
+  <div class="bar">
+    <h2>Today at a glance</h2>
+    <Button size="sm" variant="ghost" onclick={() => (customizing = true)}>{#snippet icon()}<SlidersHorizontal />{/snippet}Customize</Button>
+  </div>
+
   {#if showQuick}<div class="quick"><QuickActions /></div>{/if}
 
   {#if cards.length === 0 && !showQuick}
@@ -78,10 +89,14 @@
   {/if}
 </div>
 
+<CustomizeHome bind:open={customizing} />
+
 <style>
   .dash { max-width: 1180px; }
   .dash.focus { max-width: 720px; }
-  .quick { margin: var(--space-5) 0 var(--space-4); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-6) 0 var(--space-3); }
+  .bar h2 { font-size: var(--text-lg); color: var(--text-2); }
+  .quick { margin: 0 0 var(--space-4); }
   .cols { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
   .dcol { display: grid; gap: var(--space-4); min-width: 0; align-content: start; }
   .compact .cols, .compact .dcol { gap: var(--space-3); }

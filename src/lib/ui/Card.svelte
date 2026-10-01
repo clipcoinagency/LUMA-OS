@@ -30,8 +30,8 @@
 
 <style>
   .card {
-    background: var(--surface); border: var(--card-border); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-1); min-width: 0;
+    background: var(--surface); border: var(--card-border); border-radius: var(--radius-xl);
+    box-shadow: var(--solid-highlight), var(--shadow-1); min-width: 0;
     transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
   }
   .padded { padding: var(--space-5); }

@@ -190,6 +190,13 @@ export async function restoreBackup(backup: Backup, { snapshot = true } = {}): P
 
 /** Deletes one module's records (not its settings). Takes a safety snapshot first. */
 export async function resetModule(module: ModuleId): Promise<void> {
+  if (module === 'work' || module === 'study') {
+    // Work and Study share the projects store: clear only this area's projects (their tasks are kept, unassigned)
+    await takeSafetySnapshot('before-reset');
+    const { listProjects, deleteProject } = await import('../domain/projects');
+    for (const p of await listProjects(module)) await deleteProject(p.id);
+    return;
+  }
   const stores = (Object.keys(STORES) as StoreName[]).filter((s) => STORES[s].module === module);
   await takeSafetySnapshot('before-reset');
   await transact<void>(stores, 'readwrite', (t) => { for (const s of stores) t.objectStore(s).clear(); });

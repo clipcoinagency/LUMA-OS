@@ -30,7 +30,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 await page.goto(url);
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 
@@ -69,7 +69,7 @@ const page2 = await ctx2.newPage();
 page2.on('pageerror', (e) => errors.push(e.message));
 await page2.goto(url);
 await page2.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page2.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page2.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page2.getByRole('button', { name: /Open my workspace/ }).click();
 await page2.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 
@@ -88,7 +88,7 @@ await (async () => {
   // select(): clicking Note A from the list (phone width, list hidden once editor opens) must not
   // drop focus to <body>
   await page2.getByRole('button', { name: 'Back to notes' }).click();
-  await page2.getByText('Note A').click();
+  await page2.getByText('Note A', { exact: true }).click();
   await page2.waitForTimeout(50);
   const afterSelect = await activeInfo(page2);
   check(!!afterSelect && !afterSelect.isBody && afterSelect.id === 'note-title', 'Notes: selecting a note focuses the editor, not <body>', JSON.stringify(afterSelect));
@@ -101,7 +101,7 @@ await (async () => {
 
   // delete: the trash button's native focus-restore target (itself) is gone once the editor
   // collapses — must land somewhere still present, not <body>
-  await page2.getByText('Note A').click();
+  await page2.getByText('Note A', { exact: true }).click();
   await page2.getByRole('button', { name: 'Delete note' }).click();
   await dlg(page2).getByRole('button', { name: 'Delete note' }).click();
   await closed(page2);
@@ -117,7 +117,7 @@ const page3 = await ctx3.newPage();
 page3.on('pageerror', (e) => errors.push(e.message));
 await page3.goto(url);
 await page3.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page3.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page3.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page3.getByRole('button', { name: /Open my workspace/ }).click();
 await page3.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 

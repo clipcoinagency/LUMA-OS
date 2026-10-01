@@ -7,8 +7,10 @@
   import EventForm from './EventForm.svelte';
   import NoteForm from './NoteForm.svelte';
   import WorkoutForm from './WorkoutForm.svelte';
+  import ProjectForm from './ProjectForm.svelte';
+  import type { ProjectKind } from '../../lib/domain/projects';
   import { quick, type QuickKind } from './quick.svelte';
-  import type { CalendarEvent, Goal, Habit, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
+  import type { CalendarEvent, Goal, Habit, Project, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
   const pre = <T,>(k: string) => (quick.preset[k] as T | undefined) ?? null;
 
   // function bindings: each form is "open" while the controller points at it; closing clears it
@@ -16,10 +18,11 @@
   const set = (k: QuickKind) => (v: boolean) => { if (!v && quick.kind === k) quick.kind = null; };
 </script>
 
-<TaskForm bind:open={is('task'), set('task')} task={pre<Task>('task')} />
+<TaskForm bind:open={is('task'), set('task')} task={pre<Task>('task')} projectId={(quick.preset.projectId as string | undefined) ?? null} />
 <TransactionForm bind:open={is('transaction'), set('transaction')} type={(quick.preset.type as TransactionType) ?? 'expense'} transaction={pre<Transaction>('transaction')} />
 <HabitForm bind:open={is('habit'), set('habit')} habit={pre<Habit>('habit')} />
 <GoalForm bind:open={is('goal'), set('goal')} goal={pre<Goal>('goal')} />
-<EventForm bind:open={is('event'), set('event')} date={quick.preset.date as string | undefined} event={pre<CalendarEvent>('event')} />
-<NoteForm bind:open={is('note'), set('note')} />
+<EventForm bind:open={is('event'), set('event')} date={quick.preset.date as string | undefined} event={pre<CalendarEvent>('event')} kind={(quick.preset.kind as string | undefined) ?? 'event'} projectId={(quick.preset.projectId as string | undefined) ?? null} />
+<NoteForm bind:open={is('note'), set('note')} kind={(quick.preset.kind as string | undefined) ?? 'note'} />
 <WorkoutForm bind:open={is('workout'), set('workout')} date={quick.preset.date as string | undefined} workout={pre<Workout>('workout')} />
+<ProjectForm bind:open={is('project'), set('project')} kind={(quick.preset.kind as ProjectKind) ?? 'work'} project={pre<Project>('project')} />

@@ -2,9 +2,11 @@ import { mount } from 'svelte';
 import './styles/tokens.css';
 import './styles/base.css';
 import { installFonts } from './styles/fonts';
+import { initPwa } from './lib/pwa.svelte';
 import App from './App.svelte';
 
 installFonts();
+initPwa();
 
 // Last-resort guard: never show a raw JavaScript error to the customer.
 function fatal(err: unknown) {

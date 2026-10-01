@@ -1,6 +1,6 @@
 // The one-tap actions shared by the dashboard, the "New" sheet and the command palette.
 import type { Component } from 'svelte';
-import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus } from '@lucide/svelte';
+import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus, Briefcase, GraduationCap, BookHeart } from '@lucide/svelte';
 import { focus } from '../../lib/focus.svelte';
 import { app } from '../../lib/app.svelte';
 import { clock } from '../../lib/clock.svelte';
@@ -34,8 +34,11 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { id: 'money', module: 'finance', label: 'Spending', icon: Wallet, color: 'var(--mod-finance)', run: () => openQuick('transaction') },
   { id: 'water', module: 'wellness', label: 'Add water', icon: Droplet, color: 'var(--mod-wellness)', run: () => void addWater() },
   { id: 'workout', module: 'wellness', label: 'Log workout', icon: Dumbbell, color: 'var(--mod-wellness)', run: () => openQuick('workout') },
+  { id: 'journal', module: 'notes', label: 'Journal', icon: BookHeart, color: 'var(--mod-notes)', run: () => openQuick('note', { kind: 'journal' }) },
   { id: 'event', module: 'calendar', label: 'Add event', icon: CalendarPlus, color: 'var(--mod-calendar)', run: () => openQuick('event') },
   { id: 'note', module: 'notes', label: 'New note', icon: NotebookPen, color: 'var(--mod-notes)', run: () => openQuick('note') },
+  { id: 'project', module: 'work', label: 'New project', icon: Briefcase, color: 'var(--mod-work)', run: () => openQuick('project', { kind: 'work' }) },
+  { id: 'subject', module: 'study', label: 'New subject', icon: GraduationCap, color: 'var(--mod-study)', run: () => openQuick('project', { kind: 'study' }) },
   { id: 'goal', module: 'goals', label: 'New goal', icon: Target, color: 'var(--mod-goals)', run: () => openQuick('goal') },
 ];
 

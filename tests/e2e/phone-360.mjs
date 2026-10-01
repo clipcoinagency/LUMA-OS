@@ -54,7 +54,7 @@ console.log(`▶ ${channel}`);
 // (so the same on-disk IndexedDB is still there once we relaunch at 360px below)
 let { ctx, page } = await launch({ width: 1360, height: 900 });
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 await go(page, 'dev/data', (p) => p.getByRole('button', { name: /Add 90 days of sample data/ }).waitFor());

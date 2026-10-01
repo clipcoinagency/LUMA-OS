@@ -13,7 +13,9 @@ import type { DateKey } from '../util/dates';
 export const DB_NAME = 'lifeos';
 export const SCHEMA_VERSION = 2;
 
-export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'] as const;
+export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance', 'work', 'study'] as const;
+/** The areas switched on for a brand-new workspace (Work and Study are opt-in). */
+export const DEFAULT_MODULES: readonly ModuleId[] = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'];
 export type ModuleId = (typeof MODULE_IDS)[number];
 
 export type ThemeId = 'soft' | 'dark';
@@ -47,7 +49,7 @@ export interface Settings {
 
 export type WidgetId =
   | 'today-tasks' | 'habit-progress' | 'goal-progress' | 'upcoming-events'
-  | 'wellness-summary' | 'finance-summary' | 'recent-notes' | 'quick-actions' | 'week-stats';
+  | 'wellness-summary' | 'finance-summary' | 'recent-notes' | 'quick-actions' | 'week-stats' | 'work-projects' | 'study-subjects';
 
 export interface Workspace {
   id: 'workspace';
@@ -56,6 +58,7 @@ export interface Workspace {
   moduleOrder: ModuleId[];
   dashboardLayout: 'focus' | 'balanced' | 'compact';
   widgets: WidgetId[];            // ordered; filtered by enabled modules at render time
+  persona?: string | null;        // v2: the starting point chosen in onboarding (informational)
   updatedAt: string;
 }
 

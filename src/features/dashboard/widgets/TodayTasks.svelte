@@ -5,6 +5,7 @@
   import WidgetCard from '../WidgetCard.svelte';
   import Checkbox from '../../../lib/ui/Checkbox.svelte';
   import Badge from '../../../lib/ui/Badge.svelte';
+  import FocusButton from '../../focus/FocusButton.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import { toast } from '../../../lib/ui/toast.svelte';
   import { changes } from '../../../lib/db/changes.svelte';
@@ -65,6 +66,7 @@
             <span class="title">{t.title}</span>
             {#if overdueBy(t) > 0}<Badge tone="danger">{overdueBy(t) === 1 ? 'Yesterday' : `${overdueBy(t)}d late`}</Badge>
             {:else if t.priority === 'high'}<Badge tone="warning">High</Badge>{/if}
+            <FocusButton task={t} />
           </li>
         {/each}
       </ul>

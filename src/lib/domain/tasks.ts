@@ -36,12 +36,12 @@ export async function tasksCompletedOn(from: DateKey, to: DateKey): Promise<Task
   return getByIndex('tasks', 'by_completed', IDBKeyRange.bound(from, to));
 }
 
-export async function createTask(input: { title: string; dueDate?: DateKey | null; dueTime?: string | null; reminder?: boolean; priority?: Priority; notes?: string; tags?: string[] }): Promise<Task> {
+export async function createTask(input: { title: string; dueDate?: DateKey | null; dueTime?: string | null; reminder?: boolean; priority?: Priority; notes?: string; tags?: string[]; projectId?: string | null }): Promise<Task> {
   const at = nowIso();
   const task: Task = {
     id: newId('task'), title: input.title.trim(), notes: input.notes ?? '', priority: input.priority ?? 'none',
     dueDate: input.dueDate === undefined ? today() : input.dueDate, dueTime: input.dueTime ?? null, reminder: input.reminder ?? false, remindedOn: null,
-    tags: input.tags ?? [], done: false, completedOn: null,
+    tags: input.tags ?? [], projectId: input.projectId ?? null, done: false, completedOn: null,
     createdOn: today(), createdAt: at, updatedAt: at,
   };
   await put('tasks', task);

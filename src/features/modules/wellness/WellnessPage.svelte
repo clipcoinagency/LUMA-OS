@@ -1,6 +1,6 @@
 <script lang="ts">
   // Daily log for any day (history stays per-day), workouts, and 30-day trends. Lifestyle tracking only.
-  import { Plus, ChevronLeft, ChevronRight, Droplet, Moon, Footprints, Scale, Dumbbell, Minus } from '@lucide/svelte';
+  import { Plus, ChevronLeft, ChevronRight, Droplet, Moon, Footprints, Scale, Dumbbell, Minus, Utensils } from '@lucide/svelte';
   import { MOODS } from '../../../lib/moods';
   import PageHeader from '../PageHeader.svelte';
   import Button from '../../../lib/ui/Button.svelte';
@@ -110,6 +110,7 @@
         </div>
         <label class="f"><span class="fl"><Moon size={16} aria-hidden="true" />Sleep (hours)</span><input class="in num" inputmode="decimal" value={entry.sleepHours ?? ''} placeholder="—" onchange={(e) => set({ sleepHours: num(e.currentTarget.value, 24) })} /></label>
         <label class="f"><span class="fl"><Footprints size={16} aria-hidden="true" />Steps</span><input class="in num" inputmode="numeric" value={entry.steps ?? ''} placeholder="—" onchange={(e) => { const n = num(e.currentTarget.value, 200000); set({ steps: n === null ? null : Math.round(n) }); }} /></label>
+        <label class="f"><span class="fl"><Utensils size={16} aria-hidden="true" />Calories</span><input class="in num" inputmode="numeric" value={entry.calories ?? ''} placeholder="—" onchange={(e) => { const n = num(e.currentTarget.value, 20000); set({ calories: n === null ? null : Math.round(n) }); }} /></label>
         <label class="f"><span class="fl"><Scale size={16} aria-hidden="true" />Weight ({units.weight})</span><input class="in num" inputmode="decimal" value={entry.weight ?? ''} placeholder="—" onchange={(e) => set({ weight: num(e.currentTarget.value, 700) })} /></label>
       </div>
       <div class="mood" role="radiogroup" aria-label="Mood" use:roveRadiogroup>

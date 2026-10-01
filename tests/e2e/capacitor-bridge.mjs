@@ -44,7 +44,7 @@ await page.addInitScript(() => { window.Capacitor = { getPlatform: () => 'androi
 
 await page.goto(url);
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 

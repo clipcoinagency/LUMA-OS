@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { ChevronRight } from '@lucide/svelte';
+  import { MODULES } from '../../lib/modules';
   import Skeleton from '../../lib/ui/Skeleton.svelte';
   import { href } from '../../lib/router.svelte';
   import type { ModuleId } from '../../lib/db/schema';
@@ -12,7 +13,10 @@
 
 <section class="wc" aria-labelledby={uid}>
   <header>
-    <h2 id={uid}>{title}</h2>
+    <div class="ttl">
+      {#if module}{@const Icon = MODULES[module].icon}<span class="chip" style="--c:{MODULES[module].color}" aria-hidden="true"><Icon size={15} /></span>{/if}
+      <h2 id={uid}>{title}</h2>
+    </div>
     <div class="acts">
       {@render actions?.()}
       {#if module}<a class="open" href={href({ name: 'module', module })} aria-label="Open {title}">Open<ChevronRight size={16} aria-hidden="true" /></a>{/if}
@@ -27,11 +31,13 @@
 
 <style>
   .wc {
-    background: var(--surface); border: var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1);
+    background: var(--surface); border: var(--card-border); border-radius: var(--radius-xl); box-shadow: var(--solid-highlight), var(--shadow-1);
     padding: var(--space-5); min-width: 0; height: 100%; display: flex; flex-direction: column;
     transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
   }
-  .wc:hover { transform: translateY(-2px); box-shadow: var(--shadow-2), var(--glow); border-color: var(--border-strong); }
+  .wc:hover { transform: translateY(-2px); box-shadow: var(--solid-highlight), var(--shadow-2); border-color: var(--border-strong); }
+  .ttl { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+  .chip { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex: none; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
   header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-4); min-height: 28px; }
   h2 { font-size: var(--text-md); }
   .acts { display: flex; align-items: center; gap: var(--space-1); }

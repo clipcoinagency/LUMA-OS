@@ -19,7 +19,8 @@ export async function openApp({ url = 'http://localhost:5173', theme = 'dark', v
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   await page.goto(url);
   await page.getByRole('button', { name: /Set up my workspace/ }).click();
-  await page.getByRole('button', { name: /^Continue$/ }).click();
+  await page.getByRole('button', { name: /^Continue$/ }).click(); // persona → modules
+  await page.getByRole('button', { name: /^Continue$/ }).click(); // modules → theme
   await page.getByRole('radio', { name: new RegExp(theme === 'dark' ? 'Dark' : 'Soft') }).click();
   if (name) { await page.getByRole('button', { name: /^Continue$/ }).click(); await page.getByLabel(/What should we call you/).fill(name); await page.getByRole('button', { name: /^Continue$/ }).click(); }
   else { await page.getByRole('button', { name: /^Continue$/ }).click(); await page.getByRole('button', { name: /^Continue$/ }).click(); }

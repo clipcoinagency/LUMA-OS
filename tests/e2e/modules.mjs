@@ -10,7 +10,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const url = pathToFileURL(path.join(ROOT, 'dist', 'index.html')).href;
 const base = url.split('#')[0];
-const SHOTS = path.join(ROOT, 'tests', 'e2e', 'screenshots');
+const SHOTS = process.env.LIFEOS_SHOTS ?? path.join(ROOT, 'tests', 'e2e', 'screenshots');
 const channel = process.argv.find((a) => a.startsWith('--only='))?.slice(7) ?? 'msedge';
 await fs.mkdir(SHOTS, { recursive: true });
 
@@ -54,7 +54,7 @@ const waitText = (locator, expected) => pollUntil(async () => (await locator.inn
 console.log(`▶ ${channel}`);
 let { ctx, page } = await launch();
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 
@@ -77,7 +77,7 @@ await soft('Tasks flow', async () => {
   check(await page.getByText('No matching tasks').isVisible(), 'Tasks: search with no match shows empty state');
   await page.getByRole('searchbox', { name: 'Search tasks' }).fill('');
   // edit
-  await page.getByRole('button', { name: /Prepare slides/ }).click();
+  await page.getByRole('button', { name: /^Prepare slides/ }).click();
   await dlg(page).getByLabel('Task', { exact: true }).fill('Prepare board slides');
   await dlg(page).getByRole('radio', { name: 'Today' }).click();
   await dlg(page).getByRole('button', { name: 'Save' }).click();

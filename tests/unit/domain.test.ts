@@ -139,3 +139,25 @@ describe('goals', () => {
     expect(goalPace(g({ current: 100 }), '2026-07-01')).toBe('done');
   });
 });
+
+describe('finance budgets and trends', () => {
+  const cat = (id: string, over: Record<string, unknown> = {}) => ({ id, name: id, type: 'expense', color: '#000', icon: 'x', order: 0, archived: false, createdAt: '', updatedAt: '', ...over }) as import('../../src/lib/db/schema').FinanceCategory;
+  const tx = (date: string, amountMinor: number, categoryId: string | null = 'food') => ({ id: date + amountMinor, date, type: 'expense', amountMinor, currency: 'USD', categoryId, note: '', createdAt: '', updatedAt: '' }) as import('../../src/lib/db/schema').Transaction;
+
+  it('flags categories near or over their budget, worst first, ignoring unbudgeted ones', async () => {
+    const { budgetStatus } = await import('../../src/lib/domain/finance');
+    const rows = budgetStatus(
+      { byCategory: [{ categoryId: 'food', amountMinor: 9000 }, { categoryId: 'fun', amountMinor: 4000 }, { categoryId: 'misc', amountMinor: 50000 }] },
+      [cat('food', { budgetMinor: 10000 }), cat('fun', { budgetMinor: 3000 }), cat('misc'), cat('rent', { budgetMinor: 80000 }), cat('old', { budgetMinor: 100, archived: true })],
+    );
+    expect(rows.map((r) => [r.category.id, r.status])).toEqual([['fun', 'over'], ['food', 'near'], ['rent', 'ok']]);
+    expect(rows[2]!.spentMinor).toBe(0);
+  });
+
+  it('builds a month-by-month expense series including empty months', async () => {
+    const { monthlyExpenseSeries } = await import('../../src/lib/domain/finance');
+    const s = monthlyExpenseSeries([tx('2026-10-02', 500), tx('2026-10-20', 700), tx('2026-08-15', 300)], 'USD', 4, '2026-10-05');
+    expect(s.map((x) => x.month.slice(0, 7))).toEqual(['2026-07', '2026-08', '2026-09', '2026-10']);
+    expect(s.map((x) => x.expenseMinor)).toEqual([0, 300, 0, 1200]);
+  });
+});

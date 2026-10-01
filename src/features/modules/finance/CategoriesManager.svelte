@@ -11,6 +11,8 @@
   import { saveRecord } from '../../../lib/domain/records';
   import { newId } from '../../../lib/util/ids';
   import { nowIso } from '../../../lib/util/dates';
+  import { app } from '../../../lib/app.svelte';
+  import { minorDigits, parseAmount } from '../../../lib/util/money';
   import type { FinanceCategory, TransactionType } from '../../../lib/db/schema';
 
   let { open = $bindable(false) }: { open?: boolean } = $props();
@@ -22,6 +24,14 @@
 
   $effect(() => { void changes.version; if (open) void getAll('finance_categories').then((c) => { cats = c.sort((a, b) => a.order - b.order); }); });
   const list = $derived(cats.filter((c) => c.type === type));
+  const currency = $derived(app.settings?.currency ?? 'USD');
+  const budgetText = (c: FinanceCategory) => (typeof c.budgetMinor === 'number' && c.budgetMinor > 0 ? String(c.budgetMinor / 10 ** minorDigits(currency)) : '');
+  async function setBudget(c: FinanceCategory, v: string) {
+    const t = v.trim();
+    if (!t) { if (c.budgetMinor) await saveRecord('finance_categories', { ...c, budgetMinor: null }); return; }
+    const minor = parseAmount(t, currency);
+    if (minor !== null && minor > 0 && minor !== c.budgetMinor) await saveRecord('finance_categories', { ...c, budgetMinor: minor });
+  }
 
   async function add(e?: Event) {
     e?.preventDefault();
@@ -46,6 +56,7 @@
       <li class:off={c.archived}>
         <span class="sw" style="background:{c.color}" aria-hidden="true"></span>
         <input value={c.name} aria-label="Rename {c.name}" maxlength="40" onchange={(e) => rename(c, e.currentTarget.value)} />
+        {#if c.type === 'expense'}<input class="bud" inputmode="decimal" placeholder="Budget" value={budgetText(c)} aria-label="Monthly budget for {c.name}" maxlength="12" onchange={(e) => setBudget(c, e.currentTarget.value)} />{/if}
         <button type="button" aria-label={c.archived ? `Show ${c.name}` : `Hide ${c.name}`} title={c.archived ? 'Show' : 'Hide (old transactions keep it)'} onclick={() => saveRecord('finance_categories', { ...c, archived: !c.archived })}>
           {#if c.archived}<Eye size={18} />{:else}<EyeOff size={18} />{/if}
         </button>
@@ -70,4 +81,5 @@
   button { width: 38px; height: 38px; display: grid; place-items: center; border: 0; background: none; color: var(--text-3); cursor: pointer; border-radius: var(--radius-sm); }
   button:hover { color: var(--text); background: var(--surface-3); }
   .add { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2); align-items: end; }
+  .bud { width: 84px; flex: none; text-align: right; }
 </style>

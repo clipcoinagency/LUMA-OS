@@ -27,7 +27,7 @@ export interface NavGroup {
 
 /** Which group each module lives in, in display order inside the group. */
 const GROUP_OF: Record<ModuleId, GroupId> = {
-  tasks: 'plan', goals: 'plan', habits: 'plan', calendar: 'plan',
+  tasks: 'plan', goals: 'plan', habits: 'plan', calendar: 'plan', work: 'plan', study: 'plan',
   wellness: 'life', finance: 'life',
   notes: 'reflect',
 };

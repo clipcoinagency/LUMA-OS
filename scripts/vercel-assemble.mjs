@@ -10,5 +10,8 @@ const out = '.vercel-out';
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.copyFileSync('dist/index.html', `${out}/index.html`);
+// PWA: manifest, service worker and icons sit beside index.html (the hosted build registers them; the
+// single-file builds never do — see src/lib/pwa.svelte.ts)
+for (const f of fs.readdirSync('packaging/pwa')) fs.copyFileSync(`packaging/pwa/${f}`, `${out}/${f}`);
 fs.cpSync('poc/web', `${out}/poc-storage-test`, { recursive: true });
 console.log('assembled', fs.readdirSync(out).join(', '));

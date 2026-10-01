@@ -18,6 +18,7 @@
   import FocusMode from './features/focus/FocusMode.svelte';
   import FocusPill from './features/focus/FocusPill.svelte';
   import ResetFlow from './features/reset/ResetFlow.svelte';
+  import { focus } from './lib/focus.svelte';
   import ModulePage from './features/modules/ModulePage.svelte';
   import Settings from './features/settings/Settings.svelte';
   import DesignSystem from './dev/DesignSystem.svelte';
@@ -41,6 +42,13 @@
   });
 
   onMount(() => { void app.start(); });
+  // the PWA "Start focus" shortcut points at #/focus: open the focus room, then settle on Home
+  $effect(() => {
+    if (app.status === 'ready' && app.workspace?.onboarded && location.hash === '#/focus') {
+      location.hash = '#/dashboard';
+      focus.openFor();
+    }
+  });
 
   const route = $derived(router.route);
   const routeKey = $derived(route.name === 'module' ? `m-${route.module}` : route.name === 'dev' ? `dev-${route.page}` : route.name);

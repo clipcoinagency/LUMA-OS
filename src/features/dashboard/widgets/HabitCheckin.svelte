@@ -10,9 +10,10 @@
   import { app } from '../../../lib/app.svelte';
   import { openQuick } from '../../quick/quick.svelte';
   import { habitStats, listHabits, logsByHabit, setHabitDone, type HabitStats } from '../../../lib/domain/habits';
+  import { addDays, startOfWeek } from '../../../lib/util/dates';
   import type { Habit } from '../../../lib/db/schema';
 
-  let rows = $state<{ habit: Habit; stats: HabitStats }[] | null>(null);
+  let rows = $state<{ habit: Habit; stats: HabitStats; week: boolean[] }[] | null>(null);
 
   $effect(() => {
     void changes.version;
@@ -20,7 +21,8 @@
     const ws = app.settings?.weekStartsOn ?? 1;
     void (async () => {
       const habits = await listHabits();
-      rows = await Promise.all(habits.map(async (h) => ({ habit: h, stats: habitStats(h, await logsByHabit(h.id), day, ws) })));
+      const wk = startOfWeek(day, ws);
+      rows = await Promise.all(habits.map(async (h) => { const logs = await logsByHabit(h.id); return { habit: h, stats: habitStats(h, logs, day, ws), week: Array.from({ length: 7 }, (_, i) => logs.has(addDays(wk, i))) }; }));
     })();
   });
 
@@ -47,10 +49,11 @@
         <p><strong class="num">{done} of {due.length}</strong> <span class="muted">done today</span></p>
       </div>
       <ul class="list">
-        {#each due as { habit, stats } (habit.id)}
+        {#each due as { habit, stats, week } (habit.id)}
           <li>
             <Checkbox label="{habit.name} done today" checked={stats.doneToday} color={habit.color} size={24} onchange={(v) => setHabitDone(habit.id, clock.today, v)} />
             <span class="name">{habit.name}</span>
+            <span class="wk" aria-hidden="true">{#each week as on, i (i)}<i class:on style="--c:{habit.color}"></i>{/each}</span>
             <span class="streak meta">{streakText(stats, habit)}</span>
           </li>
         {/each}
@@ -67,5 +70,9 @@
   li:last-child { border-bottom: 0; }
   .name { flex: 1; min-width: 0; font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .streak { white-space: nowrap; }
+  .wk { display: inline-flex; gap: 3px; flex: none; }
+  .wk i { width: 7px; height: 7px; border-radius: 50%; background: var(--ring-track); }
+  .wk i.on { background: var(--c); box-shadow: 0 0 6px color-mix(in srgb, var(--c) 55%, transparent); }
+  @media (max-width: 420px) { .wk { display: none; } }
   .rest { margin-top: var(--space-2); }
 </style>

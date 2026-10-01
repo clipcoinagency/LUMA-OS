@@ -12,7 +12,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const url = pathToFileURL(path.join(ROOT, 'dist', 'index.html')).href;
 const base = url.split('#')[0];
-const SHOTS = path.join(ROOT, 'tests', 'e2e', 'screenshots');
+const SHOTS = process.env.LIFEOS_SHOTS ?? path.join(ROOT, 'tests', 'e2e', 'screenshots');
 const channel = process.argv.find((a) => a.startsWith('--only='))?.slice(7) ?? 'msedge';
 await fs.mkdir(SHOTS, { recursive: true });
 
@@ -37,7 +37,7 @@ const noOverflow = (page) => page.evaluate(() => document.documentElement.scroll
 console.log(`▶ ${channel}`);
 let { ctx, page } = await launch();
 await page.getByRole('button', { name: /Set up my workspace/ }).click();
-for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
+for (let i = 0; i < 5; i++) await page.getByRole('button', { name: /^(Continue|Create workspace)$/ }).click();
 await page.getByRole('button', { name: /Open my workspace/ }).click();
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 
@@ -84,16 +84,18 @@ await soft('Toggling a habit from the history view persists', async () => {
   if (n === 0) { check(true, 'Toggling a habit from history (skipped: no habit due that day)'); }
   else {
     const before = await habitCbs.first().getAttribute('aria-checked');
+    const nameBefore = await habitCbs.first().getAttribute('aria-label'); const dayBefore = await page.locator('#day-h').innerText();
     await habitCbs.first().click();
     await page.waitForTimeout(300);
     const after = await habitCbs.first().getAttribute('aria-checked');
     check(before !== after, 'Habit checkbox in history toggles', `${before} -> ${after}`);
     await page.reload();
     await page.locator('main h1').first().waitFor();
-    for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Previous day' }).click();
+    for (let i = 0; i < 6; i++) await page.getByRole('button', { name: 'Previous day' }).click();
     await page.waitForTimeout(400);
     const persisted = await dayPanel(page).getByRole('checkbox', { name: / (done|not done) on this day/ }).first().getAttribute('aria-checked');
-    check(persisted === after, 'Habit toggle from history survives a reload', persisted);
+    const nameAfter = await dayPanel(page).getByRole('checkbox', { name: / (done|not done) on this day/ }).first().getAttribute('aria-label'); const dayAfter = await page.locator('#day-h').innerText();
+    check(persisted === after, 'Habit toggle from history survives a reload', `after=${after} persisted=${persisted} | ${nameBefore} @ ${dayBefore} -> ${nameAfter} @ ${dayAfter}`);
   }
 });
 

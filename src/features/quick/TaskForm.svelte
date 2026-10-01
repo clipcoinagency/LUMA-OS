@@ -6,14 +6,20 @@
   import TextField from '../../lib/ui/TextField.svelte';
   import Segmented from '../../lib/ui/Segmented.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
+  import Select from '../../lib/ui/Select.svelte';
+  import { app } from '../../lib/app.svelte';
+  import { listProjects } from '../../lib/domain/projects';
   import ConfirmDialog from '../../lib/ui/ConfirmDialog.svelte';
   import { toast } from '../../lib/ui/toast.svelte';
   import { createTask, deleteTask, restoreTask, updateTask } from '../../lib/domain/tasks';
   import { requestNotificationPermission } from '../../lib/reminders.svelte';
   import { addDays, isDateKey, today } from '../../lib/util/dates';
-  import type { Priority, Task } from '../../lib/db/schema';
+  import type { Priority, Project, Task } from '../../lib/db/schema';
 
-  let { open = $bindable(false), task = null }: { open?: boolean; task?: Task | null } = $props();
+  let { open = $bindable(false), task = null, projectId = null }: { open?: boolean; task?: Task | null; projectId?: string | null } = $props();
+  let project = $state('');
+  let projects = $state<Project[]>([]);
+  const hasProjectAreas = $derived(!!app.workspace?.enabledModules.some((m) => m === 'work' || m === 'study'));
   let title = $state('');
   let notes = $state('');
   let tags = $state('');
@@ -29,6 +35,8 @@
   $effect(() => {
     if (!open) return;
     error = '';
+    project = task ? (task.projectId ?? '') : (projectId ?? '');
+    if (hasProjectAreas) void listProjects().then((all) => { projects = all.filter((p) => p.status === 'active' || p.id === project); });
     if (task) {
       title = task.title; notes = task.notes; tags = task.tags.join(', '); priority = task.priority;
       time = task.dueTime ?? ''; reminder = task.reminder;
@@ -57,10 +65,10 @@
       const remind = dueTime ? reminder : false;
       const tagList = [...new Set(tags.split(',').map((t) => t.trim().replace(/^#/, '')).filter(Boolean))].slice(0, 10);
       if (task) {
-        await updateTask(task.id, { title: title.trim(), notes: notes.trim(), tags: tagList, dueDate: due, dueTime, reminder: remind, remindedOn: null, priority: priority as Priority });
+        await updateTask(task.id, { title: title.trim(), notes: notes.trim(), tags: tagList, dueDate: due, dueTime, reminder: remind, remindedOn: null, priority: priority as Priority, projectId: project || null });
         toast('Task updated', { tone: 'success' });
       } else {
-        await createTask({ title, notes: notes.trim(), tags: tagList, dueDate: due, dueTime, reminder: remind, priority: priority as Priority });
+        await createTask({ title, notes: notes.trim(), tags: tagList, dueDate: due, dueTime, reminder: remind, priority: priority as Priority, projectId: project || null });
         toast('Task added', { tone: 'success' });
       }
       open = false;
@@ -90,6 +98,9 @@
     <div class="field"><span class="lbl">Priority</span>
       <Segmented label="Priority" size="sm" bind:value={priority} options={[{ value: 'none', label: 'None' }, { value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }]} />
     </div>
+    {#if hasProjectAreas && projects.length}
+      <Select label="Project or subject" bind:value={project} options={[{ value: '', label: 'None' }, ...projects.map((p) => ({ value: p.id, label: p.title }))]} />
+    {/if}
     <TextField label="Notes (optional)" bind:value={notes} multiline rows={2} maxlength={2000} />
     <TextField label="Tags (optional)" bind:value={tags} placeholder="work, home" hint="Separate with commas." maxlength={200} />
     <button type="submit" hidden aria-hidden="true" tabindex="-1"></button>

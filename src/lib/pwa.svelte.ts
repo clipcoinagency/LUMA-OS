@@ -46,6 +46,8 @@ export function initPwa() {
   add('manifest', './manifest.webmanifest');
   add('apple-touch-icon', './apple-touch-icon.png');
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('Offline support unavailable:', e)); });
+    const register = () => { navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('Offline support unavailable:', e)); };
+    // the module script can run after `load` has already fired, so don't rely on the event alone
+    if (document.readyState === 'complete') register(); else window.addEventListener('load', register);
   }
 }

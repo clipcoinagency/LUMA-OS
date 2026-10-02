@@ -134,6 +134,15 @@ await page.getByPlaceholder('Add an assignment…').fill('Lab report');
 await page.keyboard.press('Enter');
 await page.getByRole('button', { name: 'Lab report', exact: true }).waitFor();
 check(true, 'An assignment added inside a subject is linked to it');
+// "Add exam" / "Add meeting" open the event form preset to that type (regression: they crashed the page)
+await page.getByRole('button', { name: 'Add exam' }).click();
+const examDlg = page.locator('dialog[open]').last();
+await examDlg.getByLabel('Event', { exact: true }).fill('Midterm');
+check((await examDlg.getByLabel('Type').inputValue()) === 'exam', 'Add exam opens the event form with the type set to Exam');
+await examDlg.getByRole('button', { name: 'Add event' }).click();
+await page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 8000 });
+await page.getByText('Midterm').first().waitFor();
+check(true, 'An exam added inside a subject appears under it');
 await page.getByRole('button', { name: /^Study$|Subjects/ }).first().click();
 await page.getByText(/0 of 1 assignments/).waitFor();
 check(true, 'The subject card rolls up its assignments');

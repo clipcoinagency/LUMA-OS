@@ -16,7 +16,7 @@
   import type { Goal, Project } from '../../lib/db/schema';
 
   let { open = $bindable(false), kind = 'work', project = null }: { open?: boolean; kind?: ProjectKind; project?: Project | null } = $props();
-  const v = $derived(VOCAB[project?.kind ?? kind]);
+  const v = $derived(VOCAB[project?.kind ?? kind] ?? VOCAB.work);
   let title = $state('');
   let client = $state('');
   let color = $state(PROJECT_COLORS[0]!);

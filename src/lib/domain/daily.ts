@@ -12,12 +12,21 @@ export async function getWellness(date: DateKey = today()): Promise<WellnessDay>
   return (await get('wellness', date)) ?? emptyDay(date);
 }
 
+// Every update is a read-modify-write of the whole day. Run concurrently (two quick water taps, then a sleep
+// edit, then a mood pick) each one could read the row BEFORE the previous write landed and then overwrite it,
+// silently dropping a value. So updates are queued and applied strictly one after another.
+let wellnessQueue: Promise<unknown> = Promise.resolve();
+
 /** Upserts one day's wellness row (one row per date — past days stay as they were). */
-export async function updateWellness(date: DateKey, patch: Partial<Omit<WellnessDay, 'id' | 'date'>>): Promise<WellnessDay> {
-  const next = { ...(await getWellness(date)), ...patch, id: date, date, updatedAt: nowIso() };
-  await put('wellness', next);
-  bump();
-  return next;
+export function updateWellness(date: DateKey, patch: Partial<Omit<WellnessDay, 'id' | 'date'>>): Promise<WellnessDay> {
+  const run = wellnessQueue.then(async () => {
+    const next = { ...(await getWellness(date)), ...patch, id: date, date, updatedAt: nowIso() };
+    await put('wellness', next);
+    bump();
+    return next;
+  });
+  wellnessQueue = run.catch(() => undefined); // one failed write must not block the ones behind it
+  return run;
 }
 
 export async function wellnessRange(from: DateKey, to: DateKey): Promise<WellnessDay[]> {

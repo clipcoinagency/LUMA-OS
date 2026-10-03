@@ -3,7 +3,7 @@ import { nowIso, today } from '../util/dates';
 import { DEFAULT_MODULES, type FinanceCategory, type ModuleId, type Settings, type WidgetId, type Workspace } from './schema';
 import { get, getAll, put, putMany, transact } from './idb';
 
-export const APP_VERSION = '2.0.0-beta.1';
+export const APP_VERSION = '2.0.0';
 
 export function defaultCurrency(): string {
   try {

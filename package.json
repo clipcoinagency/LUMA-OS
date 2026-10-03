@@ -1,6 +1,6 @@
 {
   "name": "life-os",
-  "version": "1.0.0-alpha.1",
+  "version": "2.0.0",
   "private": true,
   "description": "Life OS V1 — local-first personal productivity app (shared web core + platform packaging).",
   "type": "module",

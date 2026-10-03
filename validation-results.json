@@ -1,0 +1,1039 @@
+{
+  "startedAt": "2026-10-03T17:42:25.169Z",
+  "results": [
+    {
+      "target": "chrome",
+      "label": "Google Chrome (installed)",
+      "mode": "file",
+      "url": "file:///Users/runner/work/LUMA-OS/LUMA-OS/poc/web/index.html",
+      "browserVersion": "152.0.7977.83",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "scriptProbe": {
+        "inlineClassic": true,
+        "externalClassic": true,
+        "inlineModule": true,
+        "fetchSibling": false,
+        "done": true
+      },
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "105 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "false"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "ricqojxymusojg5a"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:42:35 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "306 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 2 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "28 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 3.4 MB / 10243.4 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "163 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 29 ms, validate 7 ms, restore 480 ms"
+        },
+        {
+          "status": "info",
+          "name": "Folder moved/copied → data still visible?",
+          "detail": "YES (storage shared by all file:// pages)"
+        },
+        {
+          "status": "info",
+          "name": "file:// script loading",
+          "detail": "inline classic true, external classic true, inline module true, external module false, fetch() sibling false"
+        }
+      ]
+    },
+    {
+      "target": "chrome",
+      "label": "Google Chrome (installed)",
+      "mode": "http",
+      "url": "http://127.0.0.1:4817/index.html",
+      "browserVersion": "152.0.7977.83",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "51 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "false"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "fr5yu3l3musojot4"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:42:44 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "415 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 2 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "43 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 3.5 MB / 10243.5 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "195 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 30 ms, validate 8 ms, restore 617 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Offline reload works (service worker) + data readable",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "target": "firefox",
+      "label": "Firefox (Playwright build)",
+      "mode": "file",
+      "url": "file:///Users/runner/work/LUMA-OS/LUMA-OS/poc/web/index.html",
+      "browserVersion": "155.0",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:155.0) Gecko/20100101 Firefox/155.0",
+      "scriptProbe": {
+        "inlineClassic": true,
+        "externalClassic": true,
+        "inlineModule": true,
+        "externalModule": true,
+        "fetchSibling": true,
+        "done": true
+      },
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "52 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "no answer yet (browser is asking the user)"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "ic4b2j63musojy41"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:43:01 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "282 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 1 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "78 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 3.0 MB / 10240.0 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "205 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 35 ms, validate 12 ms, restore 363 ms"
+        },
+        {
+          "status": "info",
+          "name": "Folder moved/copied → data still visible?",
+          "detail": "YES (storage shared by all file:// pages)"
+        },
+        {
+          "status": "info",
+          "name": "file:// script loading",
+          "detail": "inline classic true, external classic true, inline module true, external module true, fetch() sibling true"
+        }
+      ]
+    },
+    {
+      "target": "firefox",
+      "label": "Firefox (Playwright build)",
+      "mode": "http",
+      "url": "http://127.0.0.1:4817/index.html",
+      "browserVersion": "155.0",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:155.0) Gecko/20100101 Firefox/155.0",
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "105 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "no answer yet (browser is asking the user)"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "jb1itia3musokabh"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:43:16 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "233 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 1 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "38 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 3.3 MB / 10240.0 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "100 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 47 ms, validate 14 ms, restore 357 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Offline reload works (service worker) + data readable",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "target": "webkit",
+      "label": "WebKit (Playwright build — Safari engine proxy, NOT real Safari)",
+      "mode": "file",
+      "url": "file:///Users/runner/work/LUMA-OS/LUMA-OS/poc/web/index.html",
+      "browserVersion": "26.6",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
+      "scriptProbe": {
+        "inlineClassic": true,
+        "externalClassic": true,
+        "inlineModule": true,
+        "fetchSibling": false,
+        "done": true
+      },
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "99 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "false"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "hyctb0o4musokkdm"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:43:25 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "333 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 1 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "24 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 2.3 MB / 19660.8 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "181 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 46 ms, validate 10 ms, restore 388 ms"
+        },
+        {
+          "status": "info",
+          "name": "Folder moved/copied → data still visible?",
+          "detail": "YES (storage shared by all file:// pages)"
+        },
+        {
+          "status": "info",
+          "name": "file:// script loading",
+          "detail": "inline classic true, external classic true, inline module true, external module false, fetch() sibling false"
+        }
+      ]
+    },
+    {
+      "target": "webkit",
+      "label": "WebKit (Playwright build — Safari engine proxy, NOT real Safari)",
+      "mode": "http",
+      "url": "http://127.0.0.1:4817/index.html",
+      "browserVersion": "26.6",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
+      "checks": [
+        {
+          "status": "pass",
+          "name": "IndexedDB opens (launch #1)",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Write test value + 1,000 dated records",
+          "detail": "58 ms"
+        },
+        {
+          "status": "info",
+          "name": "navigator.storage.persist()",
+          "detail": "false"
+        },
+        {
+          "status": "pass",
+          "name": "Test value survives full browser restart",
+          "detail": "d2aa0r69musokqmi"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter = 2",
+          "detail": "2"
+        },
+        {
+          "status": "pass",
+          "name": "All 1,000 records survive restart",
+          "detail": "1000"
+        },
+        {
+          "status": "pass",
+          "name": "Survives page refresh",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Export downloads a dated backup file",
+          "detail": "LifeOS-PoC-Backup-2026-10-03.json"
+        },
+        {
+          "status": "pass",
+          "name": "Backup contains every record + schema version",
+          "detail": "1000 records, 144 KB"
+        },
+        {
+          "status": "pass",
+          "name": "Backup excludes device-only diagnostics",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Cancel leaves data untouched",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Clear → Confirm deletes data",
+          "detail": "0"
+        },
+        {
+          "status": "pass",
+          "name": "Restore via file picker brings everything back",
+          "detail": "restore:ok, 1000 records"
+        },
+        {
+          "status": "pass",
+          "name": "Restore warns before replacing (shows counts)",
+          "detail": "Backup from 10/3/2026, 5:43:32 PM (Life OS 0.1.0) with 1000 records. This will replace the 0 records currently…"
+        },
+        {
+          "status": "pass",
+          "name": "Restore → Cancel changes nothing",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: empty.json",
+          "detail": "This file is empty."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: not-json.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: wrong-kind.json",
+          "detail": "This file isn't a Life OS backup."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: newer-version.json",
+          "detail": "This backup was made by a newer version of Life OS (data version 99). Please update Life OS, then restore again."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: edited.json",
+          "detail": "This backup appears damaged or was edited (integrity check failed)."
+        },
+        {
+          "status": "pass",
+          "name": "Rejects invalid backup: truncated.json",
+          "detail": "This file couldn't be read as a Life OS backup. It may be damaged or a different kind of file."
+        },
+        {
+          "status": "info",
+          "name": "Stress: write 5,000 more records",
+          "detail": "266 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Month query on 6,000 records < 1 s",
+          "detail": "120 rows in 2 ms"
+        },
+        {
+          "status": "pass",
+          "name": "Export of 6,000 records < 5 s",
+          "detail": "32 ms, 0.8 MB"
+        },
+        {
+          "status": "info",
+          "name": "Storage persisted / estimate",
+          "detail": "false · 2.4 MB / 19660.8 MB"
+        },
+        {
+          "status": "pass",
+          "name": "Restored + stress data survive another restart",
+          "detail": "6000 records"
+        },
+        {
+          "status": "info",
+          "name": "Cold open with 6,000 records",
+          "detail": "126 ms (incl. browser page load)"
+        },
+        {
+          "status": "pass",
+          "name": "Launch counter keeps counting across restore + restart",
+          "detail": ""
+        },
+        {
+          "status": "pass",
+          "name": "Full backup → restore of 6,000 records",
+          "detail": "export 22 ms, validate 6 ms, restore 333 ms"
+        },
+        {
+          "status": "fail",
+          "name": "Offline reload works (service worker)",
+          "detail": "page.reload: WebKit encountered an internal error"
+        }
+      ]
+    },
+    {
+      "target": "timezones",
+      "label": "Date strategy under different time zones (Chromium)",
+      "mode": "file",
+      "checks": [
+        {
+          "status": "pass",
+          "name": "Day key correct at 11:30 pm Sep 15 in Los Angeles",
+          "detail": "local key 2026-09-15 (naive toISOString would say 2026-09-16)"
+        },
+        {
+          "status": "pass",
+          "name": "Day arithmetic across DST in America/Los_Angeles",
+          "detail": "2026-11-01 2026-11-02 2026-03-09 2026-09-28"
+        },
+        {
+          "status": "pass",
+          "name": "Day key correct at 1:30 am Sep 16 in Auckland",
+          "detail": "local key 2026-09-16 (naive toISOString would say 2026-09-15)"
+        },
+        {
+          "status": "pass",
+          "name": "Day arithmetic across DST in Pacific/Auckland",
+          "detail": "2026-11-01 2026-11-02 2026-03-09 2026-09-28"
+        },
+        {
+          "status": "pass",
+          "name": "Day key correct at 12:15 am Sep 16 in India",
+          "detail": "local key 2026-09-16 (naive toISOString would say 2026-09-15)"
+        },
+        {
+          "status": "pass",
+          "name": "Day arithmetic across DST in Asia/Kolkata",
+          "detail": "2026-11-01 2026-11-02 2026-03-09 2026-09-28"
+        }
+      ]
+    }
+  ]
+}

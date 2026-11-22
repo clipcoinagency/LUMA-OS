@@ -31,4 +31,7 @@
   .success { border-left: 4px solid var(--success); }
   .danger { border-left: 4px solid var(--danger); }
   button { background: none; border: 0; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; padding: 0 4px; }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .toast { border-radius: 3px; background: var(--text); color: var(--bg); box-shadow: 5px 5px 0 var(--accent); border: 0; }
 </style>

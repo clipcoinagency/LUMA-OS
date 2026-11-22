@@ -25,4 +25,11 @@
   .soft { background: var(--surface-2); }
   .primary { background: var(--accent); color: var(--on-accent); }
   .primary:hover { background: var(--accent-hover); color: var(--on-accent); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .ib { border-radius: 999px; }
+  :global(:root[data-style='almanac']) .ib:hover { background: none; color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+  :global(:root[data-style='almanac']) .soft { background: transparent; box-shadow: inset 0 0 0 1px var(--border-strong); }
+  :global(:root[data-style='almanac']) .primary { background: var(--text); color: var(--bg); }
+  :global(:root[data-style='almanac']) .primary:hover { background: var(--accent); color: var(--on-accent); }
 </style>

@@ -6,6 +6,7 @@ import { Layers, HeartPulse, Orbit, LineChart as ChartLine, RefreshCcw } from '.
 import { MODULES } from './modules';
 import type { ModuleId, Workspace } from './db/schema';
 import type { Route } from './router.svelte';
+import { MoonStar, Award } from '@lucide/svelte';
 
 export type GroupId = 'plan' | 'life' | 'reflect';
 
@@ -42,20 +43,33 @@ const moduleItem = (m: ModuleId): NavItem => ({ id: m, label: MODULES[m].name, i
 
 const INSIGHTS: NavItem = { id: 'insights', label: 'Insights', icon: ChartLine, color: 'var(--mod-insights)', route: { name: 'insights' } };
 const RESET: NavItem = { id: 'reset', label: 'Weekly Reset', icon: RefreshCcw, color: 'var(--mod-reset)', route: { name: 'reset' } };
+// new looks only (Paper, Night Ink, Nebula)
+const CLOSE: NavItem = { id: 'close', label: 'Close the day', icon: MoonStar, color: 'var(--mod-focus)', route: { name: 'close' } };
+const SEALS: NavItem = { id: 'seals', label: 'Seals', icon: Award, color: 'var(--mod-goals)', route: { name: 'seals' } };
 
-/** Groups with only the items that are switched on, honouring the user's module order. */
-export function navGroups(ws: Pick<Workspace, 'enabledModules' | 'moduleOrder'>): NavGroup[] {
+/** Groups with only the items that are switched on, honouring the user's module order. `extras` adds
+ *  the new looks' pages (Close the day, Seals); the original themes never pass it. */
+export function navGroups(ws: Pick<Workspace, 'enabledModules' | 'moduleOrder'>, extras = false): NavGroup[] {
   const ordered = [...ws.moduleOrder.filter((m) => ws.enabledModules.includes(m)), ...ws.enabledModules.filter((m) => !ws.moduleOrder.includes(m))];
   return (['plan', 'life', 'reflect'] as GroupId[]).map((g) => {
     const items = ordered.filter((m) => GROUP_OF[m] === g).map(moduleItem);
     if (g === 'reflect') items.push(INSIGHTS, RESET);
+    if (g === 'reflect' && extras) items.push(CLOSE, SEALS);
     return { id: g, label: GROUP_META[g].label, icon: GROUP_META[g].icon, items };
   }).filter((g) => g.items.length > 0);
 }
 
+/** Almanac's table of contents: each page's number ("01"…), counted across groups in display order. */
+export function tocNumbers(groups: NavGroup[]): Record<string, { no: string; group: string }> {
+  const out: Record<string, { no: string; group: string }> = {};
+  let n = 0;
+  for (const g of groups) for (const it of g.items) out[it.id] = { no: String(++n).padStart(2, '0'), group: g.label };
+  return out;
+}
+
 export function groupOfRoute(r: Route): GroupId | 'home' | 'settings' | 'dev' {
   if (r.name === 'module') return GROUP_OF[r.module];
-  if (r.name === 'insights' || r.name === 'reset') return 'reflect';
+  if (r.name === 'insights' || r.name === 'reset' || r.name === 'close' || r.name === 'seals') return 'reflect';
   if (r.name === 'dashboard') return 'home';
   return r.name === 'settings' ? 'settings' : 'dev';
 }

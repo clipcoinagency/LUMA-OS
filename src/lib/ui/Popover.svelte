@@ -59,4 +59,8 @@
     @keyframes sheet-in { from { transform: translateY(40%); opacity: 0; } }
   }
   @media (prefers-reduced-transparency: reduce) { .pop { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface); } }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .pop { border: 1px solid var(--text); border-radius: var(--radius-lg); background: var(--surface); box-shadow: 6px 6px 0 color-mix(in srgb, var(--text) 88%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  @media (max-width: 600px) { :global(:root[data-style='almanac']) .pop, :global(:root[data-style='almanac']) .pop.above { border-radius: 14px 14px 0 0; box-shadow: none; } }
 </style>

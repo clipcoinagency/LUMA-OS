@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageKicker from '../modules/PageKicker.svelte';
   // Reflect → Weekly Reset: where you start the guided reset, see whether this week's is done, and look
   // back at every reset you've completed.
   import { RefreshCcw, ArrowRight, Check, Timer, Sparkles } from '../../lib/navicons';
@@ -39,7 +40,7 @@
 
 <header class="ph">
   <span class="ico" aria-hidden="true"><RefreshCcw size={24} /></span>
-  <div class="t"><h1>Weekly Reset</h1><p class="muted">Look back, clear the decks, and plan the week ahead — about ten minutes.</p></div>
+  <div class="t"><PageKicker id="reset" /><h1>Weekly Reset</h1><p class="muted">Look back, clear the decks, and plan the week ahead — about ten minutes.</p></div>
 </header>
 
 <section class="hero glass-strong" aria-label="This week's reset">

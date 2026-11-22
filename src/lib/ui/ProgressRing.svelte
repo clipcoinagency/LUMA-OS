@@ -32,4 +32,8 @@
   .bar { stroke-linecap: round; filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 0%, transparent)); }
   :global([data-theme='dark']) .bar { filter: drop-shadow(0 0 5px rgba(154, 140, 255, .5)); }
   .val { font-weight: 700; font-size: 0.8em; }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .track { stroke: var(--ring-track); }
+  :global(:root[data-style='almanac']) .bar { stroke-linecap: butt; filter: none; }
 </style>

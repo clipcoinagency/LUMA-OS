@@ -12,6 +12,12 @@
   import { clock } from '../../lib/clock.svelte';
   import { formatDateKey, type DateKey } from '../../lib/util/dates';
   import type { Task } from '../../lib/db/schema';
+  import { soundscape, SOUNDS } from '../../lib/soundscape.svelte';
+  import { app } from '../../lib/app.svelte';
+  import { isNewLook } from '../../lib/theme';
+  const newLook = $derived(isNewLook(app.settings?.theme));
+  // the soundscape ends with the session
+  $effect(() => { if (!focus.active && soundscape.current) soundscape.stop(); });
 
   let dlg: HTMLDialogElement | undefined = $state();
   let tasks = $state<Task[]>([]);
@@ -165,6 +171,18 @@
             {/if}
           {/if}
         </div>
+        {#if newLook}
+          <div class="sounds" role="group" aria-label="Focus sounds">
+            {#each SOUNDS as s (s.id)}
+              <button type="button" class="snd" class:on={soundscape.current === s.id} aria-pressed={soundscape.current === s.id} onclick={() => soundscape.play(s.id)}>
+                <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>{s.label}
+              </button>
+            {/each}
+            {#if soundscape.current}
+              <label class="vol"><span class="sr-only">Volume</span><input type="range" min="0" max="1" step="0.05" value={soundscape.volume} oninput={(e) => soundscape.setVolume(Number((e.target as HTMLInputElement).value))} /></label>
+            {/if}
+          </div>
+        {/if}
         <button type="button" class="discard" onclick={() => focus.discard()}>Discard session</button>
       </section>
     {/if}
@@ -254,4 +272,19 @@
   .discard { background: none; border: 0; color: var(--text-3); font-size: var(--text-sm); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .discard:hover { color: var(--danger); }
   @media (max-width: 480px) { .durs { grid-template-columns: repeat(3, 1fr); } }
+
+  /* ---- focus soundscapes (new looks only) ---- */
+  .sounds { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-2); margin-top: var(--space-5); }
+  .snd { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 var(--space-4); border-radius: 999px; cursor: pointer; font-weight: 600; font-size: var(--text-sm);
+    color: var(--text-2); background: color-mix(in srgb, var(--text) 6%, transparent); border: 1px solid var(--border); transition: color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out); }
+  .snd:hover { color: var(--text); border-color: var(--border-strong); }
+  .snd.on { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .eq i { display: block; width: 3px; height: 4px; border-radius: 1px; background: currentColor; opacity: .6; }
+  .snd.on .eq i { animation: eq 1s var(--ease-in-out) infinite alternate; opacity: 1; }
+  .snd.on .eq i:nth-child(2) { animation-delay: -.4s; } .snd.on .eq i:nth-child(3) { animation-delay: -.7s; }
+  @keyframes eq { from { height: 3px; } to { height: 12px; } }
+  .vol input { width: 110px; accent-color: var(--accent); }
+  :global(:root[data-style='almanac']) .snd { border-radius: 999px; background: transparent; border-color: var(--text); font-weight: 500; }
+  :global(:root[data-style='almanac']) .snd.on { background: var(--text); color: var(--bg); border-color: var(--text); }
 </style>

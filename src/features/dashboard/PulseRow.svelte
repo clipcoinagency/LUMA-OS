@@ -186,4 +186,41 @@
   .col.now em { color: var(--text); font-weight: 700; }
   .sk { flex: 1; border-radius: var(--radius-md); background: color-mix(in srgb, var(--text) 7%, transparent); animation: sh 1.4s var(--ease-in-out) infinite alternate; }
   @keyframes sh { to { opacity: .4; } }
+
+  /* ================================================================== Almanac: newspaper columns
+     No cards: each tile is a column under a 2px ink rule, with big light serif figures and flat
+     ink charts (today in vermilion). */
+  :global(:root[data-style='almanac']) .pulse { gap: var(--space-8); margin-top: var(--space-7); }
+  :global(:root[data-style='almanac']) .tile { background: none; border: 0; border-top: 2px solid var(--text); border-radius: 0; padding: var(--space-3) 0 0; min-height: 0; box-shadow: none; }
+  :global(:root[data-style='almanac']) .tile.lift:hover { transform: none; box-shadow: none; border-color: var(--text); }
+  :global(:root[data-style='almanac']) .chip { display: none; }
+  :global(:root[data-style='almanac']) header { margin-bottom: var(--space-4); }
+  :global(:root[data-style='almanac']) h2 { font-size: 23px; font-weight: 400; display: flex; align-items: center; gap: var(--space-2); }
+  :global(:root[data-style='almanac']) h2::before { content: ''; width: 9px; height: 9px; background: var(--c); flex: none; }
+  :global(:root[data-style='almanac']) .go { height: auto; padding: 0 0 1px; border-radius: 0; background: none; color: var(--text); border-bottom: 1px solid currentColor;
+    font: 500 10.5px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+  :global(:root[data-style='almanac']) .go:hover { background: none; color: var(--accent-ink); }
+  :global(:root[data-style='almanac']) .track { stroke-width: 4; }
+  :global(:root[data-style='almanac']) .arc { stroke: var(--c); stroke-width: 4; stroke-linecap: butt; }
+  :global(:root[data-style='almanac']) .arc.glow { display: none; }
+  :global(:root[data-style='almanac']) .mid strong { font-size: 26px; font-weight: 360; }
+  :global(:root[data-style='almanac']) .mid span, :global(:root[data-style='almanac']) .facts span, :global(:root[data-style='almanac']) .cap { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .04em; color: var(--text-3); }
+  :global(:root[data-style='almanac']) .facts strong { font-size: 24px; font-weight: 380; }
+  :global(:root[data-style='almanac']) .mb i { background: var(--text); opacity: .8; border-radius: 0; }
+  :global(:root[data-style='almanac']) .mb.now i { background: var(--accent); opacity: 1; box-shadow: none; }
+  :global(:root[data-style='almanac']) .mb i.zero, :global(:root[data-style='almanac']) .bar.zero { background: var(--ring-track); opacity: 1; }
+  :global(:root[data-style='almanac']) .big strong { font-size: 60px; font-weight: 300; letter-spacing: -0.045em; line-height: .9; }
+  :global(:root[data-style='almanac']) .big.soft strong { font-size: 24px; font-weight: 400; font-style: italic; letter-spacing: -0.01em; }
+  :global(:root[data-style='almanac']) .of { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 17px; color: var(--text-2); }
+  :global(:root[data-style='almanac']) .word, :global(:root[data-style='almanac']) .delta { border-radius: 0; background: none; border: 1px solid currentColor; padding: 2px 7px; font: 500 10px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+  :global(:root[data-style='almanac']) .word { color: var(--c); }
+  :global(:root[data-style='almanac']) .delta.up { background: none; color: var(--success); }
+  :global(:root[data-style='almanac']) .delta.down { background: none; color: var(--warning); }
+  :global(:root[data-style='almanac']) .bar { background: var(--text); opacity: .8; border-radius: 0; max-width: 22px; }
+  :global(:root[data-style='almanac']) .col:hover .bar { opacity: 1; }
+  :global(:root[data-style='almanac']) .col.now .bar { background: var(--accent); opacity: 1; box-shadow: none; }
+  :global(:root[data-style='almanac']) .col em { font-family: var(--font-mono); font-size: 10px; }
+  :global(:root[data-style='almanac']) .col.now em { color: var(--accent-ink); }
+  :global(:root[data-style='almanac']) .bars { border-bottom: 1px solid var(--text); padding-bottom: 0; }
+  :global(:root[data-style='almanac']) .mini { border-bottom: 1px solid var(--text); }
 </style>

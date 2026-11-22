@@ -9,6 +9,7 @@
   import { app } from '../../lib/app.svelte';
   import { router } from '../../lib/router.svelte';
   import { navGroups } from '../../lib/nav';
+  import { isNewLook } from '../../lib/theme';
   import { QUICK_ACTIONS } from '../quick/actions';
   import { listTasks } from '../../lib/domain/tasks';
   import { listGoals } from '../../lib/domain/goals';
@@ -32,7 +33,7 @@
     const ws = app.workspace;
     if (!ws) return [];
     const out: Cmd[] = [{ id: 'p-home', label: 'Home', hint: 'Page', icon: HomeIcon, color: 'var(--accent)', run: go({ name: 'dashboard' }) }];
-    for (const g of navGroups(ws)) for (const it of g.items) out.push({ id: `p-${it.id}`, label: it.label, hint: `${g.label} · page`, icon: it.icon, color: it.color, run: go(it.route) });
+    for (const g of navGroups(ws, isNewLook(app.settings?.theme))) for (const it of g.items) out.push({ id: `p-${it.id}`, label: it.label, hint: `${g.label} · page`, icon: it.icon, color: it.color, run: go(it.route) });
     out.push({ id: 'p-settings', label: 'Settings', hint: 'Page', icon: SettingsIcon, color: 'var(--text-2)', run: go({ name: 'settings' }) });
     for (const a of QUICK_ACTIONS) if (a.module === null || ws.enabledModules.includes(a.module)) out.push({ id: `a-${a.id}`, label: a.label, hint: 'Create', icon: a.icon, color: a.color, run: a.run });
     out.push({ id: 'a-reset', label: 'Start Weekly Reset', hint: 'Reflect', icon: RefreshCcw, color: 'var(--mod-reset)', run: () => void reset.begin() });
@@ -154,4 +155,17 @@
   .none { color: var(--text-3); justify-content: center; cursor: default; }
   @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.975); } }
   @keyframes fade { from { opacity: 0; } }
+
+  /* ---- Almanac: an index card — ink border, offset shadow, typewriter hints, a vermilion cursor bar ---- */
+  :global(:root[data-style='almanac']) dialog.pal::backdrop { backdrop-filter: none; }
+  :global(:root[data-style='almanac']) .panel { border: 1px solid var(--text); border-radius: var(--radius-lg); background: var(--surface); box-shadow: 7px 7px 0 color-mix(in srgb, var(--text) 88%, transparent); }
+  :global(:root[data-style='almanac']) .search { border-bottom: 1px solid var(--text); }
+  :global(:root[data-style='almanac']) input:focus-visible { box-shadow: none; }
+  :global(:root[data-style='almanac']) input { font-family: var(--font-display); font-size: 20px; font-style: italic; }
+  :global(:root[data-style='almanac']) kbd { font-family: var(--font-mono); font-weight: 500; border-radius: 3px; }
+  :global(:root[data-style='almanac']) li { border-radius: 0; }
+  :global(:root[data-style='almanac']) li.on { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+  :global(:root[data-style='almanac']) .ico { background: none; border-radius: 0; }
+  :global(:root[data-style='almanac']) .lbl { font-weight: 500; }
+  :global(:root[data-style='almanac']) .hint { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
 </style>

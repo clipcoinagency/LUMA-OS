@@ -6,8 +6,18 @@ interface TauriGlobal {
   dialog?: { save(opts: unknown): Promise<string | null> };
   fs?: { writeTextFile(path: string, text: string): Promise<void> };
 }
+/** One reminder for Android's alarm scheduler. `at` = epoch ms; omitted = show now. */
+export interface NativeNote { id: number; title: string; body: string; at?: number | null; route?: string }
+export interface NativeNotifications {
+  permission(): Promise<string>;
+  request(): Promise<string>;
+  replaceAll(items: NativeNote[]): Promise<void>;
+  showNow(item: NativeNote): Promise<void>;
+  onTap(cb: (route: string) => void): void;
+}
 interface NativeBridge {
   saveTextFile(name: string, text: string): Promise<SaveResult>;
+  notifications?: NativeNotifications;
 }
 declare global {
   interface Window {
@@ -67,6 +77,17 @@ function loadScript(src: string): Promise<void> {
     s.onerror = () => reject(new Error(`load ${src}`));
     document.head.appendChild(s);
   });
+}
+
+/** Android only: loads the native bridge (once) and returns it, or null on every other platform. */
+let bridgeLoad: Promise<void> | null = null;
+export async function nativeBridge(): Promise<NativeBridge | null> {
+  if (detectPlatform() !== 'capacitor') return null;
+  if (!window.LifeOSNative) {
+    bridgeLoad ??= loadScript('native-capacitor.js').catch(() => { bridgeLoad = null; });
+    await bridgeLoad;
+  }
+  return window.LifeOSNative ?? null;
 }
 
 export async function saveTextFile(name: string, text: string): Promise<SaveResult> {

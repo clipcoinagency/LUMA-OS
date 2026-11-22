@@ -14,6 +14,8 @@
   import { formatMinutes } from '../../lib/domain/focus';
   import { buildBriefing, buildHeadline, greetingFor, loadHomeSnapshot, type BriefIcon, type BriefLine, type HomeSnapshot } from '../../lib/domain/home';
   import { reducedMotion } from '../../lib/motion';
+  import { styleOf } from '../../lib/theme';
+  import { moonPhase, moonPath, yearProgress } from '../../lib/domain/almanac';
 
   let snap = $state.raw<HomeSnapshot | null>(null);
   let hl = $state<string | null>(null);
@@ -38,6 +40,9 @@
   const headline = $derived(snap ? buildHeadline(snap) : '');
   const name = $derived(app.settings?.displayName ?? '');
   const part = $derived(clock.hour < 12 ? 'Morning' : clock.hour < 17 ? 'Afternoon' : clock.hour < 21 ? 'Evening' : 'Night');
+  // New looks only: agrees with the greeting (1 am is "Night", not "Morning")
+  const newLook = $derived(styleOf(app.settings?.theme ?? 'soft') !== 'aurora'); // the new looks (Paper, Night Ink, Nebula)
+  const edition = $derived(clock.hour < 5 ? 'Night' : clock.hour < 12 ? 'Morning' : clock.hour < 17 ? 'Afternoon' : clock.hour < 21 ? 'Evening' : 'Night');
 
   const segments = $derived.by((): (RingSegment & { go: () => void })[] => {
     const s = snap;
@@ -75,24 +80,43 @@
     panel.style.setProperty('--my', `${e.clientY - r.top}px`);
   }
   const dayFraction = $derived((snap?.minutes ?? new Date().getHours() * 60) / 1440);
+
+  // Almanac masthead: "No." is the day of the year, plus the ISO week — both derived from today's date.
+  const issue = $derived.by(() => {
+    const [y, m, d] = clock.today.split('-').map(Number) as [number, number, number];
+    const t = Date.UTC(y, m - 1, d);
+    const doy = Math.round((t - Date.UTC(y, 0, 1)) / 86_400_000) + 1;
+    const dt = new Date(t);
+    dt.setUTCDate(dt.getUTCDate() + 4 - (dt.getUTCDay() || 7)); // the Thursday of this week decides the ISO year
+    const week = Math.ceil(((dt.getTime() - Date.UTC(dt.getUTCFullYear(), 0, 1)) / 86_400_000 + 1) / 7);
+    return { no: doy, week };
+  });
+  const moon = $derived(moonPhase(clock.today));
+  const year = $derived(yearProgress(clock.today));
 </script>
 
 <section class="hero glass-strong" bind:this={panel} onpointermove={move} aria-label="Today">
+  <div class="mast" aria-hidden="true" style="--yp:{year.fraction}" title="Day {year.dayOfYear} of {year.daysInYear} — {year.left} days left this year · {moon.name}, {Math.round(moon.illumination * 100)}% lit">
+    <span class="kicker m-l">No. {issue.no} · {year.left} days to go</span>
+    <span class="m-c">{formatDateKey(clock.today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+    <span class="kicker m-r">Week {issue.week} · <svg class="moon" viewBox="0 0 24 24" width="13" height="13"><circle cx="12" cy="12" r="9" class="dark" /><path d={moonPath(moon.fraction)} class="lit" /></svg>{moon.name}</span>
+  </div>
   <div class="copy">
     <p class="date">{formatDateKey(clock.today)}</p>
     <h1 class="greet">
       <span class="gi" aria-hidden="true"><GreetIcon size={26} /></span>
-      <span>{greetingFor(clock.hour)}{name ? `, ${name}` : ''}</span>
+      <span>{greetingFor(clock.hour)}{#if name}, <em class="nm">{name}<span class="stop" aria-hidden="true">.</span></em>{:else}<span class="stop" aria-hidden="true">.</span>{/if}</span>
     </h1>
 
     {#if snap}
       <p class="headline">{headline}</p>
       {#if brief.length}
+        <p class="ib kicker" aria-hidden="true">In brief</p>
         <ul class="brief" aria-label="What needs your attention">
           {#each brief as l, i (l.id)}
             {@const Ico = ICONS[l.icon]}
             <li class="b {l.tone}" style="--i:{i}">
-              <span class="bi" aria-hidden="true"><Ico size={16} /></span>
+              <span class="bi" aria-hidden="true"><Ico size={16} /></span><span class="no" aria-hidden="true" data-no={String(i + 1).padStart(2, '0')}></span>
               <span class="bt">{l.text}</span>
               {#if l.action}
                 <button type="button" class="ba" onclick={() => run(l)}>{l.action.label}<ChevronRight size={14} aria-hidden="true" /></button>
@@ -108,7 +132,7 @@
 
   <div class="orbit">
     <DayRing {segments} {dayFraction} bind:active={hl} size={300} label="Your day: progress by area" top={formatDateKey(clock.today, { weekday: 'short' })}
-      main={formatDateKey(clock.today, { day: 'numeric', month: 'short' })} sub={part} />
+      main={formatDateKey(clock.today, { day: 'numeric', month: 'short' })} sub={newLook ? edition : part} />
     <ul class="legend" aria-label="Today by area">
       {#each segments as s (s.id)}
         <li style="--c:{s.color}">
@@ -182,5 +206,70 @@
   @media (max-width: 880px) {
     .hero { grid-template-columns: 1fr; padding: var(--space-5); gap: var(--space-5); }
     .headline { max-width: none; }
+  }
+
+  /* ================================================================== Almanac: the front page
+     No panel at all — type set straight onto the paper under a masthead (heavy + hairline rules),
+     a very large optical-size serif greeting, an italic "deck", and a numbered "In brief" column. */
+  .mast, .ib, .no, .stop { display: none; }
+  .no::after { content: attr(data-no); }
+  .nm { font-style: normal; }
+  :global([data-style='almanac']) .hero {
+    background: transparent; border: 0; border-radius: 0; box-shadow: none; overflow: visible;
+    padding: 0 0 var(--space-7); column-gap: var(--space-9); row-gap: var(--space-6); align-items: start;
+    border-bottom: 1px solid var(--text);
+  }
+  :global([data-style='almanac']) .hero::before, :global([data-style='almanac']) .hero::after { display: none; }
+  :global([data-style='almanac']) .mast {
+    position: relative; display: grid; grid-column: 1 / -1; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-4);
+    padding: 11px 0 10px; border-top: 3px solid var(--text); border-bottom: 1px solid var(--text);
+  }
+  :global([data-style='almanac']) .mast::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; height: 1px; background: var(--text); }
+  :global([data-style='almanac']) .m-c { font-family: var(--font-display); font-style: italic; font-size: 16px; color: var(--text); white-space: nowrap; }
+  :global([data-style='almanac']) .m-r { display: flex; align-items: center; justify-content: flex-end; gap: 6px; text-align: right; }
+  /* the masthead's hairline fills with the year: a vermilion rule as far as today */
+  :global([data-style='almanac']) .mast::after { content: ''; position: absolute; left: 0; bottom: -2px; height: 3px; width: calc(var(--yp, 0) * 100%); background: var(--accent); }
+  .moon { flex: none; overflow: visible; }
+  .moon .dark { fill: none; stroke: currentColor; stroke-width: 1.4; opacity: .6; }
+  .moon .lit { fill: currentColor; }
+  :global([data-style='almanac']) .date, :global([data-style='almanac']) .gi { display: none; }
+  :global([data-style='almanac']) .greet {
+    display: block; margin-top: var(--space-2); font-size: clamp(46px, 6.6vw, 96px); font-weight: 340; line-height: .94; letter-spacing: -0.04em;
+  }
+  :global([data-style='almanac']) .nm { display: block; font-style: italic; font-weight: 300; }
+  :global([data-style='almanac']) .stop { display: inline; color: var(--accent); }
+  :global([data-style='almanac']) .headline {
+    margin-top: var(--space-5); font-family: var(--font-display); font-style: italic; font-weight: 380; font-size: clamp(19px, 1.9vw, 24px);
+    line-height: 1.3; color: var(--text-2); max-width: 30ch;
+  }
+  :global([data-style='almanac']) .ib { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-7); color: var(--text); }
+  :global([data-style='almanac']) .ib::after { content: ''; flex: 1; height: 1px; background: var(--text); }
+  :global([data-style='almanac']) .brief { margin-top: var(--space-2); gap: 0; }
+  :global([data-style='almanac']) .b { background: none; border: 0; border-bottom: 1px solid var(--border-strong); border-radius: 0; padding: 13px 0; gap: var(--space-4); }
+  :global([data-style='almanac']) .b:last-child { border-bottom: 0; }
+  :global([data-style='almanac']) .bi { display: none; }
+  :global([data-style='almanac']) .no { display: inline; flex: none; width: 24px; font: 500 12px var(--font-mono); color: var(--t); letter-spacing: .04em; }
+  :global([data-style='almanac']) .bt { font-size: var(--text-base); line-height: 1.45; }
+  :global([data-style='almanac']) .ba {
+    background: none; height: auto; padding: 0 0 1px; border-radius: 0; color: var(--text); font-weight: 600; font-size: var(--text-sm);
+    border-bottom: 1px solid currentColor; gap: 3px;
+  }
+  :global([data-style='almanac']) .ba:hover { background: none; color: var(--accent-ink); }
+  :global([data-style='almanac']) .orbit { gap: var(--space-4); padding-top: var(--space-2); }
+  :global([data-style='almanac']) .legend { grid-template-columns: 1fr; gap: 0; max-width: 340px; border-top: 1px solid var(--text); }
+  :global([data-style='almanac']) .legend button {
+    grid-template-columns: auto auto 1fr auto; grid-template-areas: 'sw lbl sub val'; column-gap: var(--space-3);
+    padding: 8px 2px; border: 0; border-bottom: 1px solid var(--border); border-radius: 0;
+  }
+  :global([data-style='almanac']) .legend button:hover, :global([data-style='almanac']) .legend button:focus-visible { background: none; border-color: var(--border); }
+  :global([data-style='almanac']) .legend button:hover .lbl { text-decoration: underline; text-underline-offset: 3px; }
+  :global([data-style='almanac']) .sw { width: 9px; height: 9px; border-radius: 0; box-shadow: none; }
+  :global([data-style='almanac']) .lbl { color: var(--text); font-weight: 500; }
+  :global([data-style='almanac']) .sub { font: 400 10.5px var(--font-mono); letter-spacing: .04em; color: var(--text-3); text-align: right; }
+  :global([data-style='almanac']) .val { font-size: 22px; font-weight: 400; }
+  @media (max-width: 880px) {
+    :global([data-style='almanac']) .hero { padding: 0 0 var(--space-6); }
+    :global([data-style='almanac']) .mast { grid-template-columns: 1fr 1fr; row-gap: 6px; }
+    :global([data-style='almanac']) .m-c { grid-column: 1 / -1; grid-row: 1; text-align: center; font-size: 15px; }
   }
 </style>

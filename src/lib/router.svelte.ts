@@ -6,6 +6,8 @@ export type Route =
   | { name: 'module'; module: ModuleId }
   | { name: 'insights' }
   | { name: 'reset' }
+  | { name: 'close' }               // new looks: Close the day
+  | { name: 'seals' }               // new looks: Seals
   | { name: 'settings'; section?: string }
   | { name: 'dev'; page: 'design' | 'data' };
 
@@ -18,6 +20,8 @@ export function parse(hash: string): Route {
   if (MODULE_SET.has(a)) return { name: 'module', module: a as ModuleId };
   if (a === 'insights') return { name: 'insights' };
   if (a === 'reset') return { name: 'reset' };
+  if (a === 'close') return { name: 'close' };
+  if (a === 'seals') return { name: 'seals' };
   if (a === 'settings') return { name: 'settings', section: b };
   if (a === 'dev') return { name: 'dev', page: b === 'data' ? 'data' : 'design' };
   return { name: 'dashboard' };
@@ -29,6 +33,8 @@ export function href(r: Route): string {
     case 'module': return `#/${r.module}`;
     case 'insights': return '#/insights';
     case 'reset': return '#/reset';
+    case 'close': return '#/close';
+    case 'seals': return '#/seals';
     case 'settings': return r.section ? `#/settings/${r.section}` : '#/settings';
     case 'dev': return `#/dev/${r.page}`;
   }

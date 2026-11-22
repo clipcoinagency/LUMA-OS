@@ -46,4 +46,10 @@
   }
   .sm button { min-height: 32px; font-size: var(--text-sm); }
   button[aria-checked='true'] { color: var(--text); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .seg { background: transparent; border: 1px solid var(--text); padding: 3px; border-radius: 999px; }
+  :global(:root[data-style='almanac']) .pill { top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / var(--n)); background: var(--text); box-shadow: none; border-radius: 999px; }
+  :global(:root[data-style='almanac']) button { font-weight: 500; }
+  :global(:root[data-style='almanac']) button[aria-checked='true'] { color: var(--bg); }
 </style>

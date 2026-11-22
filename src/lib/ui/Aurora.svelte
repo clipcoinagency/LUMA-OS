@@ -32,6 +32,7 @@
   <i class="b b1"></i><i class="b b2"></i><i class="b b3"></i>
   <i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i>
   <i class="grain"></i>
+  <i class="lamp"></i>
 </div>
 
 <style>
@@ -42,6 +43,8 @@
     transition: filter 6s linear, opacity 6s linear;
   }
   .b { position: absolute; display: block; border-radius: 50%; will-change: transform; }
+  /* Almanac draws its own paper (grain + vignette in almanac.css): no light fields, no orbs. */
+  :global([data-style='almanac']) .aurora { display: none; }
   .b1 {
     width: 78vmax; height: 78vmax; top: -34vmax; right: -26vmax;
     background: radial-gradient(closest-side, var(--aurora-1), transparent 100%);
@@ -85,4 +88,14 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   :global([data-theme='dark']) .grain { opacity: .07; }
+
+  /* ---- Nebula (liquid glass) ---------------------------------------------------- */
+  .lamp { display: none; }
+  :global([data-theme='nebula']) .aurora { --orb-a: #b78cff; --orb-b: #2a0f5c; --orb-glow: rgba(183, 140, 255, .45); --orb-o: .72; }
+  :global(:root[data-style='nebula']) .lamp {
+  display: block; position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; pointer-events: none;
+  left: calc((var(--px) + .5) * 100vw - 23vmax); top: calc((var(--py) + .5) * 100vh - 23vmax);
+  background: radial-gradient(closest-side, rgba(170, 120, 255, .16), rgba(255, 110, 200, .06) 55%, transparent 100%);
+  transition: left .9s var(--ease-glide), top .9s var(--ease-glide);
+  }
 </style>

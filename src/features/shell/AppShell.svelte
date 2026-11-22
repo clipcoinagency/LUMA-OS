@@ -13,9 +13,9 @@
   import { app } from '../../lib/app.svelte';
   import { palette } from '../../lib/palette.svelte';
   import { router, href } from '../../lib/router.svelte';
-  import { navGroups, groupOfRoute, itemIsActive, type GroupId, type NavItem } from '../../lib/nav';
+  import { navGroups, groupOfRoute, itemIsActive, tocNumbers, type GroupId, type NavItem } from '../../lib/nav';
   import Logo from '../../lib/ui/Logo.svelte';
-  import { themeName, nextTheme } from '../../lib/theme';
+  import { themeName, nextTheme, isNewLook } from '../../lib/theme';
 
   let { children }: { children: Snippet } = $props();
   let more = $state(false);
@@ -24,7 +24,8 @@
   let sentinel: HTMLDivElement | undefined = $state();
   let navEl: HTMLElement | undefined = $state();
 
-  const groups = $derived(navGroups(app.workspace!));
+  const groups = $derived(navGroups(app.workspace!, isNewLook(app.settings?.theme)));
+  const toc = $derived(tocNumbers(groups)); // Almanac: page numbers in the contents column
   const where = $derived(groupOfRoute(router.route));
   const currentGroup = $derived(groups.find((g) => g.id === where));
   const homeActive = $derived(router.route.name === 'dashboard');
@@ -88,17 +89,18 @@
 <div class="shell">
   <aside class="sidebar glass-strong" aria-label="Main navigation">
     <a class="brand" href={href({ name: 'dashboard' })}><Logo size={34} />Life OS</a>
+    <p class="vol kicker" aria-hidden="true">Vol. II · A personal almanac</p>
     <nav bind:this={navEl}>
       <span class="indicator" aria-hidden="true"></span>
       <a href={href({ name: 'dashboard' })} class:active={homeActive} aria-current={homeActive ? 'page' : undefined} style="--c:var(--accent)">
-        <span class="ico"><House size={18} /></span>Home
+        <span class="ico"><House size={18} /></span><span class="lbl">Home</span><span class="lead" aria-hidden="true"></span><span class="pg" aria-hidden="true" data-pg="i"></span>
       </a>
       {#each groups as g (g.id)}
         <p class="group">{g.label}</p>
         {#each g.items as it (it.id)}
           {@const on = itemIsActive(it, router.route)}
           <a href={href(it.route)} class:active={on} aria-current={on ? 'page' : undefined} style="--c:{it.color}">
-            <span class="ico mod"><it.icon size={18} /></span>{it.label}
+            <span class="ico mod"><it.icon size={18} /></span><span class="lbl">{it.label}</span><span class="lead" aria-hidden="true"></span><span class="pg" aria-hidden="true" data-pg={toc[it.id]?.no}></span>
           </a>
         {/each}
       {/each}
@@ -285,4 +287,71 @@
   .sheet-links { display: grid; gap: var(--space-1); }
   .sheet-links a, .sheet-links button { min-height: 52px; font-size: var(--text-md); color: var(--text); width: 100%; }
   .sheet-links a:hover, .sheet-links button:hover { background: var(--surface-2); }
+
+  /* ================================================================== Almanac (Paper / Night Ink)
+     The sidebar becomes a printed table of contents: page numbers with dotted leaders, section marks,
+     an ink rule down the spine, and a vermilion bookmark that glides to the current page. */
+  .vol, .lead, .pg { display: none; }
+  :global([data-style='almanac']) .vol { display: block; margin: -6px 0 var(--space-2); padding: 0 var(--space-3); font-size: 9.5px; color: var(--text-3); }
+  :global([data-style='almanac']) .brand { font-style: italic; font-weight: 400; font-size: 26px; letter-spacing: -0.02em; gap: var(--space-3); }
+  :global([data-style='almanac']) .mbrand { font-style: italic; font-weight: 400; font-size: 21px; }
+  @media (min-width: 1024px) {
+    :global([data-style='almanac']) .sidebar {
+      top: var(--banner-offset, 0px); left: 0; bottom: 0; width: calc(var(--sidebar-w) + 12px); border-radius: 0;
+      background: transparent; border: 0; border-right: 1px solid var(--text); padding: var(--space-6) var(--space-5) var(--space-5) var(--space-4);
+    }
+    :global([data-style='almanac']) .main { margin-left: calc(var(--sidebar-w) + 12px); padding: 0 var(--space-9) var(--space-10); max-width: calc(var(--content-max) + var(--sidebar-w) + 12px); }
+    :global([data-style='almanac']) .top { margin: 0 calc(-1 * var(--space-9)); padding: var(--space-5) var(--space-9) var(--space-3); }
+  }
+  :global([data-style='almanac']) .sidebar nav { gap: 0; }
+  :global([data-style='almanac']) .sidebar nav a { min-height: 34px; gap: var(--space-2); padding: 0 0 0 var(--space-3); border-radius: 0; font-weight: 500; color: var(--text-2); }
+  :global([data-style='almanac']) .sidebar nav a .ico { display: none; }
+  :global([data-style='almanac']) .sidebar nav a:hover { background: none; color: var(--text); }
+  :global([data-style='almanac']) .sidebar nav a:hover .lbl { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  :global([data-style='almanac']) .lead { display: block; flex: 1; min-width: 12px; align-self: center; transform: translateY(4px); border-bottom: 1.5px dotted color-mix(in srgb, var(--text) 30%, transparent); }
+  .pg::after { content: attr(data-pg); }
+  :global([data-style='almanac']) .pg { display: inline; font: 500 11px var(--font-mono); letter-spacing: .04em; color: var(--text-3); min-width: 18px; text-align: right; }
+  :global([data-style='almanac']) .sidebar nav a.active { color: var(--text); }
+  :global([data-style='almanac']) .sidebar nav a.active .lbl { font-family: var(--font-display); font-style: italic; font-size: 18px; letter-spacing: -0.01em; }
+  :global([data-style='almanac']) .sidebar nav a.active .pg { color: var(--accent-ink); }
+  :global([data-style='almanac']) .indicator { right: auto; left: 0; width: 3px; border-radius: 0; background: var(--accent); box-shadow: none; }
+  :global([data-style='almanac']) .group {
+    display: flex; align-items: center; gap: var(--space-2); padding: var(--space-5) 0 var(--space-1) var(--space-3);
+    font: 500 10px var(--font-mono); letter-spacing: .18em; color: var(--text-3);
+  }
+  :global([data-style='almanac']) .group::before { content: '§'; font-family: var(--font-display); font-size: 13px; letter-spacing: 0; color: var(--accent-ink); }
+  :global([data-style='almanac']) .group::after { content: ''; flex: 1; height: 1px; background: var(--border-strong); }
+  :global([data-style='almanac']) .foot { border-top: 1px solid var(--text); padding-top: var(--space-4); }
+  :global([data-style='almanac']) .foot a { border-radius: 0; font-weight: 500; }
+  :global([data-style='almanac']) .foot a:hover { background: none; color: var(--text); }
+  :global([data-style='almanac']) .focusbtn { border-radius: 999px; border: 1px solid var(--text); background: transparent; color: var(--text); font-weight: 600; }
+  :global([data-style='almanac']) .focusbtn:hover { background: var(--text); color: var(--bg); border-color: var(--text); box-shadow: none; }
+  :global([data-style='almanac']) .focusbtn :global(svg) { color: var(--accent); }
+  :global([data-style='almanac']) .searchpill { border-radius: 0; background: transparent; border: 0; border-bottom: 1px solid var(--border-strong); padding: 0 2px; }
+  :global([data-style='almanac']) .searchpill:hover { border-bottom-color: var(--text); }
+  :global([data-style='almanac']) kbd { border-radius: 3px; font-family: var(--font-mono); font-weight: 500; }
+
+  :global([data-style='almanac']) .top.scrolled { background: color-mix(in srgb, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom-color: var(--text); }
+  :global([data-style='almanac']) .tbtn { background: transparent; border: 1px solid var(--text); box-shadow: none; color: var(--text); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  :global([data-style='almanac']) .tbtn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+  :global([data-style='almanac']) .newbtn { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: none; }
+  :global([data-style='almanac']) .newbtn:hover { background: var(--accent); color: var(--on-accent); border-color: var(--accent); filter: none; box-shadow: 3px 3px 0 var(--text); transform: translate(-2px, -2px); }
+
+  :global([data-style='almanac']) .gtabs { gap: var(--space-5); border-bottom: 1px solid var(--border-strong); padding-bottom: 0; margin-bottom: var(--space-5); }
+  :global([data-style='almanac']) .gtabs a { height: 42px; padding: 0 1px; border: 0; border-radius: 0; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+  :global([data-style='almanac']) .gtabs a.on { background: none; color: var(--text); border-bottom-color: var(--accent); }
+  :global([data-style='almanac']) .gtabs a :global(svg) { display: none; }
+
+  :global([data-style='almanac']) .bottom { left: 0; right: 0; bottom: 0; border-radius: 0; padding: 0 0 env(safe-area-inset-bottom); background: var(--bg); border: 0; border-top: 1px solid var(--text); }
+  :global([data-style='almanac']) .lens { top: -1px; bottom: auto; left: 0; height: 3px; width: calc(100% / var(--slots)); border-radius: 0; background: var(--accent); box-shadow: none; }
+  :global([data-style='almanac']) .bottom button { min-height: 60px; border-radius: 0; font: 500 9.5px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+  :global([data-style='almanac']) .bottom button.active :global(svg) { color: var(--accent-ink); }
+
+  /* ---- Nebula (liquid glass) ---------------------------------------------------- */
+  :global(:root[data-style='nebula']) .sidebar { background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 24%), var(--glass-bg-strong); }
+  :global(:root[data-style='nebula']) .indicator { background: linear-gradient(90deg, rgba(183, 140, 255, .28), rgba(255, 113, 200, .12)); box-shadow: inset 0 0 0 1px rgba(214, 190, 255, .3), 0 0 22px rgba(183, 140, 255, .25); }
+  :global(:root[data-style='nebula']) .brand { font-weight: 650; letter-spacing: -0.03em; }
+  :global(:root[data-style='nebula']) .newbtn { background: var(--accent-grad); color: #fff; box-shadow: 0 8px 22px rgba(123, 97, 255, .4), inset 0 1px 0 rgba(255, 255, 255, .35); }
+  :global(:root[data-style='nebula']) .bottom { background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 40%), var(--glass-bg-strong); }
+  :global(:root[data-style='nebula']) .lens { background: linear-gradient(90deg, rgba(183, 140, 255, .3), rgba(255, 113, 200, .16)); box-shadow: inset 0 0 0 1px rgba(214, 190, 255, .35), 0 0 24px rgba(183, 140, 255, .35); }
 </style>

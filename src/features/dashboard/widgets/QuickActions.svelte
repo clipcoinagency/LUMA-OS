@@ -37,4 +37,12 @@
     .qa:not(.wrap) button { scroll-snap-align: start; }
     .qa.wrap { grid-template-columns: repeat(3, 1fr); }
   }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .qa { gap: 0; border-top: 1px solid var(--text); border-left: 1px solid var(--border); }
+  :global(:root[data-style='almanac']) button { min-height: 78px; border: 0; border-radius: 0; background: transparent; box-shadow: inset -1px 0 0 var(--border), inset 0 -1px 0 var(--border); font-weight: 500; }
+  :global(:root[data-style='almanac']) button:hover { background: var(--surface); border-color: transparent; box-shadow: inset -1px 0 0 var(--border), inset 0 -1px 0 var(--border), inset 0 3px 0 var(--c); }
+  :global(:root[data-style='almanac']) button:active { transform: none; background: var(--surface-2); }
+  :global(:root[data-style='almanac']) .ico { width: auto; height: auto; background: none; border-radius: 0; }
+  :global(:root[data-style='almanac']) button:hover .ico { transform: translateY(-2px); }
 </style>

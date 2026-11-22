@@ -28,4 +28,8 @@
   select:focus-visible { border-color: var(--accent); box-shadow: var(--focus); border-radius: var(--radius-sm); }
   svg { position: absolute; right: 12px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); pointer-events: none; color: var(--text-2); }
   .hint { font-size: var(--text-xs); color: var(--text-3); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) label { font: 500 10.5px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+  :global(:root[data-style='almanac']) select:focus-visible { border-color: var(--text); }
 </style>

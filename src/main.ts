@@ -1,6 +1,8 @@
 import { mount } from 'svelte';
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/almanac.css';
+import './styles/nebula.css';
 import { installFonts } from './styles/fonts';
 import { initPwa } from './lib/pwa.svelte';
 import App from './App.svelte';

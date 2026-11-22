@@ -246,3 +246,213 @@
   --scrim: rgba(1, 4, 10, .62);
   color-scheme: dark;
 }
+
+/* =====================================================================================================
+   ALMANAC — Paper + Night Ink.
+   A second design language rather than another palette: the app as a printed almanac. Warm paper,
+   black ink, one vermilion accent, risograph inks for the areas, editorial serif headlines with optical
+   sizing, typewriter labels, hairline rules instead of glass. No blur, no glow: depth comes from ink
+   (a hard offset shadow when something lifts) and from paper grain. Layout differences live in
+   almanac.css and in each component's [data-style='almanac'] block. */
+
+[data-theme='paper'] {
+  --font-display: 'Fraunces Almanac', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Almanac Mono', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --display-weight: 400;
+  --display-tracking: -0.018em;
+
+  --ink: #1c1915;
+  --paper: #efe9dd;
+  --bg: #efe9dd;
+  --bg-accent: none;
+  --surface: #f7f3ea;
+  --surface-2: #ebe4d6;
+  --surface-3: #e0d7c5;
+  --border: #d6ccba;
+  --border-strong: #b3a790;
+  --text: #1c1915;
+  --text-2: #554e44;   /* 7.9:1 on surface */
+  --text-3: #857c6e;   /* meta / decorative only */
+
+  --accent: #c23b17;       /* vermilion — 5.3:1 with white text */
+  --accent-hover: #a5300f;
+  --accent-soft: #f3dacd;
+  --accent-ink: #a02c0b;
+  --on-accent: #ffffff;
+  --accent-2: #2440b8;     /* riso ultramarine */
+  --accent-2-soft: #dfe3f4;
+  --accent-grad: linear-gradient(135deg, #c23b17 0%, #c23b17 100%);
+
+  --success: #2c6a3d; --success-soft: #dde9d8;
+  --warning: #8a5a08; --warning-soft: #f1e3c6;
+  --danger: #ad2a1e;  --danger-soft: #f4d9d3;
+  --info: #2440b8;    --info-soft: #dfe3f4;
+
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px #1c1915;
+  --shadow-1: 0 1px 0 rgba(28, 25, 21, .06);
+  --shadow-2: 0 1px 0 rgba(28, 25, 21, .08), 0 14px 30px -14px rgba(28, 25, 21, .28);
+  --shadow-3: 0 2px 0 rgba(28, 25, 21, .1), 0 34px 70px -24px rgba(28, 25, 21, .42);
+  --glow: 0 0 0 0 transparent;
+
+  --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 10px; --radius-2xl: 14px;
+  --radius-btn: 999px;
+  --card-border: 1px solid var(--border);
+
+  /* risograph inks */
+  --mod-tasks: #c23b17; --mod-goals: #a3700f; --mod-habits: #2c7a4a; --mod-calendar: #2440b8;
+  --mod-notes: #7a5634; --mod-wellness: #c0395f; --mod-finance: #0f6e6a;
+  --mod-work: #34508f; --mod-study: #b4551a; --mod-focus: #5a3ea6; --mod-insights: #0f6e6a; --mod-reset: #a3700f;
+
+  --aurora-1: transparent; --aurora-2: transparent; --aurora-3: transparent;
+
+  --glass-bg: rgba(247, 243, 234, .96);
+  --glass-bg-strong: #f4efe5;
+  --glass-border: #d6ccba;
+  --glass-edge: rgba(28, 25, 21, .16);
+  --glass-highlight: 0 0 0 0 transparent;
+  --glass-shadow: 0 1px 0 rgba(28, 25, 21, .06);
+  --glass-blur: 0px;
+  --glass-sat: 1;
+  --ring-track: rgba(28, 25, 21, .1);
+  --solid-highlight: 0 0 0 0 transparent;
+  --card-bg: #f7f3ea; --card-edge: #d6ccba; --card-blur: 0px; --card-lift: 4px 4px 0 #1c1915;
+
+  --grain: .5;
+  --scrim: rgba(28, 25, 21, .45);
+  color-scheme: light;
+}
+
+[data-theme='ink'] {
+  --font-display: 'Fraunces Almanac', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Almanac Mono', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --display-weight: 380;
+  --display-tracking: -0.015em;
+
+  --ink: #efe7d6;
+  --paper: #11100e;
+  --bg: #11100e;
+  --bg-accent: none;
+  --surface: #191714;
+  --surface-2: #211f1b;
+  --surface-3: #2b2823;
+  --border: #322e28;
+  --border-strong: #4b453b;
+  --text: #efe7d6;     /* bone */
+  --text-2: #b6ac99;   /* 8.4:1 on surface */
+  --text-3: #837a6b;
+
+  --accent: #ff6b3d;       /* hot vermilion; dark ink on it = 7.4:1 */
+  --accent-hover: #ff8762;
+  --accent-soft: rgba(255, 107, 61, .14);
+  --accent-ink: #ff8f6b;
+  --on-accent: #1d0c05;
+  --accent-2: #93a7ff;
+  --accent-2-soft: rgba(147, 167, 255, .14);
+  --accent-grad: linear-gradient(135deg, #ff6b3d 0%, #ff6b3d 100%);
+
+  --success: #74cf91; --success-soft: rgba(116, 207, 145, .13);
+  --warning: #eeb44e; --warning-soft: rgba(238, 180, 78, .13);
+  --danger: #ff7566;  --danger-soft: rgba(255, 117, 102, .13);
+  --info: #93a7ff;    --info-soft: rgba(147, 167, 255, .13);
+
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px #efe7d6;
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, .35);
+  --shadow-2: 0 1px 0 rgba(0, 0, 0, .4), 0 16px 34px -14px rgba(0, 0, 0, .7);
+  --shadow-3: 0 2px 0 rgba(0, 0, 0, .45), 0 36px 72px -24px rgba(0, 0, 0, .85);
+  --glow: 0 0 0 0 transparent;
+
+  --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 10px; --radius-2xl: 14px;
+  --radius-btn: 999px;
+  --card-border: 1px solid var(--border);
+
+  --mod-tasks: #ff6b3d; --mod-goals: #e8b552; --mod-habits: #7cd49b; --mod-calendar: #93a7ff;
+  --mod-notes: #d4b08a; --mod-wellness: #ff8fb1; --mod-finance: #5fd2c4;
+  --mod-work: #a3b4ff; --mod-study: #ffa468; --mod-focus: #b8a0ff; --mod-insights: #5fd2c4; --mod-reset: #e8b552;
+
+  --aurora-1: transparent; --aurora-2: transparent; --aurora-3: transparent;
+
+  --glass-bg: rgba(25, 23, 20, .96);
+  --glass-bg-strong: #171512;
+  --glass-border: #322e28;
+  --glass-edge: rgba(239, 231, 214, .12);
+  --glass-highlight: 0 0 0 0 transparent;
+  --glass-shadow: 0 1px 0 rgba(0, 0, 0, .4);
+  --glass-blur: 0px;
+  --glass-sat: 1;
+  --ring-track: rgba(239, 231, 214, .1);
+  --solid-highlight: 0 0 0 0 transparent;
+  --card-bg: #191714; --card-edge: #322e28; --card-blur: 0px; --card-lift: 4px 4px 0 #ff6b3d;
+
+  --grain: .32;
+  --scrim: rgba(5, 4, 3, .66);
+  color-scheme: dark;
+}
+
+/* =====================================================================================================
+   NEBULA — liquid violet glass. A dark ultraviolet sky with a slow starfield, glass that refracts it
+   (strong blur + saturation, a specular rim along the top edge), iridescent violet→magenta→blue edges
+   that turn slowly, and soft neon module colours. Layout = the glass shell; effects in nebula.css. */
+[data-theme='nebula'] {
+  --font-display: 'Nebula Sans', 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'Almanac Mono', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --display-weight: 640;
+  --display-tracking: -0.035em;
+
+  --bg: #0a0614;
+  --bg-accent: none;
+  --surface: #161029;
+  --surface-2: #1e1636;
+  --surface-3: #291f48;
+  --border: #2d2452;
+  --border-strong: #46397d;
+  --text: #f4effe;
+  --text-2: #c0b5e2;   /* 8.6:1 on surface */
+  --text-3: #8d82b6;
+
+  --accent: #b78cff;       /* lavender; dark ink on it = 8.1:1 */
+  --accent-hover: #caa8ff;
+  --accent-soft: rgba(183, 140, 255, .16);
+  --accent-ink: #d4bcff;
+  --on-accent: #16082e;
+  --accent-2: #ff71c8;     /* hot magenta */
+  --accent-2-soft: rgba(255, 113, 200, .15);
+  --accent-grad: linear-gradient(120deg, #7b61ff 0%, #b78cff 45%, #ff71c8 100%);
+
+  --success: #5fe3b0; --success-soft: rgba(95, 227, 176, .13);
+  --warning: #ffcc6b; --warning-soft: rgba(255, 204, 107, .13);
+  --danger: #ff7a9a;  --danger-soft: rgba(255, 122, 154, .13);
+  --info: #8fb2ff;    --info-soft: rgba(143, 178, 255, .13);
+
+  --focus: 0 0 0 3px rgba(183, 140, 255, .55);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-2: 0 10px 30px rgba(10, 0, 40, .55);
+  --shadow-3: 0 24px 70px rgba(10, 0, 40, .7);
+  --glow: 0 0 0 1px rgba(183, 140, 255, .28), 0 0 30px rgba(160, 110, 255, .28);
+
+  --radius-xs: 10px; --radius-sm: 14px; --radius-md: 18px; --radius-lg: 22px; --radius-xl: 26px; --radius-2xl: 32px;
+  --radius-btn: 999px;
+  --card-border: 1px solid var(--border);
+
+  --mod-tasks: #b78cff; --mod-goals: #ffcc6b; --mod-habits: #6ef0b8; --mod-calendar: #8fb2ff;
+  --mod-notes: #e0b3ff; --mod-wellness: #ff8fc4; --mod-finance: #5ee6e0;
+  --mod-work: #9fb6ff; --mod-study: #ffad7a; --mod-focus: #c79bff; --mod-insights: #6ae7d4; --mod-reset: #ffcc6b;
+
+  --aurora-1: rgba(128, 72, 255, .46);
+  --aurora-2: rgba(255, 72, 190, .26);
+  --aurora-3: rgba(70, 110, 255, .34);
+
+  --glass-bg: rgba(30, 20, 62, .42);
+  --glass-bg-strong: rgba(24, 16, 52, .66);
+  --glass-border: rgba(214, 190, 255, .2);
+  --glass-edge: rgba(0, 0, 0, .3);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 -1px 0 rgba(255, 255, 255, .04), inset 0 0 0 1px rgba(255, 255, 255, .03);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 30px 70px rgba(20, 0, 60, .55);
+  --glass-blur: 30px;
+  --glass-sat: 1.9;
+  --ring-track: rgba(200, 180, 255, .12);
+  --solid-highlight: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --card-bg: rgba(34, 22, 70, .4); --card-edge: rgba(206, 180, 255, .17); --card-blur: 24px; --card-lift: 0 24px 60px rgba(30, 0, 90, .55), 0 0 44px rgba(183, 140, 255, .22);
+
+  --scrim: rgba(6, 2, 16, .6);
+  color-scheme: dark;
+}

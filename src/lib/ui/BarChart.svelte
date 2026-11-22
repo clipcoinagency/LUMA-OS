@@ -36,4 +36,10 @@
   }
   .bar.hl, .col:hover .bar { opacity: 1; box-shadow: var(--glow); }
   .lbl { position: absolute; bottom: -22px; font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .bars { border-bottom: 1px solid var(--text); }
+  :global(:root[data-style='almanac']) .bar { border-radius: 0; opacity: .9; }
+  :global(:root[data-style='almanac']) .bar.hl, :global(:root[data-style='almanac']) .col:hover .bar { box-shadow: none; opacity: 1; }
+  :global(:root[data-style='almanac']) .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; }
 </style>

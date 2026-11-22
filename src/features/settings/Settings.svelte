@@ -13,6 +13,8 @@
   import ModulePicker from '../workspace/ModulePicker.svelte';
   import ThemePicker from '../workspace/ThemePicker.svelte';
   import LayoutPicker from '../workspace/LayoutPicker.svelte';
+  import NotificationSettings from './NotificationSettings.svelte';
+  import { isNewLook } from '../../lib/theme';
   import RestoreFlow from './RestoreFlow.svelte';
   import { backUpNow, lastBackupAt, undoLastChange } from './backupActions';
   import { toast } from '../../lib/ui/toast.svelte';
@@ -101,8 +103,17 @@
 
   <Card title="Appearance">
     <ThemePicker value={s.theme} onchange={(t) => app.updateSettings({ theme: t })} />
+    {#if s.theme === 'paper' || s.theme === 'ink'}
+      <div class="gap"><Switch label="Turn the page at night" description="Paper from 7 am, Night Ink from 7 pm — switches by itself." checked={!!s.almanacAuto} onchange={(v) => app.updateSettings({ almanacAuto: v })} /></div>
+    {/if}
     <div class="gap"><Switch label="Reduce motion" description="Minimise animations throughout Life OS." checked={s.reduceMotion} onchange={(v) => app.updateSettings({ reduceMotion: v })} /></div>
   </Card>
+
+  {#if isNewLook(s.theme)}
+    <Card title="Reminders & notifications" subtitle="Choose what Life OS reminds you about.">
+      <NotificationSettings />
+    </Card>
+  {/if}
 
   <Card title="Modules" subtitle="Turn areas on or off. Turning a module off hides it — your data is kept.">
     <ModulePicker selected={w.enabledModules} onchange={setModules} />

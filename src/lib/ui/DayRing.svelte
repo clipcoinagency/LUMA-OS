@@ -62,6 +62,14 @@
     <!-- the day, as an outer orbit -->
     <circle cx={C} cy={C} r={OUT} class="orbit" />
     {#if elapsed}<path d={elapsed} class="elapsed" />{/if}
+    {#each Array.from({ length: 24 }, (_, h) => h) as h (h)}
+      {@const a = -90 + (h / 24) * 360}
+      <line x1={C + (OUT - 3) * Math.cos(rad(a))} y1={C + (OUT - 3) * Math.sin(rad(a))} x2={C + (OUT + 3) * Math.cos(rad(a))} y2={C + (OUT + 3) * Math.sin(rad(a))} class="minor" />
+    {/each}
+    {#each [0, 6, 12, 18] as h (h)}
+      {@const a = -90 + (h / 24) * 360}
+      <text x={C + (OUT - 15) * Math.cos(rad(a))} y={C + (OUT - 15) * Math.sin(rad(a))} class="hr" text-anchor="middle" dominant-baseline="central">{String(h).padStart(2, '0')}</text>
+    {/each}
     {#each [0, 6, 12, 18] as h (h)}
       {@const a = -90 + (h / 24) * 360}
       <line x1={C + (OUT - 4) * Math.cos(rad(a))} y1={C + (OUT - 4) * Math.sin(rad(a))} x2={C + (OUT + 4) * Math.cos(rad(a))} y2={C + (OUT + 4) * Math.sin(rad(a))} class="mark" />
@@ -114,4 +122,20 @@
   .top { font-size: var(--text-xs); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
   .main { font-family: var(--font-display); font-weight: var(--display-weight); font-size: calc(var(--size) * .17); line-height: 1; letter-spacing: -0.03em; }
   .subt { font-size: var(--text-sm); color: var(--text-2); font-weight: 600; margin-top: 4px; }
+
+  /* ---- Almanac: hairline ink, hour ticks and numerals, flat print arcs, a vermilion "now" dot ---- */
+  .minor, .hr { display: none; }
+  :global([data-style='almanac']) .minor { display: inline; stroke: var(--text); stroke-width: 1; opacity: .45; }
+  :global([data-style='almanac']) .hr { display: inline; fill: var(--text-3); font: 500 9.5px var(--font-mono); letter-spacing: .06em; }
+  :global([data-style='almanac']) .orbit { stroke: var(--text); stroke-width: 1; opacity: .55; }
+  :global([data-style='almanac']) .elapsed { stroke: var(--text); stroke-width: 2.5; stroke-linecap: butt; }
+  :global([data-style='almanac']) .mark { stroke: var(--text); stroke-width: 2.2; opacity: 1; stroke-linecap: butt; }
+  :global([data-style='almanac']) .halo { display: none; }
+  :global([data-style='almanac']) .core, :global([data-style='almanac']) .night .core { fill: var(--accent); filter: none; r: 6.5px; }
+  :global([data-style='almanac']) .track { stroke-width: 9; stroke-linecap: butt; }
+  :global([data-style='almanac']) .fill { stroke-width: 9; stroke-linecap: butt; filter: none !important; }
+  :global([data-style='almanac']) .empty { stroke-width: 9; stroke-linecap: butt; stroke-dasharray: 1.5 5; opacity: .6; }
+  :global([data-style='almanac']) .top { font: 500 10.5px var(--font-mono); letter-spacing: .22em; color: var(--text-2); }
+  :global([data-style='almanac']) .main { font-weight: 340; letter-spacing: -0.045em; }
+  :global([data-style='almanac']) .subt { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 17px; margin-top: 2px; }
 </style>

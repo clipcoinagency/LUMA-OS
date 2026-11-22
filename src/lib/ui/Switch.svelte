@@ -39,4 +39,10 @@
   .on .thumb { transform: translateX(20px); }
   :global([data-theme='dark']) .on .thumb { background: var(--on-accent); }
   .switch:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .switch { background: transparent; border: 1.5px solid var(--text); }
+  :global(:root[data-style='almanac']) .thumb { top: 3.5px; left: 3.5px; width: 20px; height: 20px; background: var(--text); box-shadow: none; }
+  :global(:root[data-style='almanac']) .on { background: var(--accent); border-color: var(--accent); box-shadow: none; }
+  :global(:root[data-style='almanac']) .on .thumb { background: var(--bg); }
 </style>

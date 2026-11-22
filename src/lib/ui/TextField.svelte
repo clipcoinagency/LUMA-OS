@@ -52,4 +52,9 @@
   .invalid input, .invalid textarea { border-color: var(--danger); }
   .hint { font-size: var(--text-xs); color: var(--text-3); }
   .err { font-size: var(--text-xs); color: var(--danger); font-weight: 600; }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) label { font: 500 10.5px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+  :global(:root[data-style='almanac']) input:hover, :global(:root[data-style='almanac']) textarea:hover { border-color: var(--text-2); }
+  :global(:root[data-style='almanac']) input:focus-visible, :global(:root[data-style='almanac']) textarea:focus-visible { border-color: var(--text); }
 </style>

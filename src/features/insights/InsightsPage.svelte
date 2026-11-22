@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageKicker from '../modules/PageKicker.svelte';
   // Insights: patterns from your own records. Only things the data genuinely supports appear; the rest
   // show how much more is needed ("still learning") instead of a guess.
   import { LineChart, Sparkles } from '../../lib/navicons';
@@ -40,7 +41,7 @@
 
 <header class="ph">
   <span class="ico" aria-hidden="true"><LineChart size={24} /></span>
-  <div class="t"><h1>Insights</h1><p class="muted">Patterns found in your own data — never guesses.</p></div>
+  <div class="t"><PageKicker id="insights" /><h1>Insights</h1><p class="muted">Patterns found in your own data — never guesses.</p></div>
 </header>
 
 {#if !result}
@@ -138,4 +139,9 @@
   .need { font-size: var(--text-sm); color: var(--text-2); }
   .meter { height: 5px; border-radius: 99px; background: var(--ring-track); overflow: hidden; margin-top: 4px; }
   .meter i { display: block; height: 100%; border-radius: inherit; background: var(--c); transition: width var(--dur-xslow) var(--ease-glide); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .dot { border-radius: 0; box-shadow: none; }
+  :global(:root[data-style='almanac']) .bar { border-radius: 0; background: var(--c); opacity: .45; }
+  :global(:root[data-style='almanac']) .col.top .bar { opacity: 1; box-shadow: none; }
 </style>

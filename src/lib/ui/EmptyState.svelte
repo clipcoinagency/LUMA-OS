@@ -23,4 +23,8 @@
   .title { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-md); }
   .body { color: var(--text-2); max-width: 36ch; }
   .action { margin-top: var(--space-3); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .art { background: none; border: 1px solid var(--text); border-radius: 50%; color: var(--text); box-shadow: none; }
+  :global(:root[data-style='almanac']) .title { font-style: italic; font-size: 22px; font-weight: 380; }
 </style>

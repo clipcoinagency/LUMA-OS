@@ -49,4 +49,13 @@
   @keyframes in { from { opacity: 0; } }
   :global(.compact) .wc { padding: var(--space-4); }
   :global(.compact) header { margin-bottom: var(--space-3); }
+
+  /* ---- Almanac: a column under a 2px ink rule; riso swatch + serif title; typewriter "Open" ---- */
+  :global(:root[data-style='almanac']) .wc { background: none; border: 0; border-top: 2px solid var(--text); border-radius: 0; padding: var(--space-3) 0 var(--space-2); box-shadow: none; }
+  :global(:root[data-style='almanac']) .wc.lift:hover { transform: none; box-shadow: none; border-color: var(--text); }
+  :global(:root[data-style='almanac']) .chip { display: none; }
+  :global(:root[data-style='almanac']) .ttl::before { content: ''; width: 9px; height: 9px; background: var(--c, var(--text)); flex: none; }
+  :global(:root[data-style='almanac']) h2 { font-size: 22px; font-weight: 400; }
+  :global(:root[data-style='almanac']) .open { padding: 4px 0; border-radius: 0; font: 500 10.5px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+  :global(:root[data-style='almanac']) .open:hover { background: none; color: var(--accent-ink); }
 </style>

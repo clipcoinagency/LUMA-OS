@@ -22,4 +22,8 @@
   input::-webkit-search-cancel-button { display: none; }
   button { width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: none; color: var(--text-3); cursor: pointer; border-radius: 50%; flex-shrink: 0; }
   button:hover { background: var(--surface-2); color: var(--text); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .search { background: transparent; border-color: var(--text); }
+  :global(:root[data-style='almanac']) .search:focus-within { border-color: var(--text); color: var(--text); }
 </style>

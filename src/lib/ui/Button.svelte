@@ -51,4 +51,23 @@
     animation: spin .7s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .btn { font-weight: 560; letter-spacing: .005em; }
+  :global(:root[data-style='almanac']) .primary { background: var(--text); color: var(--bg); box-shadow: none; }
+  :global(:root[data-style='almanac']) .primary:hover:not(:disabled) { background: var(--accent); color: var(--on-accent); transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--text); }
+  :global(:root[data-style='almanac']) .secondary { background: transparent; border-color: var(--text); color: var(--text); }
+  :global(:root[data-style='almanac']) .secondary:hover:not(:disabled) { background: var(--text); color: var(--bg); border-color: var(--text); }
+  :global(:root[data-style='almanac']) .ghost { color: var(--text-2); }
+  :global(:root[data-style='almanac']) .ghost:hover:not(:disabled) { background: none; color: var(--text); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  :global(:root[data-style='almanac']) .danger { background: var(--danger); color: #fff; }
+
+  /* ---- Nebula (liquid glass) ---------------------------------------------------- */
+  :global(:root[data-style='nebula']) .primary { background: var(--accent-grad); color: #fff; box-shadow: 0 8px 24px rgba(123, 97, 255, .35), inset 0 1px 0 rgba(255, 255, 255, .35); position: relative; overflow: hidden; }
+  :global(:root[data-style='nebula']) .primary::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .35) 50%, transparent 70%); transform: translateX(-120%); transition: transform .7s var(--ease-glide); }
+  :global(:root[data-style='nebula']) .primary:hover:not(:disabled) { background: var(--accent-grad); transform: translateY(-1px); box-shadow: 0 12px 32px rgba(123, 97, 255, .5), 0 0 30px rgba(255, 113, 200, .25), inset 0 1px 0 rgba(255, 255, 255, .4); }
+  :global(:root[data-style='nebula']) .primary:hover:not(:disabled)::after { transform: translateX(120%); }
+  :global(:root[data-style='nebula']) .secondary { background: rgba(255, 255, 255, .05); border-color: rgba(214, 190, 255, .28); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  :global(:root[data-style='nebula']) .secondary:hover:not(:disabled) { border-color: var(--accent); background: rgba(183, 140, 255, .1); }
+  :global(:root[data-style='nebula']) .danger { color: #1a0610; }
 </style>

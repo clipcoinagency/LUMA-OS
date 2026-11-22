@@ -9,6 +9,13 @@
   import CustomizeHome from './CustomizeHome.svelte';
   import PulseRow from './PulseRow.svelte';
   import DailyLine from './DailyLine.svelte';
+  import YearInk from './YearInk.svelte';
+  import QuickCapture from './QuickCapture.svelte';
+  import DayTimeline from './DayTimeline.svelte';
+  import RitualsRow from './RitualsRow.svelte';
+  import OnThisDay from './OnThisDay.svelte';
+  import { Printer } from '@lucide/svelte';
+  import { styleOf, isNewLook } from '../../lib/theme';
   import { SlidersHorizontal } from '@lucide/svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
@@ -41,6 +48,8 @@
   let width = $state(800);
   let customizing = $state(false);
   const ws = $derived(app.workspace!);
+  const almanac = $derived(styleOf(app.settings?.theme ?? 'soft') === 'almanac'); // Paper / Night Ink: print
+  const newLook = $derived(isNewLook(app.settings?.theme));                        // Paper / Night Ink / Nebula sections
   const all = $derived(visibleWidgets(ws));
   const showQuick = $derived(all.includes('quick-actions'));
   const hasActivity = $derived(ws.enabledModules.some((m) => m === 'tasks' || m === 'habits' || m === 'wellness'));
@@ -65,11 +74,16 @@
 
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
   <CommandCenter />
+  {#if newLook}<QuickCapture />{/if}
   <PulseRow />
+  {#if newLook}<RitualsRow /><DayTimeline />{/if}
 
   <div class="bar">
     <h2>Today at a glance</h2>
-    <Button size="sm" variant="ghost" onclick={() => (customizing = true)}>{#snippet icon()}<SlidersHorizontal />{/snippet}Customize</Button>
+    <div class="bar-acts">
+      {#if almanac}<Button size="sm" variant="ghost" onclick={() => window.print()}>{#snippet icon()}<Printer />{/snippet}Print today’s page</Button>{/if}
+      <Button size="sm" variant="ghost" onclick={() => (customizing = true)}>{#snippet icon()}<SlidersHorizontal />{/snippet}Customize</Button>
+    </div>
   </div>
 
   {#if showQuick}<div class="quick"><QuickActions /></div>{/if}
@@ -92,6 +106,7 @@
     </div>
   {/if}
 
+  {#if newLook}<YearInk /><OnThisDay />{/if}
   <DailyLine />
 </div>
 
@@ -103,10 +118,18 @@
   .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-6) 0 var(--space-3); }
   .bar h2 { font-size: var(--text-lg); color: var(--text-2); }
   .quick { margin: 0 0 var(--space-4); }
+  .bar-acts { display: flex; gap: var(--space-1); flex-wrap: wrap; justify-content: flex-end; }
   .cols { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
   .dcol { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-width: 0; align-content: start; }
   .compact .cols, .compact .dcol { gap: var(--space-3); }
   .cell { animation: rise var(--dur-slow) var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
   .none { display: grid; gap: var(--space-4); justify-items: start; padding: var(--space-6); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
+
+  /* ---- Almanac: "Today at a glance" is a section head; columns get newspaper gutters ---- */
+  :global(:root[data-style='almanac']) .bar { margin: var(--space-10) 0 var(--space-6); padding-bottom: var(--space-3); border-bottom: 1px solid var(--text); align-items: flex-end; }
+  :global(:root[data-style='almanac']) .bar h2 { font-size: clamp(28px, 3.2vw, 40px); font-weight: 340; font-style: italic; letter-spacing: -0.03em; color: var(--text); line-height: 1; }
+  :global(:root[data-style='almanac']) .cols { column-gap: var(--space-8); row-gap: var(--space-8); }
+  :global(:root[data-style='almanac']) .dcol { gap: var(--space-8); }
+  :global(:root[data-style='almanac']) .compact .cols, :global(:root[data-style='almanac']) .compact .dcol { gap: var(--space-6); }
 </style>

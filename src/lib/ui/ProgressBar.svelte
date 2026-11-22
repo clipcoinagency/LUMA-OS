@@ -22,4 +22,12 @@
   }
   .fill:not(.indeterminate)::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 14px; background: linear-gradient(to right, transparent, var(--tip)); border-radius: inherit; opacity: .7; }
   @keyframes shimmer { 0%, 35% { transform: translateX(-120%); } 65%, 100% { transform: translateX(120%); } }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .track { background: var(--ring-track); border-radius: 0; }
+  :global(:root[data-style='almanac']) .fill { border-radius: 0; box-shadow: none; }
+  :global(:root[data-style='almanac']) .fill::after, :global(:root[data-style='almanac']) .fill::before { display: none; }
+
+  /* ---- Nebula (liquid glass) ---------------------------------------------------- */
+  :global(:root[data-style='nebula']) .fill { background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .25)); }
 </style>

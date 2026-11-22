@@ -15,6 +15,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const route = (event.notification.data && event.notification.data.route) || '';
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of wins) {
+      if ('focus' in c) { await c.focus(); if (route && 'navigate' in c) await c.navigate(self.registration.scope + route); return; }
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(self.registration.scope + route);
+  })());
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;

@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import { MODULES } from '../../lib/modules';
   import type { ModuleId } from '../../lib/db/schema';
+  import PageKicker from './PageKicker.svelte';
 
   interface Props { module: ModuleId; subtitle?: string; actions?: Snippet }
   let { module, subtitle, actions }: Props = $props();
@@ -11,6 +12,7 @@
 <header class="ph" style="--c:{m.color}">
   <span class="ico" aria-hidden="true"><m.icon size={24} /></span>
   <div class="t">
+    <PageKicker id={module} />
     <h1>{m.name}</h1>
     <p class="muted">{subtitle ?? m.tagline}</p>
   </div>

@@ -7,7 +7,18 @@
   const nodes = [[406, 256], [331, 386], [181, 386], [106, 256], [181, 126], [331, 126]] as const;
 </script>
 
-<svg width={size} height={size} viewBox="0 0 512 512" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} class="logo">
+<!-- Almanac mark: an ink tile, the day as a hairline dial, and the vermilion "now" dot (same motif as Home). -->
+<svg width={size} height={size} viewBox="0 0 512 512" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} class="logo alm">
+  {#if !bare}<rect width="512" height="512" rx="104" class="tile" />{/if}
+  <circle cx="256" cy="256" r="148" class="dial" />
+  {#each [0, 90, 180, 270] as a (a)}
+    <line x1={256 + 172 * Math.cos((a - 90) * Math.PI / 180)} y1={256 + 172 * Math.sin((a - 90) * Math.PI / 180)} x2={256 + 196 * Math.cos((a - 90) * Math.PI / 180)} y2={256 + 196 * Math.sin((a - 90) * Math.PI / 180)} class="tick" />
+  {/each}
+  <path d="M 256 108 A 148 148 0 0 1 384.2 182" class="elapsed" />
+  <circle cx="384.2" cy="182" r="40" class="now" />
+  <circle cx="256" cy="256" r="16" class="hub" />
+</svg>
+<svg width={size} height={size} viewBox="0 0 512 512" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} class="logo aur">
   <defs>
     <radialGradient id="{u}-bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#14204a" /><stop offset="1" stop-color="#04060f" /></radialGradient>
     <radialGradient id="{u}-s" cx="36%" cy="30%" r="78%"><stop offset="0" stop-color="#f1fbff" /><stop offset=".22" stop-color="#8fdcff" /><stop offset=".58" stop-color="#4a6dff" /><stop offset="1" stop-color="#2a1b9c" /></radialGradient>
@@ -32,4 +43,15 @@
 
 <style>
   .logo { display: block; flex: none; }
+  .alm { display: none; }
+  :global([data-style='almanac']) .alm { display: block; }
+  :global([data-style='almanac']) .aur { display: none; }
+  .tile { fill: var(--ink, #1c1915); }
+  .dial { fill: none; stroke: var(--paper, #efe9dd); stroke-width: 14; opacity: .9; }
+  .tick { stroke: var(--paper, #efe9dd); stroke-width: 14; stroke-linecap: round; opacity: .55; }
+  .elapsed { fill: none; stroke: var(--accent, #c23b17); stroke-width: 22; stroke-linecap: round; }
+  .now { fill: var(--accent, #c23b17); }
+  .hub { fill: var(--paper, #efe9dd); }
+  .logo.alm:not(:has(.tile)) .dial, .logo.alm:not(:has(.tile)) .tick, .logo.alm:not(:has(.tile)) .hub { stroke: var(--ink, #1c1915); }
+  .logo.alm:not(:has(.tile)) .hub { fill: var(--ink, #1c1915); }
 </style>

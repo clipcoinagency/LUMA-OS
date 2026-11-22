@@ -83,4 +83,15 @@
   @keyframes fade { from { opacity: 0; } }
   @keyframes up { from { transform: translateY(24px); opacity: 0; } }
   @keyframes pop { from { transform: translateY(8px) scale(.98); opacity: 0; } }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) dialog::backdrop { backdrop-filter: none; }
+  :global(:root[data-style='almanac']) .sheet { border: 1px solid var(--text); box-shadow: none; }
+  :global(:root[data-style='almanac']) header { padding-bottom: var(--space-3); border-bottom: 1px solid var(--text); }
+  :global(:root[data-style='almanac']) h2 { font-size: 27px; font-weight: 360; font-style: italic; letter-spacing: -0.02em; }
+  :global(:root[data-style='almanac']) .x:hover { background: none; box-shadow: inset 0 0 0 1px var(--text); border-radius: 999px; }
+  @media (min-width: 640px) { :global(:root[data-style='almanac']) .sheet { box-shadow: 7px 7px 0 color-mix(in srgb, var(--text) 88%, transparent); } }
+
+  /* ---- Nebula (liquid glass) ---------------------------------------------------- */
+  :global(:root[data-style='nebula']) .sheet { background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 30%), rgba(26, 17, 54, .86); border-color: rgba(214, 190, 255, .22); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); box-shadow: var(--shadow-3), 0 0 60px rgba(183, 140, 255, .18); }
 </style>

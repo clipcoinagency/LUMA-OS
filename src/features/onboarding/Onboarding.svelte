@@ -118,13 +118,14 @@
       <section class="step" in:fly={{ x: 28 * direction, duration: dur(320), delay: dur(60) }} out:fade={{ duration: dur(120) }}>
         {#if step === 'welcome'}
           <div class="welcome">
+            <div class="cover" aria-hidden="true"><Logo size={92} /><p class="kicker">Life OS · Vol. II · A personal almanac</p></div>
             <div class="orb" aria-hidden="true">
               {#each Object.values(MODULES) as m, i (m.id)}
                 <span class="orbit" style="--i:{i};--c:{m.color}"><m.icon size={18} /></span>
               {/each}
               <span class="core"></span>
             </div>
-            <h1 id="ob-heading" tabindex="-1" class="hero">Your life.<br />Your system.</h1>
+            <h1 id="ob-heading" tabindex="-1" class="hero">Your life.<br />Your <em>system</em>.</h1>
             <p class="lead">Your entire life, one system. Tasks, goals, habits, focus, money and wellbeing in one calm, private workspace — arranged the way you actually live.</p>
             <ul class="promises">
               <li><ShieldCheck size={18} aria-hidden="true" /> Your data stays on your device</li>
@@ -149,7 +150,7 @@
 
         {:else if step === 'theme'}
           <h1 id="ob-heading" tabindex="-1">Pick your look</h1>
-          <p class="lead">Three themes, same great experience. Switch any time in Settings.</p>
+          <p class="lead">Six looks: the classic three, plus Paper, Night Ink and Nebula with extra features. Switch any time in Settings.</p>
           <ThemePicker value={theme} onchange={setTheme} />
 
         {:else if step === 'about'}
@@ -264,6 +265,26 @@
 
   .assemble { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); max-width: 340px; margin-bottom: var(--space-2); }
   .tile { width: 56px; height: 56px; border-radius: var(--radius-md); display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 30%, var(--border)); box-shadow: var(--shadow-1); }
+
+  /* ---- Almanac: the welcome is a cover page ---- */
+  .cover { display: none; }
+  .hero em { font-style: normal; }
+  :global(:root[data-style='almanac']) .orb { display: none; }
+  :global(:root[data-style='almanac']) .cover { display: grid; justify-items: center; gap: var(--space-4); margin-bottom: var(--space-3); }
+  :global(:root[data-style='almanac']) .cover .kicker { display: flex; align-items: center; gap: var(--space-3); width: min(560px, 86vw); color: var(--text-2); }
+  :global(:root[data-style='almanac']) .cover .kicker::before, :global(:root[data-style='almanac']) .cover .kicker::after { content: ''; flex: 1; height: 1px; background: var(--text); }
+  :global(:root[data-style='almanac']) .hero { font-size: clamp(3.2rem, 10vw, 6.6rem); font-weight: 320; letter-spacing: -0.048em; line-height: .9; }
+  :global(:root[data-style='almanac']) .hero em { font-style: italic; font-weight: 300; }
+  :global(:root[data-style='almanac']) .welcome .lead { font-family: var(--font-display); font-style: italic; font-size: clamp(18px, 2vw, 21px); line-height: 1.4; max-width: 46ch; }
+  :global(:root[data-style='almanac']) .promises { font: 500 10.5px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+  :global(:root[data-style='almanac']) .promises :global(svg) { color: var(--accent); width: 15px; height: 15px; }
+  :global(:root[data-style='almanac']) .brand { font-style: italic; font-weight: 400; font-size: 21px; }
+  :global(:root[data-style='almanac']) .progress li { height: 3px; border-radius: 0; background: var(--border-strong); }
+  :global(:root[data-style='almanac']) .progress li.done { background: var(--text); }
+  :global(:root[data-style='almanac']) .progress li.current { background: var(--accent); box-shadow: none; }
+  :global(:root[data-style='almanac']) h1:not(.hero) { font-size: clamp(30px, 4.4vw, 48px); font-weight: 340; letter-spacing: -0.035em; }
+  :global(:root[data-style='almanac']) .step > .lead { font-family: var(--font-display); font-style: italic; font-size: 19px; }
+  :global(:root[data-style='almanac']) .tile { border-radius: 0; background: transparent; border: 1px solid var(--text); box-shadow: none; }
 
   .nav {
     position: sticky; bottom: 0; display: flex; justify-content: space-between; gap: var(--space-3);

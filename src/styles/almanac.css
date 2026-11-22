@@ -1,0 +1,84 @@
+/* Almanac — the global layer for the Paper / Night Ink design language (html[data-style='almanac']).
+   Component-specific changes live in each component's own [data-style='almanac'] block; this file only
+   holds what is genuinely global: the paper itself, type defaults, and the shared surface classes. */
+
+/* ---- paper: a fixed grain layer under the whole app (no blobs, no orbs) ---- */
+:root[data-style='almanac'] body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: var(--grain, .5);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .09 0 0 0 0 .07 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+:root[data-theme='ink'] body::before { filter: invert(1); mix-blend-mode: screen; }
+/* a faint darkening toward the edges, like a sheet under a lamp */
+:root[data-style='almanac'] body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 20%, transparent 55%, color-mix(in srgb, var(--ink) 7%, transparent));
+}
+
+/* ---- type ---- */
+:root[data-style='almanac'] body { font-feature-settings: 'cv11', 'ss01', 'tnum' 0; }
+:root[data-style='almanac'] :is(h1, h2, h3, .display) { font-optical-sizing: auto; text-wrap: balance; }
+:root[data-style='almanac'] a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+:root[data-style='almanac'] ::selection { background: var(--text); color: var(--bg); }
+:root[data-style='almanac'] .grad-text { background: none; color: var(--accent-ink); -webkit-text-fill-color: currentColor; font-style: italic; }
+:root[data-style='almanac'] * { scrollbar-color: var(--border-strong) transparent; }
+
+/* Typewriter labels: section kickers, page numbers, dates. Only rendered by Almanac markup. */
+.kicker {
+  font: 500 11px/1.25 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- surfaces: paper sheets, no glass ---- */
+:root[data-style='almanac'] :is(.glass, .glass-strong) {
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none;
+}
+:root[data-style='almanac'] .solid { box-shadow: none; }
+:root[data-style='almanac'] .gcard {
+  background: var(--card-bg); -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid var(--card-edge); border-radius: var(--radius-md); box-shadow: none;
+  transition: transform .28s var(--ease-out), box-shadow .28s var(--ease-out), border-color .2s var(--ease-out);
+}
+:root[data-style='almanac'] .gcard::before, :root[data-style='almanac'] .gcard::after { display: none; }
+:root[data-style='almanac'] .gcard.lift:hover {
+  transform: translate(-3px, -3px); box-shadow: var(--card-lift); border-color: var(--text);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style='almanac'] .gcard.lift:hover { transform: none; box-shadow: none; }
+}
+
+/* (page changes use the app's own page transition — a CSS animation on the same element would
+   fight it: Svelte reads the starting opacity, so the page could stay invisible) */
+
+/* ---- page headers: kicker, a very large light serif title, an italic deck, a double rule ---- */
+.kick { display: none; }
+:root[data-style='almanac'] .kick { display: block; margin-bottom: 4px; }
+:root[data-style='almanac'] .kick b { font-family: var(--font-display); font-weight: 400; font-size: 14px; color: var(--accent-ink); letter-spacing: 0; }
+:root[data-style='almanac'] .kick .dot { color: var(--text-3); }
+:root[data-style='almanac'] main :is(.ph, .settings > .head) {
+  position: relative; align-items: flex-end; padding: var(--space-4) 0 var(--space-5); margin-bottom: var(--space-8); border-bottom: 1px solid var(--text);
+}
+:root[data-style='almanac'] main :is(.ph, .settings > .head)::after { content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 1px; background: var(--text); }
+:root[data-style='almanac'] main .ph > .ico { display: none; }
+:root[data-style='almanac'] main :is(.ph, .settings > .head) h1 { font-size: clamp(46px, 5.8vw, 84px); font-weight: 320; letter-spacing: -0.045em; line-height: .92; }
+:root[data-style='almanac'] main :is(.ph, .settings > .head) .muted { margin-top: var(--space-2); font-family: var(--font-display); font-style: italic; font-size: clamp(17px, 1.6vw, 20px); color: var(--text-2); }
+
+/* the page container receives focus after navigation (for screen readers); it never needs a ring */
+:root[data-style='almanac'] main#main:focus-visible { box-shadow: none; }
+
+/* ---- print: "Print today's page" — the front page on real paper (Night Ink prints as Paper) ---- */
+@media print {
+  @page { margin: 14mm 12mm; }
+  :root[data-style='almanac'] {
+    --bg: #fff; --surface: #fff; --surface-2: #f4f1ea; --surface-3: #ebe6dc; --card-bg: #fff; --card-edge: #d6ccba;
+    --text: #1c1915; --text-2: #4d463d; --text-3: #7d7466; --border: #d6ccba; --border-strong: #b3a790; --ring-track: rgba(28, 25, 21, .12);
+    --accent: #c23b17; --accent-ink: #a02c0b; --ink: #1c1915; --paper: #fff;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact; color-scheme: light;
+  }
+  :root[data-style='almanac'] body { background: #fff; }
+  :root[data-style='almanac'] body::before, :root[data-style='almanac'] body::after { display: none; }
+  :root[data-style='almanac'] :is(aside.sidebar, header.top, nav.bottom, nav.gtabs, .toaster, .quick, .bar-acts, .fpill, .banner) { display: none !important; }
+  :root[data-style='almanac'] main button:not(.cb) { display: none !important; }
+  :root[data-style='almanac'] .main { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+  :root[data-style='almanac'] :is(section, .cell, .tile) { break-inside: avoid; }
+}

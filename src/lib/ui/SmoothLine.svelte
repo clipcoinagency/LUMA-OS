@@ -60,4 +60,11 @@
   @keyframes fadein { to { opacity: 1; } }
   @keyframes fadeglow { to { opacity: .55; } }
   @keyframes pulse { 0%, 100% { transform: scale(.8); opacity: .3; } 50% { transform: scale(1.5); opacity: .08; } }
+
+  /* Almanac: one confident pen stroke; no glow, no halo; dotted grid like graph paper */
+  :global([data-style='almanac']) .fade, :global([data-style='almanac']) .halo { display: none; }
+  :global([data-style='almanac']) .line { stroke-width: 2px; }
+  :global([data-style='almanac']) .area { opacity: 0; animation-name: fadeprint; }
+  :global([data-style='almanac']) .grid { stroke-dasharray: 1 4; }
+  @keyframes fadeprint { to { opacity: .55; } }
 </style>

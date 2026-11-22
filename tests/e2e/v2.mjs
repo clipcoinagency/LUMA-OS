@@ -157,10 +157,10 @@ await page.getByText('Saved').waitFor();
 check((await page.getByRole('radio', { name: 'Good' }).getAttribute('aria-checked')) === 'true', 'A journal entry keeps its mood');
 check(await page.getByRole('radio', { name: 'Journal' }).first().isVisible(), 'Journal filter appears once an entry exists');
 
-// three themes
+// themes: the original three, plus Paper, Night Ink and Nebula
 await page.goto(url + '#/settings');
 await page.getByRole('heading', { level: 1, name: 'Settings' }).waitFor();
-check((await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio').count()) === 3, 'Settings offers three themes (Light, Soft, Dark)');
+check((await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio').count()) === 6, 'Settings offers six themes (Light, Soft, Dark, Paper, Night Ink, Nebula)');
 await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Light/ }).click();
 check((await page.evaluate(() => document.documentElement.dataset.theme)) === 'light', 'Choosing Light applies the light theme');
 await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Soft/ }).click();

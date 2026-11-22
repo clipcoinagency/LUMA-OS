@@ -49,6 +49,8 @@ jobs:
         run: node tests/e2e/phone-360.mjs --only=${{ matrix.channel }}
       - name: e2e — capacitor-bridge
         run: node tests/e2e/capacitor-bridge.mjs --only=${{ matrix.channel }}
+      - name: e2e — new looks (Paper, Night Ink, Nebula)
+        run: node tests/e2e/newlooks.mjs --only=${{ matrix.channel }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

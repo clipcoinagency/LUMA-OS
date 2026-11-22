@@ -1,0 +1,62 @@
+/* Nebula — the global layer for the liquid-glass look (html[data-style='nebula']). Only active when the
+   Nebula theme is chosen; the original three themes never match these selectors. Component-specific
+   pieces live in each component's [data-style='nebula'] block. Everything that moves is off under
+   reduced motion (base.css neutralises animations globally). */
+
+@property --nb-spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+/* ---- the sky: two layers of stars that twinkle out of step, over the violet light fields ---- */
+:root[data-style='nebula'] body::before,
+:root[data-style='nebula'] body::after {
+  content: ''; position: fixed; inset: -10%; z-index: -1; pointer-events: none;
+  background-repeat: repeat;
+}
+:root[data-style='nebula'] body::before {
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255, 255, 255, .75), transparent 60%),
+    radial-gradient(1px 1px at 68% 14%, rgba(255, 255, 255, .55), transparent 60%),
+    radial-gradient(1.4px 1.4px at 38% 72%, rgba(220, 200, 255, .7), transparent 60%),
+    radial-gradient(1px 1px at 86% 58%, rgba(255, 255, 255, .5), transparent 60%),
+    radial-gradient(1.2px 1.2px at 24% 88%, rgba(255, 190, 240, .55), transparent 60%);
+  background-size: 340px 340px;
+  animation: nb-twinkle 7s ease-in-out infinite alternate, nb-drift 240s linear infinite;
+}
+:root[data-style='nebula'] body::after {
+  background-image:
+    radial-gradient(1px 1px at 50% 40%, rgba(255, 255, 255, .45), transparent 60%),
+    radial-gradient(1.6px 1.6px at 8% 64%, rgba(200, 220, 255, .6), transparent 60%),
+    radial-gradient(1px 1px at 78% 84%, rgba(255, 255, 255, .4), transparent 60%);
+  background-size: 520px 520px;
+  animation: nb-twinkle 11s ease-in-out -4s infinite alternate, nb-drift 420s linear infinite reverse;
+}
+@keyframes nb-twinkle { from { opacity: .35; } to { opacity: .95; } }
+@keyframes nb-drift { to { transform: translate3d(-340px, -170px, 0); } }
+
+/* ---- type ---- */
+:root[data-style='nebula'] ::selection { background: rgba(183, 140, 255, .45); color: #fff; }
+:root[data-style='nebula'] * { scrollbar-color: rgba(183, 140, 255, .35) transparent; }
+:root[data-style='nebula'] main h1 {
+  background: linear-gradient(120deg, #ffffff 0%, #f1e6ff 38%, #d4bcff 64%, #ff9fd8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.kicker { font-variant-numeric: tabular-nums; }
+
+/* ---- liquid glass cards: a specular rim along the top, an iridescent edge that slowly turns ---- */
+:root[data-style='nebula'] .gcard {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%),
+    radial-gradient(90% 70% at 100% 100%, color-mix(in srgb, var(--accent-2) 9%, transparent), transparent 62%),
+    var(--card-bg);
+}
+:root[data-style='nebula'] .gcard::before {
+  background: conic-gradient(from var(--nb-spin), #7b61ff, #ff71c8, #5ee6e0, #b78cff, #7b61ff);
+  opacity: .42; animation: nb-spin 14s linear infinite;
+}
+:root[data-style='nebula'] .gcard.lift:hover::before { opacity: .95; }
+@keyframes nb-spin { to { --nb-spin: 360deg; } }
+:root[data-style='nebula'] .glass, :root[data-style='nebula'] .glass-strong {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 30%);
+}
+
+:root[data-style='nebula'] main#main:focus-visible { box-shadow: none; }

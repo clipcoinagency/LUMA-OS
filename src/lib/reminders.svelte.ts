@@ -7,6 +7,9 @@ import { today } from './util/dates';
 import { changes } from './db/changes.svelte';
 import { playChime } from './sound';
 import type { Task } from './db/schema';
+import { requestNotifyPermission, showNotification } from './notify';
+import { idFor } from './domain/notifyPlan';
+import { taskNotificationsOn } from './notifications.svelte';
 
 export const dueReminders = $state<Task[]>([]);
 const queuedIds = new Set<string>();
@@ -29,8 +32,8 @@ async function check() {
     void markReminded(t.id, day);
   }
   playChime();
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    for (const t of due) new Notification('Life OS reminder', { body: t.title, tag: t.id });
+  if (taskNotificationsOn()) {
+    for (const t of due) void showNotification({ key: t.id, title: 'Life OS reminder', body: t.title, route: '#/tasks' }, idFor(`now|${t.id}`));
   }
 }
 
@@ -56,5 +59,5 @@ export function initReminders() {
 /** Requests OS notification permission — call only from a deliberate user action (e.g. turning the
  *  reminder toggle on), never automatically, per browser policy and good practice alike. */
 export function requestNotificationPermission() {
-  if (typeof Notification !== 'undefined' && Notification.permission === 'default') void Notification.requestPermission();
+  void requestNotifyPermission();
 }

@@ -1,6 +1,9 @@
 // Reactive controller for Focus Mode: one running session at a time, parked in IndexedDB so it
 // survives reloads, ticking from timestamps (see domain/focus.ts). The overlay and the little
 // "session in progress" pill both read from here.
+import { showNotification } from './notify';
+import { idFor } from './domain/notifyPlan';
+import { focusNotificationsOn } from './notifications.svelte';
 import {
   clearActive, elapsedMs, formatClock, loadActive, pausedState, progressOf, recordSession, remainingMs, resumedState, saveActive, targetMs,
   type ActiveFocus,
@@ -130,7 +133,7 @@ class FocusController {
       if (this.active && !this.reached && remainingMs(this.active, this.now) === 0 && !this.active.pausedAt) {
         this.reached = true;
         playSessionDone();
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification('Focus session complete', { body: this.active.label, tag: 'focus' });
+        if (focusNotificationsOn()) void showNotification({ key: 'focus', title: 'Focus session complete', body: this.active.label, route: '#/dashboard' }, idFor(`now|focus|${this.active.startedAt}`));
       }
     }, 250);
   }

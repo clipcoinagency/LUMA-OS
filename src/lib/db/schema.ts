@@ -19,7 +19,7 @@ export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wel
 export const DEFAULT_MODULES: readonly ModuleId[] = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance'];
 export type ModuleId = (typeof MODULE_IDS)[number];
 
-export type ThemeId = 'soft' | 'light' | 'dark';
+export type ThemeId = 'paper' | 'ink' | 'nebula' | 'soft' | 'light' | 'dark';
 
 // ---------------------------------------------------------------- records
 
@@ -46,7 +46,23 @@ export interface Settings {
   backupReminderDays: number;     // 0 = off
   focusTargetMin?: number;        // daily focus goal in minutes (default 120)
   readingGoal?: number;           // books to finish this year (0/undefined = no goal)
+  notify?: NotifyPrefs;           // reminders & system notifications (undefined = never set up; see lib/notifications)
+  almanacAuto?: boolean;          // Paper/Night Ink: turn to Night Ink after dark, back to Paper in the morning
   updatedAt: string;
+}
+
+/** Which reminders become system notifications. Times are "HH:MM" 24h local. */
+export interface NotifyPrefs {
+  enabled: boolean;               // master switch
+  tasks: boolean;                 // a task's own reminder, at its time
+  events: boolean;                // calendar events, eventLeadMin before they start
+  eventLeadMin: number;
+  habits: boolean;                // an evening nudge if habits are still open
+  habitTime: string;
+  morning: boolean;               // a short briefing to start the day
+  morningTime: string;
+  reset: boolean;                 // the Weekly Reset, the evening before the week starts
+  focus: boolean;                 // when a focus session reaches its time
 }
 
 export type WidgetId =

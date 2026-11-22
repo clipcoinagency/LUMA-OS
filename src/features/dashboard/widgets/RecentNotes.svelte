@@ -46,5 +46,7 @@
   li { padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); display: grid; gap: 4px; }
   .row { display: flex; justify-content: space-between; gap: var(--space-2); align-items: baseline; }
   .title { font-weight: 650; display: flex; gap: 6px; align-items: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* new looks only: long titles shorten with an ellipsis instead of widening the page on phones */
+  :global(:is(:root[data-style='almanac'], :root[data-style='nebula'])) li { min-width: 0; }
   .snip { color: var(--text-2); font-size: var(--text-sm); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

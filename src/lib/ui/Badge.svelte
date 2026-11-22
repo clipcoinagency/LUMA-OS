@@ -17,4 +17,8 @@
   .warning { background: var(--warning-soft); color: var(--warning); }
   .danger { background: var(--danger-soft); color: var(--danger); }
   .info { background: var(--info-soft); color: var(--info); }
+
+  /* ---- Almanac ---------------------------------------------------------------- */
+  :global(:root[data-style='almanac']) .badge { border-radius: 0; background: none; border: 1px solid currentColor; padding: 1px 6px; font: 500 10px/1.5 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+  :global(:root[data-style='almanac']) .neutral { color: var(--text-2); border-color: var(--border-strong); }
 </style>

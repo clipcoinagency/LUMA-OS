@@ -48,7 +48,9 @@ try {
   await page.getByRole('heading', { name: 'Fine-tune your areas' }).waitFor();
   await next().click();                                       // modules
   await page.getByRole('heading', { name: 'Pick your look' }).waitFor();
-  check((await page.locator('.grid [role=radio]').count()) === 6, 'Onboarding offers six looks', String(await page.locator('.grid [role=radio]').count()));
+  // count inside the theme picker only — on a slow runner the previous step's cards are still fading out
+  const looks = page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio');
+  check((await looks.count()) === 6, 'Onboarding offers six looks', String(await looks.count()));
   await themeRadio('Paper').click();
   await next().click();
   await page.getByLabel('What should we call you?').fill('Sam');

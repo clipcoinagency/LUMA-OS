@@ -26,7 +26,14 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 const go = async (hash) => { await page.goto(`${base}#/${hash}`); await page.locator('main h1').first().waitFor(); };
 const themeRadio = (name) => page.locator('[role=radio]', { has: page.locator('.name', { hasText: new RegExp(`^${name}$`) }) });
-const setTheme = async (name) => { await go('settings'); await themeRadio(name).click(); await page.waitForFunction((n) => document.documentElement.dataset.theme === n, name === 'Night Ink' ? 'ink' : name.toLowerCase()); };
+// the colours switch at once, but the saved setting lands a moment later (slower on CI runners) —
+// wait for the picker to show it as chosen, which is driven by the saved setting itself
+const setTheme = async (name) => {
+  await go('settings');
+  await themeRadio(name).click();
+  await page.waitForFunction((n) => document.documentElement.dataset.theme === n, name === 'Night Ink' ? 'ink' : name.toLowerCase());
+  await page.locator('[role=radio][aria-checked=true]', { has: page.locator('.name', { hasText: new RegExp('^' + name + '$') }) }).waitFor();
+};
 const closed = () => page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 8000 });
 // for a failing width check: which (unclipped) elements stick out past the viewport
 const overflowers = () => page.evaluate(() => { const vw = document.documentElement.clientWidth; const out = []; for (const el of document.querySelectorAll('body *')) { const b = el.getBoundingClientRect(); if (!b.width || b.right <= vw + 0.5 || getComputedStyle(el).position === 'fixed') continue; let p = el, clipped = false; while ((p = p.parentElement)) { const cs = getComputedStyle(p); if (cs.position === 'fixed' || /auto|scroll|hidden|clip/.test(cs.overflowX)) { clipped = true; break; } } if (!clipped) out.push(el.tagName + '.' + String(el.className?.baseVal ?? el.className).slice(0, 40) + '@' + Math.round(b.right) + ' in .' + String(el.parentElement?.className).slice(0, 30) + ' "' + (el.textContent || '').trim().slice(0, 50) + '"'); } return out.slice(0, 5).join(', '); });
@@ -40,7 +47,8 @@ try {
   await next().click();                                       // persona
   await page.getByRole('heading', { name: 'Fine-tune your areas' }).waitFor();
   await next().click();                                       // modules
-  check((await page.locator('.grid [role=radio]').count()) === 6, 'Onboarding offers six looks');
+  await page.getByRole('heading', { name: 'Pick your look' }).waitFor();
+  check((await page.locator('.grid [role=radio]').count()) === 6, 'Onboarding offers six looks', String(await page.locator('.grid [role=radio]').count()));
   await themeRadio('Paper').click();
   await next().click();
   await page.getByLabel('What should we call you?').fill('Sam');
@@ -120,6 +128,7 @@ try {
   // ---------------------------------------------------------------- the original themes stay as they were
   await setTheme('Light');
   check((await page.evaluate(() => document.documentElement.dataset.style)) === 'aurora', 'Light keeps the original style');
+  await page.getByRole('heading', { name: 'Reminders & notifications' }).waitFor({ state: 'detached', timeout: 8000 }).catch(() => {});
   check(!(await page.getByRole('heading', { name: 'Reminders & notifications' }).count()), 'Light: Settings unchanged (no notifications card)');
   await go('dashboard');
   check(!(await page.getByPlaceholder(/Add anything/).count()), 'Light: no quick capture on Home');

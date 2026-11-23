@@ -3,7 +3,7 @@
 // "session in progress" pill both read from here.
 import { showNotification } from './notify';
 import { idFor } from './domain/notifyPlan';
-import { focusNotificationsOn } from './notifications.svelte';
+import { focusNotificationsOn, nativeSchedules } from './notifications.svelte';
 import {
   clearActive, elapsedMs, formatClock, loadActive, pausedState, progressOf, recordSession, remainingMs, resumedState, saveActive, targetMs,
   type ActiveFocus,
@@ -133,7 +133,7 @@ class FocusController {
       if (this.active && !this.reached && remainingMs(this.active, this.now) === 0 && !this.active.pausedAt) {
         this.reached = true;
         playSessionDone();
-        if (focusNotificationsOn()) void showNotification({ key: 'focus', title: 'Focus session complete', body: this.active.label, route: '#/dashboard' }, idFor(`now|focus|${this.active.startedAt}`));
+        if (focusNotificationsOn() && !nativeSchedules()) void showNotification({ key: 'focus', title: 'Focus session complete', body: this.active.label, route: '#/dashboard' }, idFor(`now|focus|${this.active.startedAt}`));
       }
     }, 250);
   }

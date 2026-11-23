@@ -15,6 +15,7 @@ import { inResetSeason } from './domain/review';
 import { DEFAULT_NOTIFY, idFor, keyOf, planNotifications, type PlanInput, type Planned } from './domain/notifyPlan';
 import { notifyChannel, notifyPermission, scheduleNative, showNotification, wireNativeTaps } from './notify';
 import { toast } from './ui/toast.svelte';
+import { detectPlatform } from './platform/platform';
 
 const LOOKBACK_MS = 15 * 60_000;     // a background tab may be throttled; still ring if we're a little late
 const NATIVE_DAYS = 7;
@@ -25,6 +26,8 @@ export function notifyPrefs(): NotifyPrefs { return { ...DEFAULT_NOTIFY, ...(app
  *  never opened it; once they have, their switch decides. */
 export function taskNotificationsOn(): boolean { const n = app.settings?.notify; return n ? n.enabled && n.tasks : true; }
 export function focusNotificationsOn(): boolean { const n = app.settings?.notify; return n ? n.enabled && n.focus : true; }
+/** Android app with reminders set up: task and focus alerts are already on Android's own schedule. */
+export function nativeSchedules(): boolean { return detectPlatform() === 'capacitor' && !!app.settings?.notify?.enabled; }
 
 async function gather(fromMs: number, toMs: number): Promise<PlanInput | null> {
   const st = app.settings, ws = app.workspace;

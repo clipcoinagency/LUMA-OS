@@ -14,10 +14,16 @@
   let closedToday = $state(false);
   let seals = $state.raw<Seal[]>([]);
   let breathing = $state(false);
+  let loadedOnce = false; // plain flag (not state), so reading it never re-runs the effect
   $effect(() => {
     const v = changes.version, day = clock.today;
     void getRange('notes', 'by_date', day, day).then((ns) => { if (v === changes.version) closedToday = ns.some((n) => n.tags.includes(CLOSED_TAG)); });
-    void loadSealStats(day, app.settings?.weekStartsOn ?? 1).then((st) => { if (v === changes.version) seals = computeSeals(st); });
+    // seals read every store, so wait until a burst of edits (ticking several tasks) settles
+    const wait = setTimeout(() => {
+      void loadSealStats(day, app.settings?.weekStartsOn ?? 1).then((st) => { if (v === changes.version) seals = computeSeals(st); });
+    }, loadedOnce ? 800 : 0);
+    loadedOnce = true;
+    return () => clearTimeout(wait);
   });
   const earned = $derived(seals.filter((s) => s.earned).length);
   const next = $derived(seals.filter((s) => !s.earned).sort((a, b) => b.value / b.target - a.value / a.target)[0]);

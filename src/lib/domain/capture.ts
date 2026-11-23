@@ -81,6 +81,7 @@ export function parseCapture(input: string, today: DateKey): Capture {
 function monthDay(today: DateKey, mon: string, day: number): DateKey {
   const m = MONTHS.indexOf(mon.slice(0, 3).toLowerCase()) + 1;
   const [y] = today.split('-').map(Number) as [number];
-  const k = `${y}-${pad(m)}-${pad(Math.min(31, Math.max(1, day)))}` as DateKey;
-  return k < today ? (`${y + 1}-${pad(m)}-${pad(day)}` as DateKey) : k;
+  const fit = (yr: number) => `${yr}-${pad(m)}-${pad(Math.min(new Date(yr, m, 0).getDate(), Math.max(1, day)))}` as DateKey;
+  const k = fit(y);
+  return k < today ? fit(y + 1) : k;
 }

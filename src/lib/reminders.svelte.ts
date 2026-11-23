@@ -9,7 +9,7 @@ import { playChime } from './sound';
 import type { Task } from './db/schema';
 import { requestNotifyPermission, showNotification } from './notify';
 import { idFor } from './domain/notifyPlan';
-import { taskNotificationsOn } from './notifications.svelte';
+import { nativeSchedules, taskNotificationsOn } from './notifications.svelte';
 
 export const dueReminders = $state<Task[]>([]);
 const queuedIds = new Set<string>();
@@ -32,7 +32,7 @@ async function check() {
     void markReminded(t.id, day);
   }
   playChime();
-  if (taskNotificationsOn()) {
+  if (taskNotificationsOn() && !nativeSchedules()) {
     for (const t of due) void showNotification({ key: t.id, title: 'Life OS reminder', body: t.title, route: '#/tasks' }, idFor(`now|${t.id}`));
   }
 }

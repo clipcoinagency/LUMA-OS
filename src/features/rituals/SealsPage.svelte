@@ -66,6 +66,14 @@
   .sum b { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-2xl); color: var(--text); margin-right: 4px; }
   .sub { font-size: var(--text-md); color: var(--text-2); margin: var(--space-6) 0 var(--space-3); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: var(--space-3); }
+  /* phones: two seals per row instead of one long column */
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+    .seal { padding: var(--space-4) var(--space-2); }
+    .emb { width: 70px; height: 70px; }
+    .glyph { top: calc(var(--space-4) + 22px); }
+    h3 { font-size: var(--text-sm); }
+  }
   .seal { position: relative; display: grid; justify-items: center; text-align: center; gap: 4px; padding: var(--space-5) var(--space-4); --c: var(--mod-goals); }
   .emb { width: 92px; height: 92px; margin-bottom: var(--space-2); }
   .rim { fill: color-mix(in srgb, var(--text) 7%, transparent); stroke: color-mix(in srgb, var(--text) 18%, transparent); stroke-width: 1; }

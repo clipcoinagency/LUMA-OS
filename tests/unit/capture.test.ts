@@ -25,6 +25,8 @@ describe('quick capture', () => {
   it('understands month names and rolls past dates to next year', () => {
     expect(parseCapture('Pay rent dec 1', TODAY).dueDate).toBe('2026-12-01');
     expect(parseCapture('Birthday 5th March', TODAY).dueDate).toBe('2027-03-05');
+    expect(parseCapture('Report feb 30', TODAY).dueDate).toBe('2027-02-28');            // clamped, never an impossible date
+    expect(parseCapture('Party dec 31', TODAY).dueDate).toBe('2026-12-31');
   });
   it('understands 24h times, "at 9", noon and parts of the day; a time alone means today', () => {
     expect(parseCapture('Standup 09:30', TODAY)).toMatchObject({ title: 'Standup', dueDate: TODAY, dueTime: '09:30', reminder: true });

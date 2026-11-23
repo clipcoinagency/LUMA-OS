@@ -82,3 +82,7 @@
   :root[data-style='almanac'] .main { margin: 0 !important; padding: 0 !important; max-width: none !important; }
   :root[data-style='almanac'] :is(section, .cell, .tile) { break-inside: avoid; }
 }
+
+/* Insights' screen-reader tables: a table can't shrink to the 1px of .sr-only, so park it off-screen to
+   the left instead (still read aloud; a leftward overflow never widens the page on phones) */
+:root[data-style='almanac'] table.sr-only { left: -10000px; }

@@ -46,7 +46,10 @@
   const trend = $derived(monthlyExpenseSeries(history, currency, 6, month).map((x) => ({ label: formatDateKey(x.month, { month: 'short' }), value: x.expenseMinor / 10 ** minorDigits(currency) })));
   const hasTrend = $derived(trend.filter((t) => t.value > 0).length >= 2);
   const money = (m: number) => formatMoney(m, currency);
-  const spendChange = $derived(sum && prev.expenseMinor > 0 ? (sum.expenseMinor - prev.expenseMinor) / prev.expenseMinor : null);
+  // the current month isn't over, so compare it with the same number of days last month
+  const isThisMonth = $derived(month === startOfMonth(clock.today));
+  const prevComparable = $derived(isThisMonth ? summarize(prevTxns.filter((t) => Number(t.date.slice(8)) <= Number(clock.today.slice(8))), currency) : prev);
+  const spendChange = $derived(sum && prevComparable.expenseMinor > 0 ? (sum.expenseMinor - prevComparable.expenseMinor) / prevComparable.expenseMinor : null);
   const daily = $derived.by(() => {
     if (!txns) return [];
     const last = month === startOfMonth(clock.today) ? clock.today : endOfMonth(month);
@@ -84,7 +87,7 @@
 {#if sum}
   <section class="summary" aria-label="Month summary">
     <div class="s main"><span class="l">Spent</span><span class="v big num">{money(sum.expenseMinor)}</span>
-      {#if spendChange !== null}<span class="chg" class:up={spendChange > 0}>{#if spendChange > 0}<TrendingUp size={14} aria-hidden="true" />{:else}<TrendingDown size={14} aria-hidden="true" />{/if}{Math.abs(Math.round(spendChange * 100))}% {spendChange > 0 ? 'more' : 'less'} than last month</span>{/if}
+      {#if spendChange !== null}<span class="chg" class:up={spendChange > 0}>{#if spendChange > 0}<TrendingUp size={14} aria-hidden="true" />{:else}<TrendingDown size={14} aria-hidden="true" />{/if}{Math.abs(Math.round(spendChange * 100))}% {spendChange > 0 ? 'more' : 'less'} than {isThisMonth ? 'this point last month' : 'the month before'}</span>{/if}
     </div>
     <div class="s"><span class="l">Income</span><span class="v num">{money(sum.incomeMinor)}</span></div>
     <div class="s"><span class="l">Saved</span><span class="v num">{money(sum.savingMinor)}</span></div>

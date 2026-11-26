@@ -38,6 +38,16 @@ describe('insights never fabricate', () => {
     expect(t!.series!.reduce((n, s) => n + s.value, 0)).toBeLessThanOrEqual(30);
   });
 
+  it('does not let the unfinished current week drag the weekly average down', () => {
+    // 5 tasks in each of the last 8 COMPLETE weeks (Mon 2026-09-28 starts the current, unfinished week) and none yet this week
+    const tasks: Task[] = [];
+    for (let w = 1; w <= 8; w++) for (let k = 0; k < 5; k++) tasks.push(doneTask(w * 10 + k, addDays('2026-09-28' as DateKey, -7 * w + k)));
+    const t = computeInsights(empty({ tasks })).ready.find((i) => i.id === 'tasks-trend');
+    expect(t!.headline).toBe('You finish about 5.0 tasks a week.');
+    expect(t!.detail).toBeUndefined();                       // steady → no invented "up/down"
+    expect(t!.series!.map((s) => s.value)).toEqual([5, 5, 5, 5, 5, 5, 5, 5]);
+  });
+
   it('finds the weekday you finish the most on, only if it clearly stands out', () => {
     // 2026-09-29 is a Tuesday: put most completions there
     const tuesdays = ['2026-09-29', '2026-09-22', '2026-09-15', '2026-09-08'];

@@ -74,7 +74,8 @@ export function computeInsights(d: InsightsData): InsightsResult {
   if (on('tasks')) {
     const done = d.tasks.filter((t) => t.done && t.completedOn);
     const wkStart = startOfWeek(d.today, d.weekStartsOn);
-    const weeks = Array.from({ length: 8 }, (_, i) => addDays(wkStart, -7 * (7 - i)));
+    // the last 8 COMPLETE weeks: this week isn't over, so counting it would understate the average
+    const weeks = Array.from({ length: 8 }, (_, i) => addDays(wkStart, -7 * (8 - i)));
     const counts = weeks.map((w) => done.filter((t) => t.completedOn! >= w && t.completedOn! <= addDays(w, 6)).length);
     const total = counts.reduce((a, b) => a + b, 0);
     if (total >= 8 && days >= 10) {
@@ -88,7 +89,7 @@ export function computeInsights(d: InsightsData): InsightsResult {
       ready.push({
         id: 'tasks-trend', area: 'tasks', title: 'Task completion', headline: `You finish about ${rA.toFixed(rA >= 10 ? 0 : 1)} tasks a week.`, detail,
         series: weeks.map((w, i) => ({ label: new Date(w + 'T00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' }), value: counts[i]! })), format: 'count',
-        note: 'Tasks completed per week, last 8 weeks.',
+        note: 'Tasks completed per week, last 8 full weeks (this week is not over yet).',
       });
       if (done.length >= 14) {
         const by = Array.from({ length: 7 }, () => 0);

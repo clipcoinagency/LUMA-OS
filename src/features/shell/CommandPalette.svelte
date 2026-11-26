@@ -17,6 +17,8 @@
   import { getAll } from '../../lib/db/idb';
   import { CheckSquare, Target, Repeat, NotebookPen, RefreshCcw } from '@lucide/svelte';
   import { themeName, nextTheme } from '../../lib/theme';
+  import { shortcuts } from '../../lib/shortcuts.svelte';
+  import { Keyboard } from '@lucide/svelte';
 
   interface Cmd { id: string; label: string; hint: string; icon: Component; color: string; run: () => void }
 
@@ -41,6 +43,7 @@
       id: 'a-theme', label: `Switch to ${themeName(nextTheme(app.settings?.theme ?? 'soft'))} theme`, hint: 'Appearance', icon: Palette, color: 'var(--accent-2)',
       run: () => void app.updateSettings({ theme: nextTheme(app.settings?.theme ?? 'soft') }),
     });
+    if (isNewLook(app.settings?.theme)) out.push({ id: 'a-keys', label: 'Keyboard shortcuts', hint: 'Help', icon: Keyboard, color: 'var(--text-2)', run: () => { shortcuts.open = true; } });
     return out;
   });
 

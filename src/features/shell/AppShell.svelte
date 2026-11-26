@@ -16,6 +16,9 @@
   import { navGroups, groupOfRoute, itemIsActive, tocNumbers, type GroupId, type NavItem } from '../../lib/nav';
   import Logo from '../../lib/ui/Logo.svelte';
   import { themeName, nextTheme, isNewLook } from '../../lib/theme';
+  import ShortcutsSheet from './ShortcutsSheet.svelte';
+  import { initShortcuts } from '../../lib/shortcuts.svelte';
+  $effect(() => { initShortcuts(); });
 
   let { children }: { children: Snippet } = $props();
   let more = $state(false);
@@ -152,6 +155,7 @@
 
 <QuickHost />
 <CommandPalette />
+{#if isNewLook(app.settings?.theme)}<ShortcutsSheet />{/if}
 
 <Modal bind:open={creating} title="Create" size="sm">
   <QuickActions wrap onrun={() => (creating = false)} />

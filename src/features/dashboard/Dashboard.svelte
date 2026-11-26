@@ -11,6 +11,7 @@
   import DailyLine from './DailyLine.svelte';
   import YearInk from './YearInk.svelte';
   import QuickCapture from './QuickCapture.svelte';
+  import GettingStarted from './GettingStarted.svelte';
   import DayTimeline from './DayTimeline.svelte';
   import RitualsRow from './RitualsRow.svelte';
   import OnThisDay from './OnThisDay.svelte';
@@ -74,7 +75,7 @@
 
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
   <CommandCenter />
-  {#if newLook}<QuickCapture />{/if}
+  {#if newLook}<QuickCapture /><GettingStarted />{/if}
   <PulseRow />
   {#if newLook}<RitualsRow /><DayTimeline />{/if}
 

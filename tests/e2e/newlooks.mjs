@@ -6,6 +6,7 @@
 import { chromium } from 'playwright';
 import os from 'node:os';
 import path from 'node:path';
+import fs from 'node:fs';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -64,6 +65,11 @@ try {
   check((await page.locator('aside nav a .pg').first().getAttribute('data-pg')) === 'i', 'Paper: contents numbers in the sidebar');
   check(await page.getByRole('link', { name: 'Close the day' }).isVisible(), 'New looks add "Close the day" to Reflect');
 
+  // ---------------------------------------------------------------- Get started checklist
+  const gs = page.getByRole('region', { name: 'Get started' });
+  await gs.waitFor();
+  check(/^0 of \d+ done/.test((await gs.locator('.meta').innerText()).trim()), 'Get started: a new workspace starts at 0 done', (await gs.locator('.meta').innerText()).trim());
+
   // ---------------------------------------------------------------- quick capture
   const qc = page.getByPlaceholder(/Add anything/);
   await qc.fill('Call mom tomorrow 6pm #family !high');
@@ -80,6 +86,12 @@ try {
   const mom = page.locator('main').getByText('Call mom', { exact: true });
   await mom.waitFor();
   check(await mom.isVisible(), 'Quick capture: the task is in Tasks');
+  await go('dashboard');
+  await page.locator('.gs li.on', { hasText: 'Add your first task' }).waitFor({ timeout: 6000 });
+  check(true, 'Get started: "Add your first task" ticks itself');
+  await page.getByRole('button', { name: 'Hide the Get started list' }).click();
+  await page.getByRole('region', { name: 'Get started' }).waitFor({ state: 'detached', timeout: 4000 });
+  check(true, 'Get started: can be hidden');
 
   // ---------------------------------------------------------------- breathe
   await go('dashboard');
@@ -118,6 +130,40 @@ try {
   await lights.waitFor();
   check(await lights.isVisible(), 'Seals: "Lights out" is earned after closing the day');
 
+  // ---------------------------------------------------------------- keyboard shortcuts (new looks)
+  await go('dashboard');
+  await page.locator('body').click({ position: { x: 700, y: 8 } }).catch(() => {});
+  await page.keyboard.press('?');
+  const sheet = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
+  await sheet.waitFor();
+  check(await sheet.getByText('Go to a page').isVisible(), 'Shortcuts: "?" opens the cheat sheet');
+  await page.keyboard.press('Escape'); await closed();
+  await page.keyboard.press('g'); await page.keyboard.press('t');
+  await page.waitForFunction(() => location.hash === '#/tasks', null, { timeout: 4000 });
+  check(true, 'Shortcuts: "g" then "t" goes to Tasks');
+  await page.keyboard.press('n');
+  await page.getByRole('heading', { name: /New task/ }).waitFor({ timeout: 4000 });
+  check(true, 'Shortcuts: "n" opens a new task');
+  await page.keyboard.press('Escape'); await closed();
+  await go('dashboard');
+  await page.getByPlaceholder(/Add anything/).fill('');
+  await page.getByPlaceholder(/Add anything/).pressSequentially('gtn?f');
+  check((await page.getByPlaceholder(/Add anything/).inputValue()) === 'gtn?f' && (await page.evaluate(() => location.hash)) === '#/dashboard' && !(await page.locator('dialog[open]').count()),
+    'Shortcuts: typing in a text box never triggers them');
+  await page.getByPlaceholder(/Add anything/).fill('');
+
+  // ---------------------------------------------------------------- CSV export (new looks)
+  await go('settings');
+  await page.getByRole('heading', { name: 'Export to a spreadsheet' }).waitFor();
+  const [dl] = await Promise.all([
+    page.waitForEvent('download'),
+    page.locator('li', { hasText: 'Every task with its dates' }).getByRole('button', { name: 'Export .csv' }).click(),
+  ]);
+  const csvPath = await dl.path();
+  const csv = fs.readFileSync(csvPath, 'utf8');
+  check(/^LifeOS-tasks-\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), 'CSV export: sensible file name', dl.suggestedFilename());
+  check(csv.startsWith('\uFEFFTask,Done,Completed on,Due date') && csv.includes('Call mom,no,') && csv.includes('\r\n'), 'CSV export: header, a real task row and spreadsheet line ends');
+
   // ---------------------------------------------------------------- Nebula
   await setTheme('Nebula');
   check((await page.evaluate(() => document.documentElement.dataset.style)) === 'nebula', 'Nebula uses its own style');
@@ -133,12 +179,18 @@ try {
   await page.getByRole('heading', { name: 'Reminders & notifications' }).waitFor({ state: 'detached', timeout: 8000 }).catch(() => {});
   check(!(await page.getByRole('heading', { name: 'Reminders & notifications' }).count()), 'Light: Settings unchanged (no notifications card)');
   await go('dashboard');
-  check(!(await page.getByPlaceholder(/Add anything/).count()), 'Light: no quick capture on Home');
+  check(!(await page.getByPlaceholder(/Add anything/).count()) && !(await page.locator('.gs').count()), 'Light: no quick capture or checklist on Home');
   check(!(await page.locator('.mast').isVisible()), 'Light: no masthead');
   check(!(await page.getByRole('link', { name: 'Close the day' }).count()), 'Light: navigation unchanged');
   await page.goto(`${base}#/close`);
   await page.waitForFunction(() => location.hash === '#/dashboard', null, { timeout: 5000 });
   check(true, 'Light: the new pages are not reachable');
+  await page.keyboard.press('?');
+  await page.keyboard.press('g'); await page.keyboard.press('t');
+  await sleep(500);
+  check(!(await page.locator('dialog[open]').count()) && (await page.evaluate(() => location.hash)) === '#/dashboard', 'Light: shortcuts do nothing');
+  await go('settings');
+  check(!(await page.getByRole('heading', { name: 'Export to a spreadsheet' }).count()), 'Light: Settings unchanged (no export card)');
 
   // ---------------------------------------------------------------- phone
   await setTheme('Nebula');

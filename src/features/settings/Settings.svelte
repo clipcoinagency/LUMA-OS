@@ -14,6 +14,9 @@
   import ThemePicker from '../workspace/ThemePicker.svelte';
   import LayoutPicker from '../workspace/LayoutPicker.svelte';
   import NotificationSettings from './NotificationSettings.svelte';
+  import ExportCsv from './ExportCsv.svelte';
+  import { shortcuts } from '../../lib/shortcuts.svelte';
+  import { Keyboard } from '@lucide/svelte';
   import { isNewLook } from '../../lib/theme';
   import RestoreFlow from './RestoreFlow.svelte';
   import { backUpNow, lastBackupAt, undoLastChange } from './backupActions';
@@ -103,6 +106,9 @@
 
   <Card title="Appearance">
     <ThemePicker value={s.theme} onchange={(t) => app.updateSettings({ theme: t })} />
+    {#if isNewLook(s.theme)}
+      <div class="gap"><Button size="sm" onclick={() => (shortcuts.open = true)}>{#snippet icon()}<Keyboard />{/snippet}Keyboard shortcuts</Button></div>
+    {/if}
     {#if s.theme === 'paper' || s.theme === 'ink'}
       <div class="gap"><Switch label="Turn the page at night" description="Paper from 7 am, Night Ink from 7 pm — switches by itself." checked={!!s.almanacAuto} onchange={(v) => app.updateSettings({ almanacAuto: v })} /></div>
     {/if}
@@ -154,6 +160,12 @@
       {:else}
         <p class="privacy"><Share size={18} aria-hidden="true" /><span>In Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</span></p>
       {/if}
+    </Card>
+  {/if}
+
+  {#if isNewLook(s.theme)}
+    <Card title="Export to a spreadsheet" subtitle="Your records as CSV files — private, made on this device.">
+      <ExportCsv />
     </Card>
   {/if}
 

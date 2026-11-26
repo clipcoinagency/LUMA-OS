@@ -51,8 +51,13 @@ export function isStandalone(): boolean {
   return matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 }
 
-function download(name: string, text: string): SaveResult {
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+/** What kind of file is being saved. Defaults to a JSON backup, so existing callers are unchanged. */
+export interface FileKind { mime: string; label: string; ext: string }
+const JSON_FILE: FileKind = { mime: 'application/json', label: 'Life OS backup', ext: 'json' };
+export const CSV_FILE: FileKind = { mime: 'text/csv', label: 'Spreadsheet (CSV)', ext: 'csv' };
+
+function download(name: string, text: string, kind: FileKind = JSON_FILE): SaveResult {
+  const url = URL.createObjectURL(new Blob([text], { type: kind.mime + ';charset=utf-8' }));
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
@@ -90,17 +95,17 @@ export async function nativeBridge(): Promise<NativeBridge | null> {
   return window.LifeOSNative ?? null;
 }
 
-export async function saveTextFile(name: string, text: string): Promise<SaveResult> {
+export async function saveTextFile(name: string, text: string, kind: FileKind = JSON_FILE): Promise<SaveResult> {
   const platform = detectPlatform();
   if (platform === 'tauri') {
     const T = window.__TAURI__;
     if (T?.dialog && T.fs) {
-      const path = await T.dialog.save({ defaultPath: name, filters: [{ name: 'Life OS backup', extensions: ['json'] }] });
+      const path = await T.dialog.save({ defaultPath: name, filters: [{ name: kind.label, extensions: [kind.ext] }] });
       if (!path) return { ok: false, cancelled: true };
       await T.fs.writeTextFile(path, text);
       return { ok: true, where: path };
     }
-    return download(name, text);
+    return download(name, text, kind);
   }
   if (platform === 'capacitor') {
     if (!window.LifeOSNative) {
@@ -109,7 +114,7 @@ export async function saveTextFile(name: string, text: string): Promise<SaveResu
     if (window.LifeOSNative) return window.LifeOSNative.saveTextFile(name, text);
   }
   if (isIOS() && typeof navigator.canShare === 'function') {
-    const file = new File([text], name, { type: 'application/json' });
+    const file = new File([text], name, { type: kind.mime });
     if (navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: name });
@@ -119,7 +124,7 @@ export async function saveTextFile(name: string, text: string): Promise<SaveResu
       }
     }
   }
-  return download(name, text);
+  return download(name, text, kind);
 }
 
 /** Opens the system file picker; resolves null if the user cancels. */

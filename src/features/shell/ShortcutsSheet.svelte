@@ -41,6 +41,6 @@
   dl > div:first-child { border-top: 0; }
   dd { margin: 0; font-size: var(--text-sm); color: var(--text-2); text-align: right; }
   dt { display: flex; gap: 4px; flex: none; }
-  kbd { min-width: 24px; padding: 3px 7px; text-align: center; border-radius: 6px; font: 600 12px var(--font-body); color: var(--text); background: var(--surface-2); border: 1px solid var(--border-strong); box-shadow: 0 1px 0 var(--border-strong); }
+  kbd { text-transform: none; min-width: 24px; padding: 3px 7px; text-align: center; border-radius: 6px; font: 600 12px var(--font-body); color: var(--text); background: var(--surface-2); border: 1px solid var(--border-strong); box-shadow: 0 1px 0 var(--border-strong); }
   :global(:root[data-style='almanac']) kbd { border-radius: 3px; font-family: var(--font-mono); font-weight: 500; background: transparent; border-color: var(--text); box-shadow: 1px 1px 0 var(--text); }
 </style>

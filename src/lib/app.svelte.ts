@@ -94,7 +94,7 @@ class AppState {
 
 export const app = new AppState();
 
-const THEME_COLORS: Record<ThemeId, string> = { paper: '#efe9dd', ink: '#11100e', nebula: '#0b0716', soft: '#fbf6f2', light: '#f2f5fc', dark: '#04050d' };
+const THEME_COLORS: Record<ThemeId, string> = { paper: '#efe9dd', ink: '#11100e', nebula: '#0b0716', clay: '#efe4d3', chalk: '#f1f0ea', graphite: '#0d0e10', soft: '#fbf6f2', light: '#f2f5fc', dark: '#04050d' };
 
 /** The theme actually on screen: the chosen one, except that Paper/Night Ink with "turn the page at
  *  night" follow the clock. The original three themes are always shown exactly as chosen. */

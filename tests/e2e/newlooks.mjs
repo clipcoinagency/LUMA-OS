@@ -51,7 +51,7 @@ try {
   await page.getByRole('heading', { name: 'Pick your look' }).waitFor();
   // count inside the theme picker only — on a slow runner the previous step's cards are still fading out
   const looks = page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio');
-  check((await looks.count()) === 6, 'Onboarding offers six looks', String(await looks.count()));
+  check((await looks.count()) === 9, 'Onboarding offers nine looks', String(await looks.count()));
   await themeRadio('Paper').click();
   await next().click();
   await page.getByLabel('What should we call you?').fill('Sam');
@@ -197,6 +197,21 @@ try {
   await page.keyboard.press('g'); await page.keyboard.press('t');
   await page.waitForFunction(() => location.hash === '#/tasks', null, { timeout: 5000 });
   check(true, 'Light: g then t goes to Tasks');
+
+  // ---------------------------------------------------------------- the original colours are exactly as they were; the Studio looks are new
+  const rootVar = (n) => page.evaluate((v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim().toLowerCase(), n);
+  for (const [theme, bg, accent] of [['Soft', '#f8f3ef', '#a24f69'], ['Light', '#f2f5fc', null], ['Dark', '#04050d', null]]) {
+    await setTheme(theme);
+    check((await rootVar('--bg')) === bg && (!accent || (await rootVar('--accent')) === accent), `${theme}: original colours unchanged`, await rootVar('--bg'));
+    check((await page.evaluate(() => document.documentElement.dataset.style)) === 'aurora', `${theme}: original style unchanged`);
+  }
+  for (const [theme, bg] of [['Clay', '#efe4d3'], ['Chalk', '#f1f0ea'], ['Graphite', '#0d0e10']]) {
+    await setTheme(theme);
+    check((await rootVar('--bg')) === bg && (await page.evaluate(() => document.documentElement.dataset.style)) === 'studio', `${theme}: the new Studio look applies`, await rootVar('--bg'));
+    await go('dashboard');
+    check(await page.getByPlaceholder(/Add anything/).isVisible(), `${theme}: Home works`);
+  }
+  await setTheme('Light');
 
   // ---------------------------------------------------------------- Finance: bills and debts (Light)
   await go('finance');

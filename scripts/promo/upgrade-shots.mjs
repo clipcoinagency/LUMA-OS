@@ -29,7 +29,7 @@ await page.goto(BASE + '#/settings'); const n = page.getByLabel(/name/i).first()
 const setTheme = async (label) => { await page.goto(BASE + '#/settings'); await page.locator('main h1').first().waitFor(); await page.evaluate((l) => [...document.querySelectorAll('[role=radio]')].find((b) => b.querySelector('.name')?.textContent.trim() === l)?.click(), label); await sleep(800); };
 const shot = async (theme, id, fn, { full = false } = {}) => {
   if (ONLY && !ONLY.includes(id)) return;
-  await fn(); await sleep(1500);
+  await fn(); await sleep(4000);
   const file = path.join(OUT, `${theme.replace(/\s+/g, '')}-${id}.png`);
   await page.screenshot({ path: file, fullPage: full }); console.log('wrote', path.basename(file));
 };
@@ -39,6 +39,9 @@ for (const theme of THEMES) {
   await setTheme(theme);
   await shot(theme, 'home', () => goto('#/dashboard'), { full: true });
   await shot(theme, 'finance', () => goto('#/finance'), { full: true });
+  await shot(theme, 'tasks', () => goto('#/tasks'));
+  await shot(theme, 'settings', () => goto('#/settings'), { full: true });
+  await shot(theme, 'insights', () => goto('#/insights'), { full: true });
   await shot(theme, 'bills', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Bills' }).click(); await sleep(800); }, { full: true });
   await shot(theme, 'debts', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Debts' }).click(); await sleep(800); }, { full: true });
   await shot(theme, 'debt-form', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Debts' }).click(); await sleep(500); await page.getByRole('button', { name: 'Add debt' }).first().click(); await sleep(700); });

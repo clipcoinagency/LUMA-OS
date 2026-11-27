@@ -1,4 +1,4 @@
-// The three themes, in the order the picker and the "switch theme" shortcuts cycle through them.
+// The themes, in the order the picker and the "switch theme" shortcuts cycle through them.
 import type { ThemeId } from './db/schema';
 
 export const THEMES: { id: ThemeId; name: string; mood: string }[] = [
@@ -8,13 +8,16 @@ export const THEMES: { id: ThemeId; name: string; mood: string }[] = [
   { id: 'paper', name: 'Paper', mood: 'Warm paper, black ink and one red accent. Calm and editorial.' },
   { id: 'ink', name: 'Night Ink', mood: 'The Paper look for evenings. Deep ink with bone-white type.' },
   { id: 'nebula', name: 'Nebula', mood: 'Liquid violet glass, iridescent edges and a quiet starfield.' },
+  { id: 'clay', name: 'Clay', mood: 'Sand paper, terracotta ink and hard-edged panels. Warm and handmade.' },
+  { id: 'chalk', name: 'Chalk', mood: 'Chalk white, klein blue and a sharp grotesk. Bold and clean.' },
+  { id: 'graphite', name: 'Graphite', mood: 'Near-black with one lime signal. Precise and nocturnal.' },
 ];
 
 export const themeName = (t: ThemeId) => THEMES.find((x) => x.id === t)?.name ?? 'Soft';
-export type StyleId = 'almanac' | 'nebula' | 'aurora';
+export type StyleId = 'almanac' | 'nebula' | 'studio' | 'aurora';
 /** Paper and Night Ink share the Almanac layout (rules instead of glass, editorial type); Nebula is
  *  liquid glass; the original three themes are "aurora" and are never changed by the new looks. */
-export const styleOf = (t: ThemeId): StyleId => (t === 'paper' || t === 'ink' ? 'almanac' : t === 'nebula' ? 'nebula' : 'aurora');
+export const styleOf = (t: ThemeId): StyleId => (t === 'paper' || t === 'ink' ? 'almanac' : t === 'nebula' ? 'nebula' : t === 'clay' || t === 'chalk' || t === 'graphite' ? 'studio' : 'aurora');
 /** The new looks (Paper, Night Ink, Nebula) carry the extra sections and features. */
 export const isNewLook = (t: ThemeId | undefined): boolean => !!t && styleOf(t) !== 'aurora';
 

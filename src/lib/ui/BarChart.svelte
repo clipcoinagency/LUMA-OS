@@ -27,7 +27,7 @@
 </figure>
 
 <style>
-  .chart { margin: 0; }
+  .chart { margin: 0; position: relative; overflow-x: clip; } /* the hidden data table must never widen the page */
   .bars { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; align-items: end; padding-bottom: 22px; }
   .col { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
   .bar {

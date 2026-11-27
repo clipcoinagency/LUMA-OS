@@ -73,13 +73,13 @@ check(await widget(page, 'Habit check-in').getByText('1-day streak').isVisible()
 
 // money
 await page.getByRole('region', { name: 'Quick actions' }).getByRole('button', { name: 'Spending' }).click();
-await page.getByLabel(/^Amount/).fill('12.50');
+await page.locator('dialog[open]').getByLabel(/^Amount/).fill('12.50');
 await page.getByRole('button', { name: 'Save', exact: true }).click();
 await widget(page, 'This month').getByText('$12.50').first().waitFor();
 check(true, 'Record spending $12.50 → This month shows it');
 // validation
 await page.getByRole('region', { name: 'Quick actions' }).getByRole('button', { name: 'Spending' }).click();
-await page.getByLabel(/^Amount/).fill('abc');
+await page.locator('dialog[open]').getByLabel(/^Amount/).fill('abc');
 await page.getByRole('button', { name: 'Save', exact: true }).click();
 check(await page.getByText('Enter an amount, like 12.50').isVisible(), 'Invalid amount is rejected with a clear message');
 await page.getByRole('button', { name: 'Cancel' }).click();

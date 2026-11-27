@@ -45,6 +45,9 @@ img, svg { display: block; }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+/* a table can't shrink to the 1px above (it keeps its content width), so on a phone a hidden data table
+   would widen the whole page: park it off-screen instead */
+table.sr-only { left: -10000px; }
 
 .muted { color: var(--text-2); }
 .meta { color: var(--text-3); font-size: var(--text-sm); }

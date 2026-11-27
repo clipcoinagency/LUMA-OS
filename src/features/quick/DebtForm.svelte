@@ -95,7 +95,7 @@
     </div>
     <div class="row">
       <TextField label="Amount" bind:value={amount} inputmode="decimal" placeholder="0.00" error={errors.amount} hint={preview} oninput={() => (errors = { ...errors, amount: undefined })} />
-      <CurrencyPicker bind:value={currency} label="Currency" />
+      {#if open}<CurrencyPicker bind:value={currency} label="Currency" />{/if}
     </div>
     <div class="row">
       <DateField label={owe ? 'Borrowed on' : 'Lent on'} bind:value={date} error={errors.date} oninput={() => (errors = { ...errors, date: undefined })} />

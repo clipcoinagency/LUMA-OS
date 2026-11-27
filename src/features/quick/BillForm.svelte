@@ -83,7 +83,7 @@
     <TextField label="Name" bind:value={name} maxlength={60} placeholder="e.g. Rent, Netflix, Gym" error={errors.name} oninput={() => (errors = { ...errors, name: undefined })} />
     <div class="row">
       <TextField label="Amount" bind:value={amount} inputmode="decimal" placeholder="0.00" error={errors.amount} {hint} oninput={() => (errors = { ...errors, amount: undefined })} />
-      <CurrencyPicker bind:value={currency} label="Currency" />
+      {#if open}<CurrencyPicker bind:value={currency} label="Currency" />{/if}
     </div>
     <Segmented label="How often" bind:value={cadence} options={[{ value: 'weekly', label: 'Weekly' }, { value: 'monthly', label: 'Monthly' }, { value: 'yearly', label: 'Yearly' }]} />
     <div class="row">

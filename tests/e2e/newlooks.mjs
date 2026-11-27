@@ -2,7 +2,7 @@
 // work, and the original three themes stay exactly as they were (no new sections, no new pages).
 //  Paper: masthead + contents numbers → quick capture (plain English) → Breathe → Close the day
 //  (move a loose end, one line, mood, close → journal note) → Seals → Nebula: year in light →
-//  Light: none of the extras, /close redirects home, no notifications card → phone 360 → no errors.
+//  Light: has the same features (own style, own year title) → Finance debts + bills → phone 360 → no errors.
 import { chromium } from 'playwright';
 import os from 'node:os';
 import path from 'node:path';
@@ -173,24 +173,64 @@ try {
   check(true, 'Nebula: "The year in light" on Home');
   check(await page.getByRole('heading', { name: 'Today, hour by hour' }).isVisible(), 'Nebula: the day timeline on Home');
 
-  // ---------------------------------------------------------------- the original themes stay as they were
+  // ---------------------------------------------------------------- the original themes now have every feature too
   await setTheme('Light');
-  check((await page.evaluate(() => document.documentElement.dataset.style)) === 'aurora', 'Light keeps the original style');
-  await page.getByRole('heading', { name: 'Reminders & notifications' }).waitFor({ state: 'detached', timeout: 8000 }).catch(() => {});
-  check(!(await page.getByRole('heading', { name: 'Reminders & notifications' }).count()), 'Light: Settings unchanged (no notifications card)');
-  await go('dashboard');
-  check(!(await page.getByPlaceholder(/Add anything/).count()) && !(await page.locator('.gs').count()), 'Light: no quick capture or checklist on Home');
-  check(!(await page.locator('.mast').isVisible()), 'Light: no masthead');
-  check(!(await page.getByRole('link', { name: 'Close the day' }).count()), 'Light: navigation unchanged');
-  await page.goto(`${base}#/close`);
-  await page.waitForFunction(() => location.hash === '#/dashboard', null, { timeout: 5000 });
-  check(true, 'Light: the new pages are not reachable');
-  await page.keyboard.press('?');
-  await page.keyboard.press('g'); await page.keyboard.press('t');
-  await sleep(500);
-  check(!(await page.locator('dialog[open]').count()) && (await page.evaluate(() => location.hash)) === '#/dashboard', 'Light: shortcuts do nothing');
+  check((await page.evaluate(() => document.documentElement.dataset.style)) === 'aurora', 'Light keeps its own style');
   await go('settings');
-  check(!(await page.getByRole('heading', { name: 'Export to a spreadsheet' }).count()), 'Light: Settings unchanged (no export card)');
+  check(await page.getByRole('heading', { name: 'Reminders & notifications' }).isVisible(), 'Light: Settings has Reminders & notifications');
+  check(await page.getByRole('heading', { name: 'Export to a spreadsheet' }).isVisible(), 'Light: Settings has the spreadsheet export');
+  await go('dashboard');
+  check(await page.getByPlaceholder(/Add anything/).isVisible(), 'Light: quick capture on Home');
+  check(!(await page.locator('.mast').isVisible()), 'Light: no almanac masthead');
+  check(await page.getByRole('heading', { name: 'Your year, day by day' }).isVisible(), 'Light: the year view has its own title');
+  check(await page.getByRole('link', { name: 'Close the day' }).first().isVisible(), 'Light: navigation lists Close the day');
+  await page.goto(`${base}#/close`);
+  await page.getByRole('heading', { level: 1 }).first().waitFor();
+  check((await page.evaluate(() => location.hash)) === '#/close', 'Light: the Close the day page opens');
+  await go('dashboard');
+  await page.locator('body').click({ position: { x: 700, y: 6 } }).catch(() => {});
+  await page.keyboard.press('?');
+  await page.locator('dialog[open]').waitFor({ timeout: 5000 });
+  check(true, 'Light: ? opens the shortcuts sheet');
+  await page.keyboard.press('Escape');
+  await page.locator('dialog[open]').waitFor({ state: 'detached', timeout: 5000 });
+  await page.keyboard.press('g'); await page.keyboard.press('t');
+  await page.waitForFunction(() => location.hash === '#/tasks', null, { timeout: 5000 });
+  check(true, 'Light: g then t goes to Tasks');
+
+  // ---------------------------------------------------------------- Finance: bills and debts (Light)
+  await go('finance');
+  await page.getByRole('radio', { name: 'Debts' }).click();
+  await page.getByRole('button', { name: 'Add debt' }).first().click();
+  const debtDlg = page.locator('dialog[open]');
+  await debtDlg.getByLabel('Borrowed from').fill('Sam');
+  await debtDlg.getByLabel('Amount', { exact: true }).fill('120.00');
+  await debtDlg.getByRole('button', { name: 'Add debt' }).click();
+  await debtDlg.waitFor({ state: 'detached', timeout: 5000 });
+  await page.getByText('Sam', { exact: true }).first().waitFor();
+  check(await page.getByText('$120.00').first().isVisible(), 'Debts: a debt I owe is listed with its balance');
+  await page.getByRole('button', { name: 'Pay', exact: true }).first().click();
+  const pay = page.locator('dialog[open]');
+  await pay.getByLabel(/Amount/).fill('20.00');
+  await pay.getByRole('button', { name: 'Record payment' }).click();
+  await pay.waitFor({ state: 'detached', timeout: 5000 });
+  await page.getByText('$100.00').first().waitFor();
+  check(true, 'Debts: a repayment lowers the balance (120 → 100)');
+  await page.getByRole('radio', { name: 'Bills' }).click();
+  await page.getByRole('button', { name: 'Add bill' }).first().click();
+  const bd = page.locator('dialog[open]');
+  await bd.getByLabel('Name', { exact: true }).fill('Netflix');
+  await bd.getByLabel('Amount', { exact: true }).fill('15.99');
+  await bd.getByRole('button', { name: 'Add bill' }).click();
+  await bd.waitFor({ state: 'detached', timeout: 5000 });
+  await page.getByText('Netflix', { exact: true }).first().waitFor();
+  await page.getByRole('button', { name: 'Mark paid' }).first().click();
+  await page.getByText(/recorded as an expense/).first().waitFor({ timeout: 5000 });
+  check(true, 'Bills: Mark paid records an expense');
+  await page.getByRole('radio', { name: 'Money' }).click();
+  await page.getByText('Netflix', { exact: true }).first().waitFor({ timeout: 5000 });
+  check(true, 'Bills: the paid bill shows up in Money transactions');
+
 
   // ---------------------------------------------------------------- phone
   await setTheme('Nebula');

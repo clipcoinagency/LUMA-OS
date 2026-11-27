@@ -35,11 +35,15 @@
   const localMin = (iso: string) => { const d = new Date(iso); return d.getHours() * 60 + d.getMinutes(); };
   const HOUR = 46;
 
+  // The window follows the day: from an hour before the first thing (or now) to three hours after the last,
+  // never shorter than eight hours — so a quiet day is a compact strip, not a 17-hour column.
   const range = $derived.by(() => {
-    // "now" only stretches the view during waking hours, so a 2 am glance doesn't show an empty night
     const pts = [...(nowMin >= 6 * 60 ? [nowMin] : []), ...events.map((e) => mins(e.startTime!)), ...events.map((e) => (e.endTime ? mins(e.endTime) : mins(e.startTime!) + 60)), ...timed.map((t) => mins(t.dueTime!))];
-    const lo = Math.min(8 * 60, ...pts), hi = Math.max(21 * 60, ...pts);
-    return { start: Math.max(0, Math.floor(lo / 60) - (lo % 60 === 0 && lo > 0 ? 1 : 0)), end: Math.min(24, Math.ceil(hi / 60) + 1) };
+    if (!pts.length) pts.push(9 * 60);
+    let start = Math.max(0, Math.floor(Math.min(...pts) / 60) - 1);
+    let end = Math.min(24, Math.ceil(Math.max(...pts) / 60) + 3);
+    if (end - start < 8) { end = Math.min(24, start + 8); start = Math.max(0, end - 8); }
+    return { start, end };
   });
   const y = (m: number) => ((m - range.start * 60) / 60) * HOUR;
   const hours = $derived(Array.from({ length: range.end - range.start + 1 }, (_, i) => range.start + i));

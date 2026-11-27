@@ -29,6 +29,8 @@ export interface PlanInput {
   focus: { endsAt: number; label: string; key: string } | null;
   /** open debts that have a due date; `amount` is already formatted ("$50.00") */
   debts?: { id: string; person: string; direction: 'owe' | 'owed'; dueDate: DateKey; amount: string }[];
+  /** active bills; `amount` is already formatted */
+  bills?: { id: string; name: string; dueDate: DateKey; amount: string }[];
   timeLabel: (hm: string) => string;
 }
 
@@ -90,6 +92,12 @@ export function planNotifications(i: PlanInput): Planned[] {
         if (d.dueDate !== day) continue;
         push({ key: `debt|${d.id}|${d.dueDate}`, at: atLocal(day, p.morningTime), title: d.direction === 'owe' ? 'A payment is due' : 'Money is due back to you',
           body: d.direction === 'owe' ? `You owe ${d.person} ${d.amount} — due ${isToday ? 'today' : 'on this day'}.` : `${d.person} owes you ${d.amount} — due ${isToday ? 'today' : 'on this day'}.`, route: '#/finance' });
+      }
+    }
+    if (p.debts !== false) {
+      for (const b of i.bills ?? []) {
+        if (b.dueDate !== day) continue;
+        push({ key: `bill|${b.id}|${b.dueDate}`, at: atLocal(day, p.morningTime), title: `${b.name} is due${isToday ? ' today' : ''}`, body: `${b.amount} — open Finance to mark it paid.`, route: '#/finance' });
       }
     }
     if (p.habits && i.habitsActive) {

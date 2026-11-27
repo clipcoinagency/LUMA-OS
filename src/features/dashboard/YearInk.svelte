@@ -8,7 +8,7 @@
   import { formatDateKey } from '../../lib/util/dates';
   import { loadYearInk, type InkDay } from '../../lib/domain/almanac';
   import { styleOf } from '../../lib/theme';
-  const title = $derived(styleOf(app.settings?.theme ?? 'paper') === 'nebula' ? 'The year in light' : 'The year in ink');
+  const title = $derived({ almanac: 'The year in ink', nebula: 'The year in light', aurora: 'Your year, day by day' }[styleOf(app.settings?.theme ?? 'paper')]);
 
   let days = $state.raw<InkDay[]>([]);
   let picked = $state<InkDay | null>(null);

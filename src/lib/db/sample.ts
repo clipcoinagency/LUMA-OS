@@ -4,7 +4,7 @@ import { addDays, nowIso, today, weekday, type DateKey } from '../util/dates';
 import { newId } from '../util/ids';
 import { getAll, transact } from './idb';
 import type {
-  CalendarEvent, Debt, DebtPayment, Goal, GoalProgress, Habit, HabitLog, Note, Task, Transaction, WellnessDay, Workout,
+  Bill, CalendarEvent, Debt, DebtPayment, Goal, GoalProgress, Habit, HabitLog, Note, Task, Transaction, WellnessDay, Workout,
 } from './schema';
 
 function rng(seed: number) {
@@ -105,7 +105,15 @@ export async function seedSampleData(days = 90, seed = 7): Promise<Record<string
   mkDebt('Jordan', 'owed', 4500, 12, 2, 'Concert ticket');
   const lee = mkDebt('Lee', 'owed', 8000, 60, null, 'Dinner and cab', 15); mkPay(lee, 15, 8000, 'Settled in full');
 
-  const rows = { habits, habit_logs: habitLogs, tasks, goals, goal_progress: progress, events, notes, wellness, workouts, transactions: txns, debts, debt_payments: debtPayments } as const;
+  const bills: Bill[] = [];
+  const mkBill = (name: string, amountMinor: number, cadence: Bill['cadence'], dueIn: number, cat: string | null, note = '') => {
+    const nextDue = addDays(end, dueIn);
+    bills.push({ id: newId('bill'), name, amountMinor, currency: 'USD', cadence, anchor: nextDue, nextDue, categoryId: cat ? catBy(cat) : null, note, paused: false, ...stamp });
+  };
+  mkBill('Rent', 145000, 'monthly', 6, 'Housing'); mkBill('Netflix', 1599, 'monthly', 3, 'Fun', 'Standard plan'); mkBill('Gym', 3500, 'monthly', 12, 'Fun');
+  mkBill('Electricity', 8200, 'monthly', -1, 'Housing'); mkBill('Car insurance', 84000, 'yearly', 120, 'Transport'); mkBill('Cloud storage', 299, 'monthly', 20, null);
+
+  const rows = { habits, habit_logs: habitLogs, tasks, goals, goal_progress: progress, events, notes, wellness, workouts, transactions: txns, debts, debt_payments: debtPayments, bills } as const;
   await transact<void>(Object.keys(rows) as (keyof typeof rows)[], 'readwrite', (t) => {
     for (const [store, list] of Object.entries(rows)) {
       const os = t.objectStore(store);

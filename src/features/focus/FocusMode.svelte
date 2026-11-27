@@ -14,8 +14,6 @@
   import type { Task } from '../../lib/db/schema';
   import { soundscape, SOUNDS } from '../../lib/soundscape.svelte';
   import { app } from '../../lib/app.svelte';
-  import { isNewLook } from '../../lib/theme';
-  const newLook = $derived(isNewLook(app.settings?.theme));
   // the soundscape ends with the session
   $effect(() => { if (!focus.active && soundscape.current) soundscape.stop(); });
 
@@ -171,7 +169,7 @@
             {/if}
           {/if}
         </div>
-        {#if newLook}
+        {#if true}
           <div class="sounds" role="group" aria-label="Focus sounds">
             {#each SOUNDS as s (s.id)}
               <button type="button" class="snd" class:on={soundscape.current === s.id} aria-pressed={soundscape.current === s.id} onclick={() => soundscape.play(s.id)}>

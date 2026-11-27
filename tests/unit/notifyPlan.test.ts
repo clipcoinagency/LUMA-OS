@@ -104,3 +104,16 @@ describe('debt reminders', () => {
     expect(planNotifications(input({ debts, prefs: { ...old, enabled: true } })).filter((p) => p.key.startsWith('debt|'))).toHaveLength(2);
   });
 });
+
+describe('bill reminders', () => {
+  const bills = [{ id: 'r', name: 'Rent', dueDate: D('2026-11-27'), amount: '$1,450.00' }];
+  it('rings on the due date at the morning-briefing time', () => {
+    const b = planNotifications(input({ bills })).filter((p) => p.key.startsWith('bill|'));
+    expect(b).toHaveLength(1);
+    expect(b[0]).toMatchObject({ key: 'bill|r|2026-11-27', at: atLocal(D('2026-11-27'), '08:00'), title: 'Rent is due', body: '$1,450.00 — open Finance to mark it paid.', route: '#/finance' });
+  });
+  it('shares the debts switch, and stays quiet when notifications are off', () => {
+    expect(planNotifications(input({ bills, prefs: { ...DEFAULT_NOTIFY, enabled: true, debts: false } })).some((p) => p.key.startsWith('bill|'))).toBe(false);
+    expect(planNotifications(input({ bills, prefs: { ...DEFAULT_NOTIFY, enabled: false } })).some((p) => p.key.startsWith('bill|'))).toBe(false);
+  });
+});

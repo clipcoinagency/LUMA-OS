@@ -1,6 +1,6 @@
 // The one-tap actions shared by the dashboard, the "New" sheet and the command palette.
 import type { Component } from 'svelte';
-import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus, Briefcase, GraduationCap, BookHeart, BookOpen, Layers, HandCoins } from '@lucide/svelte';
+import { CheckSquare, Repeat, Target, CalendarPlus, NotebookPen, Droplet, Wallet, Dumbbell, Focus, Briefcase, GraduationCap, BookHeart, BookOpen, Layers, HandCoins, Receipt } from '@lucide/svelte';
 import { focus } from '../../lib/focus.svelte';
 import { app } from '../../lib/app.svelte';
 import { clock } from '../../lib/clock.svelte';
@@ -34,6 +34,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { id: 'habit', module: 'habits', label: 'Habits', icon: Repeat, color: 'var(--mod-habits)', run: () => router.go({ name: 'module', module: 'habits' }) },
   { id: 'money', module: 'finance', label: 'Spending', icon: Wallet, color: 'var(--mod-finance)', run: () => openQuick('transaction') },
   { id: 'debt', module: 'finance', label: 'Add debt', icon: HandCoins, color: 'var(--mod-finance)', run: () => { financeView.tab = 'debts'; openQuick('debt'); } },
+  { id: 'bill', module: 'finance', label: 'Add bill', icon: Receipt, color: 'var(--mod-finance)', run: () => { financeView.tab = 'bills'; openQuick('bill'); } },
   { id: 'water', module: 'wellness', label: 'Add water', icon: Droplet, color: 'var(--mod-wellness)', run: () => void addWater() },
   { id: 'workout', module: 'wellness', label: 'Log workout', icon: Dumbbell, color: 'var(--mod-wellness)', run: () => openQuick('workout') },
   { id: 'journal', module: 'notes', label: 'Journal', icon: BookHeart, color: 'var(--mod-notes)', run: () => openQuick('note', { kind: 'journal' }) },
@@ -51,6 +52,6 @@ export function enabledQuickActions(includeWorkout = false): QuickAction[] {
   const order = app.workspace?.moduleOrder ?? [];
   const on = app.workspace?.enabledModules ?? [];
   return QUICK_ACTIONS
-    .filter((a) => (a.module === null || on.includes(a.module)) && (includeWorkout || (a.id !== 'workout' && a.id !== 'debt')))
+    .filter((a) => (a.module === null || on.includes(a.module)) && (includeWorkout || (a.id !== 'workout' && a.id !== 'debt' && a.id !== 'bill')))
     .sort((x, y) => (x.module === null ? -1 : order.indexOf(x.module)) - (y.module === null ? -1 : order.indexOf(y.module)));
 }

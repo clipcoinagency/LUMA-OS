@@ -63,7 +63,7 @@ describe('schema migrations', () => {
 
   it('the v2 and v3 stores carry their indexes', async () => {
     const db = await openDB('mig-idx', SCHEMA_VERSION);
-    const t = db.transaction(['focus_sessions', 'projects', 'reviews', 'books', 'reading_logs', 'decks', 'cards', 'card_reviews', 'debts', 'debt_payments']);
+    const t = db.transaction(['focus_sessions', 'projects', 'reviews', 'books', 'reading_logs', 'decks', 'cards', 'card_reviews', 'debts', 'debt_payments', 'bills']);
     expect([...t.objectStore('focus_sessions').indexNames]).toEqual(['by_date', 'by_task']);
     expect([...t.objectStore('projects').indexNames]).toEqual(['by_kind', 'by_status']);
     expect([...t.objectStore('reviews').indexNames]).toEqual(['by_date']);
@@ -73,5 +73,6 @@ describe('schema migrations', () => {
     expect([...t.objectStore('card_reviews').indexNames]).toEqual(['by_card', 'by_date']);
     expect([...t.objectStore('debts').indexNames]).toEqual(['by_date', 'by_due']);
     expect([...t.objectStore('debt_payments').indexNames]).toEqual(['by_date', 'by_debt']);
+    expect([...t.objectStore('bills').indexNames]).toEqual(['by_next']);
   });
 });

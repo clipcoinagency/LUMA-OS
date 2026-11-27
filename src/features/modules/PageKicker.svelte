@@ -3,10 +3,9 @@
   // numbers the contents column shows. Hidden in the Aurora themes (see .kick in almanac.css).
   import { app } from '../../lib/app.svelte';
   import { navGroups, tocNumbers } from '../../lib/nav';
-  import { isNewLook } from '../../lib/theme';
 
   let { id }: { id: string } = $props();
-  const entry = $derived(app.workspace ? tocNumbers(navGroups(app.workspace, isNewLook(app.settings?.theme)))[id] : undefined);
+  const entry = $derived(app.workspace ? tocNumbers(navGroups(app.workspace, true))[id] : undefined);
 </script>
 
 {#if entry}<p class="kick kicker" aria-hidden="true"><b>§</b> {entry.group} <span class="dot">·</span> No. {entry.no}</p>{/if}

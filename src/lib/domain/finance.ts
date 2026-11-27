@@ -83,6 +83,28 @@ export function budgetStatus(summary: Pick<PeriodSummary, 'byCategory'>, categor
     .sort((a, b) => b.ratio - a.ratio);
 }
 
+/** Income and expense totals for each of the last `months` months (ending with the month of `day`), oldest first. */
+export function monthlyCashflow(txns: Transaction[], currency: string, months: number, day: DateKey = today()): { month: DateKey; incomeMinor: number; expenseMinor: number }[] {
+  const [y, m] = day.split('-').map(Number) as [number, number];
+  const out: { month: DateKey; incomeMinor: number; expenseMinor: number }[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(y, m - 1 - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    let income = 0, expense = 0;
+    for (const t of txns) {
+      if (t.currency !== currency || !t.date.startsWith(key) || !Number.isSafeInteger(t.amountMinor) || t.amountMinor < 0) continue;
+      if (t.type === 'income') income += t.amountMinor; else if (t.type === 'expense') expense += t.amountMinor;
+    }
+    out.push({ month: `${key}-01` as DateKey, incomeMinor: income, expenseMinor: expense });
+  }
+  return out;
+}
+
+/** Share of income kept (saved + not spent): (income − expenses) ÷ income. null when there is no income to measure against. */
+export function savingsRate(incomeMinor: number, expenseMinor: number): number | null {
+  return incomeMinor > 0 ? (incomeMinor - expenseMinor) / incomeMinor : null;
+}
+
 /** Expense totals for each of the last `months` months (ending with the month of `day`), oldest first. */
 export function monthlyExpenseSeries(txns: Transaction[], currency: string, months: number, day: DateKey = today()): { month: DateKey; expenseMinor: number }[] {
   const out: { month: DateKey; expenseMinor: number }[] = [];

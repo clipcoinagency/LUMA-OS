@@ -6,21 +6,22 @@
   import CurrencyPicker from '../../../lib/ui/CurrencyPicker.svelte';
   import CategoriesManager from './CategoriesManager.svelte';
   import DebtsPanel from './DebtsPanel.svelte';
+  import BillsPanel from './BillsPanel.svelte';
   import { financeView } from './view.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import MonthNav from '../../../lib/ui/MonthNav.svelte';
   import Segmented from '../../../lib/ui/Segmented.svelte';
   import SearchField from '../../../lib/ui/SearchField.svelte';
   import BarChart from '../../../lib/ui/BarChart.svelte';
+  import PairedBars from '../../../lib/ui/PairedBars.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
   import { changes } from '../../../lib/db/changes.svelte';
   import { clock } from '../../../lib/clock.svelte';
   import { app } from '../../../lib/app.svelte';
   import { openQuick } from '../../quick/quick.svelte';
-  import { budgetStatus, monthlyExpenseSeries, summarize, transactionsInRange } from '../../../lib/domain/finance';
+  import { budgetStatus, monthlyCashflow, monthlyExpenseSeries, savingsRate, summarize, transactionsInRange } from '../../../lib/domain/finance';
   import { getAll } from '../../../lib/db/idb';
   import { formatMoney, minorDigits } from '../../../lib/util/money';
-  import { isNewLook } from '../../../lib/theme';
   import { addMonths, diffDays, eachDay, endOfMonth, formatDateKey, startOfMonth } from '../../../lib/util/dates';
   import type { FinanceCategory, Transaction } from '../../../lib/db/schema';
 
@@ -47,12 +48,13 @@
   const prev = $derived(summarize(prevTxns, currency));
   const budgets = $derived(sum ? budgetStatus(sum, [...cats.values()]) : []);
   const trend = $derived(monthlyExpenseSeries(history, currency, 6, month).map((x) => ({ label: formatDateKey(x.month, { month: 'short' }), value: x.expenseMinor / 10 ** minorDigits(currency) })));
+  const cashflow = $derived(monthlyCashflow(history, currency, 6, month).map((x) => ({ label: formatDateKey(x.month, { month: 'short' }), a: x.incomeMinor / 10 ** minorDigits(currency), b: x.expenseMinor / 10 ** minorDigits(currency) })));
+  const hasCashflow = $derived(cashflow.filter((c) => c.a > 0 || c.b > 0).length >= 2 && cashflow.some((c) => c.a > 0));
+  const rate = $derived(sum ? savingsRate(sum.incomeMinor, sum.expenseMinor) : null);
   const hasTrend = $derived(trend.filter((t) => t.value > 0).length >= 2);
   const money = (m: number) => formatMoney(m, currency);
-  // New looks: the current month isn't over, so compare it with the same number of days last month
-  // (the original looks keep comparing with the whole of last month, exactly as before)
-  const fair = $derived(isNewLook(app.settings?.theme));
-  const isThisMonth = $derived(fair && month === startOfMonth(clock.today));
+  // the current month isn't over, so compare it with the same number of days last month
+  const isThisMonth = $derived(month === startOfMonth(clock.today));
   const prevComparable = $derived(isThisMonth ? summarize(prevTxns.filter((t) => Number(t.date.slice(8)) <= Number(clock.today.slice(8))), currency) : prev);
   const spendChange = $derived(sum && prevComparable.expenseMinor > 0 ? (sum.expenseMinor - prevComparable.expenseMinor) / prevComparable.expenseMinor : null);
   const daily = $derived.by(() => {
@@ -84,6 +86,8 @@
     <CurrencyPicker variant="pill" label="Currency" value={currency} onchange={(v) => app.updateSettings({ currency: v })} />
     {#if financeView.tab === 'debts'}
       <Button variant="primary" onclick={() => openQuick('debt')}>{#snippet icon()}<Plus />{/snippet}Add debt</Button>
+    {:else if financeView.tab === 'bills'}
+      <Button variant="primary" onclick={() => openQuick('bill')}>{#snippet icon()}<Plus />{/snippet}Add bill</Button>
     {:else}
       <Button onclick={() => (manage = true)}>{#snippet icon()}<Tags />{/snippet}Categories</Button>
       <Button variant="primary" onclick={() => openQuick('transaction')}>{#snippet icon()}<Plus />{/snippet}Record</Button>
@@ -91,21 +95,23 @@
   {/snippet}
 </PageHeader>
 
-<div class="views"><Segmented label="Finance view" bind:value={financeView.tab} options={[{ value: 'money', label: 'Money' }, { value: 'debts', label: 'Debts' }]} /></div>
+<div class="views"><Segmented label="Finance view" bind:value={financeView.tab} options={[{ value: 'money', label: 'Money' }, { value: 'bills', label: 'Bills' }, { value: 'debts', label: 'Debts' }]} /></div>
 
 {#if financeView.tab === 'debts'}
   <DebtsPanel />
+{:else if financeView.tab === 'bills'}
+  <BillsPanel />
 {:else}
 <div class="bar"><MonthNav {month} today={clock.today} allowFuture={false} onchange={(m) => (month = m)} /></div>
 
 {#if sum}
   <section class="summary" aria-label="Month summary">
     <div class="s main"><span class="l">Spent</span><span class="v big num">{money(sum.expenseMinor)}</span>
-      {#if spendChange !== null}<span class="chg" class:up={spendChange > 0}>{#if spendChange > 0}<TrendingUp size={14} aria-hidden="true" />{:else}<TrendingDown size={14} aria-hidden="true" />{/if}{Math.abs(Math.round(spendChange * 100))}% {spendChange > 0 ? 'more' : 'less'} than {isThisMonth ? 'this point last month' : fair ? 'the month before' : 'last month'}</span>{/if}
+      {#if spendChange !== null}<span class="chg" class:up={spendChange > 0}>{#if spendChange > 0}<TrendingUp size={14} aria-hidden="true" />{:else}<TrendingDown size={14} aria-hidden="true" />{/if}{Math.abs(Math.round(spendChange * 100))}% {spendChange > 0 ? 'more' : 'less'} than {isThisMonth ? 'this point last month' : 'the month before'}</span>{/if}
     </div>
     <div class="s"><span class="l">Income</span><span class="v num">{money(sum.incomeMinor)}</span></div>
     <div class="s"><span class="l">Saved</span><span class="v num">{money(sum.savingMinor)}</span></div>
-    <div class="s"><span class="l">Left</span><span class="v num" class:neg={sum.balanceMinor < 0}>{money(sum.balanceMinor)}</span></div>
+    <div class="s"><span class="l">Left</span><span class="v num" class:neg={sum.balanceMinor < 0}>{money(sum.balanceMinor)}</span>{#if rate !== null}<span class="rate" class:neg={rate < 0}>{rate >= 0 ? `You kept ${Math.round(rate * 100)}% of your income` : `Spent ${Math.round(-rate * 100)}% more than you earned`}</span>{/if}</div>
   </section>
   {#if sum.otherCurrencyCount}<p class="meta other">{sum.otherCurrencyCount} transaction{sum.otherCurrencyCount === 1 ? '' : 's'} in other currencies are listed below but not included in these totals.</p>{/if}
 
@@ -144,6 +150,12 @@
               </li>
             {/each}
           </ul>
+        </section>
+      {/if}
+      {#if hasCashflow}
+        <section class="card" aria-labelledby="cf-h">
+          <h2 id="cf-h">Income vs spending</h2>
+          <PairedBars data={cashflow} label="Income and spending per month, last 6 months" aName="Income" bName="Spending" height={150} format={(v) => formatMoney(Math.round(v * 10 ** minorDigits(currency)), currency)} />
         </section>
       {/if}
       {#if hasTrend}
@@ -200,6 +212,7 @@
   .neg { color: var(--danger); }
   .chg { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-xs); font-weight: 650; color: var(--success); }
   .chg.up { color: var(--warning); }
+  .rate { font-size: var(--text-xs); font-weight: 650; color: var(--success); } .rate.neg { color: var(--warning); }
   .other { margin-bottom: var(--space-3); }
   .card { background: var(--surface); border: var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); padding: var(--space-4) var(--space-5); }
   .card h2, .tx h2 { font-size: var(--text-md); margin-bottom: var(--space-3); }

@@ -39,6 +39,7 @@ for (const theme of THEMES) {
   await setTheme(theme);
   await shot(theme, 'home', () => goto('#/dashboard'), { full: true });
   await shot(theme, 'finance', () => goto('#/finance'), { full: true });
+  await shot(theme, 'bills', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Bills' }).click(); await sleep(800); }, { full: true });
   await shot(theme, 'debts', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Debts' }).click(); await sleep(800); }, { full: true });
   await shot(theme, 'debt-form', async () => { await goto('#/finance'); await page.getByRole('radio', { name: 'Debts' }).click(); await sleep(500); await page.getByRole('button', { name: 'Add debt' }).first().click(); await sleep(700); });
   await page.keyboard.press('Escape'); await sleep(400);

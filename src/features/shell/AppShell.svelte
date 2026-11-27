@@ -15,7 +15,7 @@
   import { router, href } from '../../lib/router.svelte';
   import { navGroups, groupOfRoute, itemIsActive, tocNumbers, type GroupId, type NavItem } from '../../lib/nav';
   import Logo from '../../lib/ui/Logo.svelte';
-  import { themeName, nextTheme, isNewLook } from '../../lib/theme';
+  import { themeName, nextTheme } from '../../lib/theme';
   import ShortcutsSheet from './ShortcutsSheet.svelte';
   import { initShortcuts } from '../../lib/shortcuts.svelte';
   $effect(() => { initShortcuts(); });
@@ -27,7 +27,7 @@
   let sentinel: HTMLDivElement | undefined = $state();
   let navEl: HTMLElement | undefined = $state();
 
-  const groups = $derived(navGroups(app.workspace!, isNewLook(app.settings?.theme)));
+  const groups = $derived(navGroups(app.workspace!, true));
   const toc = $derived(tocNumbers(groups)); // Almanac: page numbers in the contents column
   const where = $derived(groupOfRoute(router.route));
   const currentGroup = $derived(groups.find((g) => g.id === where));
@@ -155,7 +155,7 @@
 
 <QuickHost />
 <CommandPalette />
-{#if isNewLook(app.settings?.theme)}<ShortcutsSheet />{/if}
+<ShortcutsSheet />
 
 <Modal bind:open={creating} title="Create" size="sm">
   <QuickActions wrap onrun={() => (creating = false)} />

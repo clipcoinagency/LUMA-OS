@@ -11,8 +11,9 @@
   import BookForm from './BookForm.svelte';
   import DeckForm from './DeckForm.svelte';
   import DebtForm from './DebtForm.svelte';
+  import BillForm from './BillForm.svelte';
   import { quick, type QuickKind } from './quick.svelte';
-  import type { Book, BookStatus, CalendarEvent, Debt, DebtDirection, Deck, Goal, Habit, Project, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
+  import type { Bill, Book, BookStatus, CalendarEvent, Debt, DebtDirection, Deck, Goal, Habit, Project, Task, Transaction, TransactionType, Workout } from '../../lib/db/schema';
   const pre = <T,>(k: string) => (quick.preset[k] as T | undefined) ?? null;
 
   // function bindings: each form is "open" while the controller points at it; closing clears it
@@ -33,4 +34,5 @@
 <ProjectForm bind:open={is('project'), set('project')} kind={kindFor('project') === 'study' ? 'study' : 'work'} project={pre<Project>('project')} />
 <BookForm bind:open={is('book'), set('book')} book={pre<Book>('book')} status={(quick.preset.status as BookStatus | undefined) ?? 'want'} />
 <DeckForm bind:open={is('deck'), set('deck')} deck={pre<Deck>('deck')} />
+<BillForm bind:open={is('bill'), set('bill')} bill={pre<Bill>('bill')} />
 <DebtForm bind:open={is('debt'), set('debt')} debt={pre<Debt>('debt')} direction={(quick.preset.direction as DebtDirection | undefined) ?? 'owe'} />

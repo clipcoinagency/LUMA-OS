@@ -17,7 +17,6 @@
   import ExportCsv from './ExportCsv.svelte';
   import { shortcuts } from '../../lib/shortcuts.svelte';
   import { Keyboard } from '@lucide/svelte';
-  import { isNewLook } from '../../lib/theme';
   import RestoreFlow from './RestoreFlow.svelte';
   import { backUpNow, lastBackupAt, undoLastChange } from './backupActions';
   import { toast } from '../../lib/ui/toast.svelte';
@@ -106,20 +105,16 @@
 
   <Card title="Appearance">
     <ThemePicker value={s.theme} onchange={(t) => app.updateSettings({ theme: t })} />
-    {#if isNewLook(s.theme)}
-      <div class="gap"><Button size="sm" onclick={() => (shortcuts.open = true)}>{#snippet icon()}<Keyboard />{/snippet}Keyboard shortcuts</Button></div>
-    {/if}
+    <div class="gap"><Button size="sm" onclick={() => (shortcuts.open = true)}>{#snippet icon()}<Keyboard />{/snippet}Keyboard shortcuts</Button></div>
     {#if s.theme === 'paper' || s.theme === 'ink'}
       <div class="gap"><Switch label="Turn the page at night" description="Paper from 7 am, Night Ink from 7 pm — switches by itself." checked={!!s.almanacAuto} onchange={(v) => app.updateSettings({ almanacAuto: v })} /></div>
     {/if}
     <div class="gap"><Switch label="Reduce motion" description="Minimise animations throughout Life OS." checked={s.reduceMotion} onchange={(v) => app.updateSettings({ reduceMotion: v })} /></div>
   </Card>
 
-  {#if isNewLook(s.theme)}
-    <Card title="Reminders & notifications" subtitle="Choose what Life OS reminds you about.">
-      <NotificationSettings />
-    </Card>
-  {/if}
+  <Card title="Reminders & notifications" subtitle="Choose what Life OS reminds you about.">
+    <NotificationSettings />
+  </Card>
 
   <Card title="Modules" subtitle="Turn areas on or off. Turning a module off hides it — your data is kept.">
     <ModulePicker selected={w.enabledModules} onchange={setModules} />
@@ -163,11 +158,9 @@
     </Card>
   {/if}
 
-  {#if isNewLook(s.theme)}
-    <Card title="Export to a spreadsheet" subtitle="Your records as CSV files — private, made on this device.">
-      <ExportCsv />
-    </Card>
-  {/if}
+  <Card title="Export to a spreadsheet" subtitle="Your records as CSV files — private, made on this device.">
+    <ExportCsv />
+  </Card>
 
   <Card title="Data & backup" subtitle={lastBackup ? `Last backup: ${fmt(lastBackup)}` : 'You have not made a backup on this device yet.'}>
     <p class="privacy"><ShieldCheck size={18} aria-hidden="true" /><span>Your data stays on your device. It is stored {where}</span></p>

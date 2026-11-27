@@ -75,7 +75,7 @@
         </div>
       {/if}
       {#if app.workspace?.enabledModules.includes('finance')}
-        <Switch label="Debts coming due" description="On the day a debt is due back, at your morning-briefing time." checked={p.debts !== false} disabled={!p.enabled} onchange={(v) => void save({ debts: v })} />
+        <Switch label="Bills & debts coming due" description="On the day a bill or debt is due, at your morning-briefing time." checked={p.debts !== false} disabled={!p.enabled} onchange={(v) => void save({ debts: v })} />
       {/if}
       <Switch label="Weekly Reset" description="The evening before your week starts, at 6 pm." checked={p.reset} disabled={!p.enabled} onchange={(v) => void save({ reset: v })} />
       <Switch label="Focus finished" description="When a focus session reaches its time." checked={p.focus} disabled={!p.enabled} onchange={(v) => void save({ focus: v })} />

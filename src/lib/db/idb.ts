@@ -46,7 +46,7 @@ export const MIGRATIONS: Record<number, Migration> = {
   3: (db) => {
     for (const name of V3_STORES) if (!db.objectStoreNames.contains(name)) createStore(db, name);
   },
-  // v4: Debts (debts, debt_payments). Purely additive.
+  // v4: Debts and Bills & subscriptions (debts, debt_payments, bills). Purely additive.
   4: (db) => {
     for (const name of V4_STORES) if (!db.objectStoreNames.contains(name)) createStore(db, name);
   },

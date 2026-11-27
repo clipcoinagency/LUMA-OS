@@ -16,7 +16,6 @@
   import ResetPage from './features/reset/ResetPage.svelte';
   import ClosePage from './features/rituals/ClosePage.svelte';
   import SealsPage from './features/rituals/SealsPage.svelte';
-  import { isNewLook } from './lib/theme';
   import Aurora from './lib/ui/Aurora.svelte';
   import FocusMode from './features/focus/FocusMode.svelte';
   import FocusPill from './features/focus/FocusPill.svelte';
@@ -59,8 +58,6 @@
   // a disabled module's URL falls back to the dashboard
   $effect(() => {
     if (app.status === 'ready' && route.name === 'module' && !app.workspace?.enabledModules.includes(route.module)) router.go({ name: 'dashboard' });
-    // Close the day and Seals belong to the new looks only
-    if (app.status === 'ready' && (route.name === 'close' || route.name === 'seals') && !isNewLook(app.settings?.theme)) router.go({ name: 'dashboard' });
   });
   // finishing setup (or restoring a backup from the Welcome screen) always lands on the dashboard
   let wasOnboarded: boolean | undefined;

@@ -8,7 +8,6 @@
   import { app } from '../../lib/app.svelte';
   import { clock } from '../../lib/clock.svelte';
   import { changes } from '../../lib/db/changes.svelte';
-  import { isNewLook } from '../../lib/theme';
   import { computeInsights, loadInsightsData, type Insight, type InsightsResult, type SeriesFormat } from '../../lib/domain/insights';
   import { formatMinutes } from '../../lib/domain/focus';
   import { formatMoney } from '../../lib/util/money';
@@ -19,7 +18,7 @@
     const v = changes.version;
     const ws = app.workspace, st = app.settings;
     if (!ws || !st) return;
-    void loadInsightsData({ today: clock.today, weekStartsOn: st.weekStartsOn, enabled: ws.enabledModules, currency: st.currency, fullWeeksOnly: isNewLook(st.theme) }).then((d) => {
+    void loadInsightsData({ today: clock.today, weekStartsOn: st.weekStartsOn, enabled: ws.enabledModules, currency: st.currency, fullWeeksOnly: true }).then((d) => {
       if (v === changes.version) result = computeInsights(d);
     });
   });

@@ -9,7 +9,6 @@ import { palette } from './palette.svelte';
 import { focus } from './focus.svelte';
 import { router } from './router.svelte';
 import { navGroups } from './nav';
-import { isNewLook } from './theme';
 import { openQuick } from '../features/quick/quick.svelte';
 
 class Shortcuts { open = $state(false); }
@@ -47,7 +46,7 @@ function goTo(id: string) {
 }
 
 function onKey(e: KeyboardEvent) {
-  if (!app.workspace?.onboarded || !isNewLook(app.settings?.theme)) return;
+  if (!app.workspace?.onboarded) return;
   if (e.key === 'Escape' && shortcuts.open) { shortcuts.open = false; return; }
   const sheetOpen = shortcuts.open;
   if (shouldIgnore(e, !!document.querySelector('dialog[open]') && !sheetOpen)) return;

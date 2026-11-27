@@ -1,4 +1,4 @@
-// Life OS data schema — version 4 (v4 adds the Debts tracker: debts + debt_payments; v2 added projects, focus_sessions and reviews; v3 adds the Study & Read
+// Life OS data schema — version 4 (v4 adds the Debts tracker + Bills & subscriptions: debts, debt_payments, bills; v2 added projects, focus_sessions and reviews; v3 adds the Study & Read
 // stores: books, reading_logs, decks, cards, card_reviews). Every earlier store is untouched and every field
 // added to an older record type is optional, so v1/v2 data and backups load as-is.
 //
@@ -244,6 +244,23 @@ export interface DebtPayment {
   createdAt: string;
 }
 
+// ---------------------------------------------------------------- Bills & subscriptions (v4)
+
+export type BillCadence = 'weekly' | 'monthly' | 'yearly';
+
+/** A recurring cost (rent, a subscription, insurance). Paying it records a real expense and moves nextDue on. */
+export interface Bill extends Stamped {
+  name: string;
+  amountMinor: number;            // per cycle, always positive
+  currency: string;
+  cadence: BillCadence;
+  anchor: DateKey;                // the first due date: keeps "the 31st" from drifting to the 28th after a short month
+  nextDue: DateKey;
+  categoryId: string | null;      // the expense category a payment is filed under
+  note: string;
+  paused: boolean;                // cancelled / on hold: kept for history, not counted or reminded
+}
+
 // ---------------------------------------------------------------- v2 records
 
 /** A work project or a study subject — the container between a Goal and its Tasks. */
@@ -379,6 +396,7 @@ export interface StoreRecordMap {
   card_reviews: CardReview;
   debts: Debt;
   debt_payments: DebtPayment;
+  bills: Bill;
   safety: SafetySnapshot;
 }
 export type StoreName = keyof StoreRecordMap;
@@ -419,6 +437,7 @@ export const STORES: Record<StoreName, StoreDef> = {
   card_reviews: { keyPath: 'id', indexes: { by_card: 'cardId', by_date: 'date' }, dateField: 'date', module: 'study' },
   debts: { keyPath: 'id', indexes: { by_date: 'date', by_due: 'dueDate' }, dateField: 'date', module: 'finance' },
   debt_payments: { keyPath: 'id', indexes: { by_debt: 'debtId', by_date: 'date' }, dateField: 'date', module: 'finance' },
+  bills: { keyPath: 'id', indexes: { by_next: 'nextDue' }, dateField: 'nextDue', module: 'finance' },
   safety: { keyPath: 'id', indexes: { by_created: 'createdAt' }, local: true },
 };
 
@@ -427,8 +446,8 @@ export const V2_STORES: StoreName[] = ['projects', 'focus_sessions', 'reviews'];
 /** Stores that exist since schema v3 (Study & Read). */
 export const V3_STORES: StoreName[] = ['books', 'reading_logs', 'decks', 'cards', 'card_reviews'];
 
-/** Stores that exist since schema v4 (Debts). */
-export const V4_STORES: StoreName[] = ['debts', 'debt_payments'];
+/** Stores that exist since schema v4 (Debts, Bills & subscriptions). */
+export const V4_STORES: StoreName[] = ['debts', 'debt_payments', 'bills'];
 
 export const STORE_NAMES = Object.keys(STORES) as StoreName[];
 export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);

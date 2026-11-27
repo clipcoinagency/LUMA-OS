@@ -9,7 +9,6 @@
   import { app } from '../../lib/app.svelte';
   import { router } from '../../lib/router.svelte';
   import { navGroups } from '../../lib/nav';
-  import { isNewLook } from '../../lib/theme';
   import { QUICK_ACTIONS } from '../quick/actions';
   import { listTasks } from '../../lib/domain/tasks';
   import { listGoals } from '../../lib/domain/goals';
@@ -35,7 +34,7 @@
     const ws = app.workspace;
     if (!ws) return [];
     const out: Cmd[] = [{ id: 'p-home', label: 'Home', hint: 'Page', icon: HomeIcon, color: 'var(--accent)', run: go({ name: 'dashboard' }) }];
-    for (const g of navGroups(ws, isNewLook(app.settings?.theme))) for (const it of g.items) out.push({ id: `p-${it.id}`, label: it.label, hint: `${g.label} · page`, icon: it.icon, color: it.color, run: go(it.route) });
+    for (const g of navGroups(ws, true)) for (const it of g.items) out.push({ id: `p-${it.id}`, label: it.label, hint: `${g.label} · page`, icon: it.icon, color: it.color, run: go(it.route) });
     out.push({ id: 'p-settings', label: 'Settings', hint: 'Page', icon: SettingsIcon, color: 'var(--text-2)', run: go({ name: 'settings' }) });
     for (const a of QUICK_ACTIONS) if (a.module === null || ws.enabledModules.includes(a.module)) out.push({ id: `a-${a.id}`, label: a.label, hint: 'Create', icon: a.icon, color: a.color, run: a.run });
     out.push({ id: 'a-reset', label: 'Start Weekly Reset', hint: 'Reflect', icon: RefreshCcw, color: 'var(--mod-reset)', run: () => void reset.begin() });
@@ -43,7 +42,7 @@
       id: 'a-theme', label: `Switch to ${themeName(nextTheme(app.settings?.theme ?? 'soft'))} theme`, hint: 'Appearance', icon: Palette, color: 'var(--accent-2)',
       run: () => void app.updateSettings({ theme: nextTheme(app.settings?.theme ?? 'soft') }),
     });
-    if (isNewLook(app.settings?.theme)) out.push({ id: 'a-keys', label: 'Keyboard shortcuts', hint: 'Help', icon: Keyboard, color: 'var(--text-2)', run: () => { shortcuts.open = true; } });
+    out.push({ id: 'a-keys', label: 'Keyboard shortcuts', hint: 'Help', icon: Keyboard, color: 'var(--text-2)', run: () => { shortcuts.open = true; } });
     return out;
   });
 

@@ -85,7 +85,7 @@ const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {
   2: (data) => data,
   // v3 only ADDED stores (books, reading_logs, decks, cards, card_reviews): older backups are valid as-is.
   3: (data) => data,
-  // v4 only ADDED stores (debts, debt_payments): older backups are valid as-is.
+  // v4 only ADDED stores (debts, debt_payments, bills): older backups are valid as-is.
   4: (data) => data,
 };
 

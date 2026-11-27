@@ -16,7 +16,7 @@
   import RitualsRow from './RitualsRow.svelte';
   import OnThisDay from './OnThisDay.svelte';
   import { Printer } from '@lucide/svelte';
-  import { styleOf, isNewLook } from '../../lib/theme';
+  import { styleOf } from '../../lib/theme';
   import { SlidersHorizontal } from '@lucide/svelte';
   import Button from '../../lib/ui/Button.svelte';
   import { app } from '../../lib/app.svelte';
@@ -50,7 +50,6 @@
   let customizing = $state(false);
   const ws = $derived(app.workspace!);
   const almanac = $derived(styleOf(app.settings?.theme ?? 'soft') === 'almanac'); // Paper / Night Ink: print
-  const newLook = $derived(isNewLook(app.settings?.theme));                        // Paper / Night Ink / Nebula sections
   const all = $derived(visibleWidgets(ws));
   const showQuick = $derived(all.includes('quick-actions'));
   const hasActivity = $derived(ws.enabledModules.some((m) => m === 'tasks' || m === 'habits' || m === 'wellness'));
@@ -75,9 +74,9 @@
 
 <div class="dash {ws.dashboardLayout}" bind:clientWidth={width}>
   <CommandCenter />
-  {#if newLook}<QuickCapture /><GettingStarted />{/if}
+  <QuickCapture /><GettingStarted />
   <PulseRow />
-  {#if newLook}<RitualsRow /><DayTimeline />{/if}
+  <RitualsRow /><DayTimeline />
 
   <div class="bar">
     <h2>Today at a glance</h2>
@@ -107,7 +106,7 @@
     </div>
   {/if}
 
-  {#if newLook}<YearInk /><OnThisDay />{/if}
+  <YearInk /><OnThisDay />
   <DailyLine />
 </div>
 

@@ -82,3 +82,25 @@ describe('notification plan', () => {
     for (const k of ['x', 'task|abc|2026-11-25|09:30', '']) { const id = idFor(k); expect(Number.isInteger(id) && id > 0 && id <= 0x7fffffff).toBe(true); }
   });
 });
+
+describe('debt reminders', () => {
+  const debts = [
+    { id: 'a', person: 'Sam', direction: 'owe' as const, dueDate: D('2026-11-27'), amount: '$50.00' },
+    { id: 'b', person: 'Priya', direction: 'owed' as const, dueDate: D('2026-11-25'), amount: '$200.00' },
+  ];
+  it('rings on the due date at the morning-briefing time, in plain words', () => {
+    const plan = planNotifications(input({ debts }));
+    const d = plan.filter((p) => p.key.startsWith('debt|'));
+    expect(d).toHaveLength(2);
+    expect(d[0]).toMatchObject({ key: 'debt|b|2026-11-25', at: atLocal(D('2026-11-25'), '08:00'), body: 'Priya owes you $200.00 — due today.', route: '#/finance' });
+    expect(d[1]!.body).toBe('You owe Sam $50.00 — due on this day.');
+  });
+  it('stays quiet when switched off, or when notifications are off', () => {
+    expect(planNotifications(input({ debts, prefs: { ...DEFAULT_NOTIFY, enabled: true, debts: false } })).some((p) => p.key.startsWith('debt|'))).toBe(false);
+    expect(planNotifications(input({ debts, prefs: { ...DEFAULT_NOTIFY, enabled: false } })).some((p) => p.key.startsWith('debt|'))).toBe(false);
+  });
+  it('treats an older saved setting (no debts flag) as on', () => {
+    const { debts: _omit, ...old } = DEFAULT_NOTIFY;
+    expect(planNotifications(input({ debts, prefs: { ...old, enabled: true } })).filter((p) => p.key.startsWith('debt|'))).toHaveLength(2);
+  });
+});

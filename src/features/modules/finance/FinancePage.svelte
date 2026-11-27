@@ -1,10 +1,12 @@
 <script lang="ts">
   // Month-by-month finance: summary, category breakdown, daily spending, and every transaction.
   // Browse back to any previous month — nothing is overwritten.
-  import { Plus, Wallet, Tags, SearchX, TrendingDown, TrendingUp } from '@lucide/svelte';
+  import { Plus, Wallet, Tags, SearchX, TrendingDown, TrendingUp, HandCoins } from '@lucide/svelte';
   import PageHeader from '../PageHeader.svelte';
   import CurrencyPicker from '../../../lib/ui/CurrencyPicker.svelte';
   import CategoriesManager from './CategoriesManager.svelte';
+  import DebtsPanel from './DebtsPanel.svelte';
+  import { financeView } from './view.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import MonthNav from '../../../lib/ui/MonthNav.svelte';
   import Segmented from '../../../lib/ui/Segmented.svelte';
@@ -80,11 +82,20 @@
 <PageHeader module="finance">
   {#snippet actions()}
     <CurrencyPicker variant="pill" label="Currency" value={currency} onchange={(v) => app.updateSettings({ currency: v })} />
-    <Button onclick={() => (manage = true)}>{#snippet icon()}<Tags />{/snippet}Categories</Button>
-    <Button variant="primary" onclick={() => openQuick('transaction')}>{#snippet icon()}<Plus />{/snippet}Record</Button>
+    {#if financeView.tab === 'debts'}
+      <Button variant="primary" onclick={() => openQuick('debt')}>{#snippet icon()}<Plus />{/snippet}Add debt</Button>
+    {:else}
+      <Button onclick={() => (manage = true)}>{#snippet icon()}<Tags />{/snippet}Categories</Button>
+      <Button variant="primary" onclick={() => openQuick('transaction')}>{#snippet icon()}<Plus />{/snippet}Record</Button>
+    {/if}
   {/snippet}
 </PageHeader>
 
+<div class="views"><Segmented label="Finance view" bind:value={financeView.tab} options={[{ value: 'money', label: 'Money' }, { value: 'debts', label: 'Debts' }]} /></div>
+
+{#if financeView.tab === 'debts'}
+  <DebtsPanel />
+{:else}
 <div class="bar"><MonthNav {month} today={clock.today} allowFuture={false} onchange={(m) => (month = m)} /></div>
 
 {#if sum}
@@ -173,9 +184,12 @@
   </section>
 {/if}
 
+{/if}
+
 <CategoriesManager bind:open={manage} />
 
 <style>
+  .views { margin-bottom: var(--space-4); }
   .bar { margin-bottom: var(--space-4); }
   .summary { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3); }
   @media (max-width: 760px) { .summary { grid-template-columns: repeat(3, 1fr); } .summary .main { grid-column: 1 / -1; } }

@@ -1,4 +1,4 @@
-// Life OS data schema — version 3 (v2 added projects, focus_sessions and reviews; v3 adds the Study & Read
+// Life OS data schema — version 4 (v4 adds the Debts tracker: debts + debt_payments; v2 added projects, focus_sessions and reviews; v3 adds the Study & Read
 // stores: books, reading_logs, decks, cards, card_reviews). Every earlier store is untouched and every field
 // added to an older record type is optional, so v1/v2 data and backups load as-is.
 //
@@ -12,7 +12,7 @@
 import type { DateKey } from '../util/dates';
 
 export const DB_NAME = 'lifeos';
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const MODULE_IDS = ['tasks', 'goals', 'habits', 'calendar', 'notes', 'wellness', 'finance', 'work', 'study'] as const;
 /** The areas switched on for a brand-new workspace (Work and Study are opt-in). */
@@ -62,6 +62,7 @@ export interface NotifyPrefs {
   morning: boolean;               // a short briefing to start the day
   morningTime: string;
   reset: boolean;                 // the Weekly Reset, the evening before the week starts
+  debts?: boolean;               // a debt's due date, at the morning-briefing time (default on)
   focus: boolean;                 // when a focus session reaches its time
 }
 
@@ -216,6 +217,33 @@ export interface FinanceCategory extends Stamped {
   budgetMinor?: number | null;    // v2: monthly budget for an expense category
 }
 
+// ---------------------------------------------------------------- Debts (v4)
+
+/** 'owe' = I borrowed it (I owe them) · 'owed' = I lent it (they owe me). */
+export type DebtDirection = 'owe' | 'owed';
+
+/** Money borrowed or lent. The balance is never stored: it is the amount minus the DebtPayment rows. */
+export interface Debt extends Stamped {
+  person: string;
+  direction: DebtDirection;
+  amountMinor: number;            // the original amount, always positive
+  currency: string;
+  date: DateKey;                  // the day it began
+  dueDate: DateKey | null;
+  note: string;
+  settledOn: DateKey | null;      // the day it was paid off in full (or written off); null while open
+}
+
+/** One repayment. Dated rows, like every other history in Life OS: the balance on any past day can be rebuilt. */
+export interface DebtPayment {
+  id: string;
+  debtId: string;
+  date: DateKey;
+  amountMinor: number;            // always positive
+  note: string;
+  createdAt: string;
+}
+
 // ---------------------------------------------------------------- v2 records
 
 /** A work project or a study subject — the container between a Goal and its Tasks. */
@@ -349,6 +377,8 @@ export interface StoreRecordMap {
   decks: Deck;
   cards: Card;
   card_reviews: CardReview;
+  debts: Debt;
+  debt_payments: DebtPayment;
   safety: SafetySnapshot;
 }
 export type StoreName = keyof StoreRecordMap;
@@ -387,6 +417,8 @@ export const STORES: Record<StoreName, StoreDef> = {
   decks: { keyPath: 'id', indexes: { by_updated: 'updatedAt' }, dateField: 'createdOn', module: 'study' },
   cards: { keyPath: 'id', indexes: { by_deck: 'deckId', by_due: 'due' }, dateField: 'createdOn', module: 'study' },
   card_reviews: { keyPath: 'id', indexes: { by_card: 'cardId', by_date: 'date' }, dateField: 'date', module: 'study' },
+  debts: { keyPath: 'id', indexes: { by_date: 'date', by_due: 'dueDate' }, dateField: 'date', module: 'finance' },
+  debt_payments: { keyPath: 'id', indexes: { by_debt: 'debtId', by_date: 'date' }, dateField: 'date', module: 'finance' },
   safety: { keyPath: 'id', indexes: { by_created: 'createdAt' }, local: true },
 };
 
@@ -394,6 +426,9 @@ export const STORES: Record<StoreName, StoreDef> = {
 export const V2_STORES: StoreName[] = ['projects', 'focus_sessions', 'reviews'];
 /** Stores that exist since schema v3 (Study & Read). */
 export const V3_STORES: StoreName[] = ['books', 'reading_logs', 'decks', 'cards', 'card_reviews'];
+
+/** Stores that exist since schema v4 (Debts). */
+export const V4_STORES: StoreName[] = ['debts', 'debt_payments'];
 
 export const STORE_NAMES = Object.keys(STORES) as StoreName[];
 export const BACKUP_STORES = STORE_NAMES.filter((s) => !STORES[s].local);

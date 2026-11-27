@@ -4,7 +4,7 @@ import { addDays, nowIso, today, weekday, type DateKey } from '../util/dates';
 import { newId } from '../util/ids';
 import { getAll, transact } from './idb';
 import type {
-  CalendarEvent, Goal, GoalProgress, Habit, HabitLog, Note, Task, Transaction, WellnessDay, Workout,
+  CalendarEvent, Debt, DebtPayment, Goal, GoalProgress, Habit, HabitLog, Note, Task, Transaction, WellnessDay, Workout,
 } from './schema';
 
 function rng(seed: number) {
@@ -90,7 +90,22 @@ export async function seedSampleData(days = 90, seed = 7): Promise<Record<string
   goals[0]!.current = trip;
   goals[1]!.current = books;
 
-  const rows = { habits, habit_logs: habitLogs, tasks, goals, goal_progress: progress, events, notes, wellness, workouts, transactions: txns } as const;
+  // a few debts, with fixed values so the generator's random sequence (and everything else) stays exactly as before
+  const debts: Debt[] = [];
+  const debtPayments: DebtPayment[] = [];
+  const mkDebt = (person: string, direction: 'owe' | 'owed', amountMinor: number, began: number, due: number | null, note: string, settledAgo: number | null = null) => {
+    const d: Debt = { id: newId('debt'), person, direction, amountMinor, currency: 'USD', date: addDays(end, -began), dueDate: due === null ? null : addDays(end, due), note, settledOn: settledAgo === null ? null : addDays(end, -settledAgo), ...stamp };
+    debts.push(d);
+    return d;
+  };
+  const mkPay = (d: Debt, agoDays: number, amountMinor: number, note = '') => debtPayments.push({ id: newId('dpay'), debtId: d.id, date: addDays(end, -agoDays), amountMinor, note, createdAt: at });
+  const sam = mkDebt('Sam', 'owe', 24000, 20, 9, 'Flight deposit'); mkPay(sam, 8, 6000, 'First instalment');
+  const priya = mkDebt('Priya', 'owed', 35000, 45, -5, 'Laptop repair'); mkPay(priya, 20, 10000);
+  const mum = mkDebt('Mum', 'owe', 120000, 70, null, 'Course fees'); mkPay(mum, 40, 40000); mkPay(mum, 10, 20000);
+  mkDebt('Jordan', 'owed', 4500, 12, 2, 'Concert ticket');
+  const lee = mkDebt('Lee', 'owed', 8000, 60, null, 'Dinner and cab', 15); mkPay(lee, 15, 8000, 'Settled in full');
+
+  const rows = { habits, habit_logs: habitLogs, tasks, goals, goal_progress: progress, events, notes, wellness, workouts, transactions: txns, debts, debt_payments: debtPayments } as const;
   await transact<void>(Object.keys(rows) as (keyof typeof rows)[], 'readwrite', (t) => {
     for (const [store, list] of Object.entries(rows)) {
       const os = t.objectStore(store);

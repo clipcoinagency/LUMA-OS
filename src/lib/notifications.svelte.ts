@@ -10,6 +10,8 @@ import { changes } from './db/changes.svelte';
 import type { NotifyPrefs } from './db/schema';
 import { buildHeadline, loadHomeSnapshot, timeLabel } from './domain/home';
 import { listTasks } from './domain/tasks';
+import { loadDebtViews } from './domain/debts';
+import { formatMoney } from './util/money';
 import { loadActive, remainingMs } from './domain/focus';
 import { inResetSeason } from './domain/review';
 import { DEFAULT_NOTIFY, idFor, keyOf, planNotifications, type PlanInput, type Planned } from './domain/notifyPlan';
@@ -33,10 +35,11 @@ async function gather(fromMs: number, toMs: number): Promise<PlanInput | null> {
   const st = app.settings, ws = app.workspace;
   if (!st || !ws) return null;
   const now = new Date();
-  const [snap, tasks, active] = await Promise.all([
+  const [snap, tasks, active, debts] = await Promise.all([
     loadHomeSnapshot({ enabled: ws.enabledModules, name: st.displayName, currency: st.currency, weekStartsOn: st.weekStartsOn, focusTargetMin: st.focusTargetMin }),
     listTasks(),
     loadActive(),
+    ws.enabledModules.includes('finance') ? loadDebtViews(keyOf(now)) : Promise.resolve([]),
   ]);
   const nowMs = now.getTime();
   return {
@@ -48,6 +51,7 @@ async function gather(fromMs: number, toMs: number): Promise<PlanInput | null> {
     resetDoneThisWeek: inResetSeason(keyOf(now), st.weekStartsOn) && snap.reset === null,
     focus: active && !active.pausedAt ? { endsAt: nowMs + remainingMs(active, nowMs), label: active.label, key: `focus|${active.startedAt}` } : null,
     timeLabel,
+    debts: debts.filter((d) => d.status !== 'settled' && d.debt.dueDate).map((d) => ({ id: d.debt.id, person: d.debt.person, direction: d.debt.direction, dueDate: d.debt.dueDate!, amount: formatMoney(d.balanceMinor, d.debt.currency) })),
   };
 }
 

@@ -2,9 +2,9 @@
 // install (which runs every migration in order) ends up with exactly the same set of stores.
 import { describe, expect, it, afterEach } from 'vitest';
 import { closeDB, openDB } from '../../src/lib/db/idb';
-import { STORE_NAMES, STORES, V2_STORES, V3_STORES, SCHEMA_VERSION } from '../../src/lib/db/schema';
+import { STORE_NAMES, STORES, V2_STORES, V3_STORES, V4_STORES, SCHEMA_VERSION } from '../../src/lib/db/schema';
 
-const V1_STORES = STORE_NAMES.filter((s) => !V2_STORES.includes(s) && !V3_STORES.includes(s));
+const V1_STORES = STORE_NAMES.filter((s) => !V2_STORES.includes(s) && !V3_STORES.includes(s) && !V4_STORES.includes(s));
 
 /** Creates a database as an older release would have left it (only the given stores), with one old task. */
 function rawOld(name: string, version: number, stores: typeof STORE_NAMES): Promise<void> {
@@ -31,7 +31,7 @@ const oldTask = (db: IDBDatabase) => new Promise<unknown>((resolve) => {
 afterEach(async () => { await closeDB(); });
 
 describe('schema migrations', () => {
-  it('is at schema version 3', () => { expect(SCHEMA_VERSION).toBe(3); });
+  it('is at schema version 4', () => { expect(SCHEMA_VERSION).toBe(4); });
 
   it('upgrading a v1 database adds the v2 and v3 stores and keeps existing rows', async () => {
     await rawOld('mig-upgrade-1', 1, V1_STORES);
@@ -48,6 +48,14 @@ describe('schema migrations', () => {
     for (const s of V3_STORES) expect(db.objectStoreNames.contains(s)).toBe(true);
   });
 
+  it('upgrading a v3 database adds only the Debts stores and keeps existing rows', async () => {
+    await rawOld('mig-upgrade-3', 3, [...V1_STORES, ...V2_STORES, ...V3_STORES]);
+    const db = await openDB('mig-upgrade-3', SCHEMA_VERSION);
+    expect(storeNames(db)).toEqual([...STORE_NAMES].sort());
+    expect(await oldTask(db)).toMatchObject({ id: 'task_old' });
+    for (const s of V4_STORES) expect(db.objectStoreNames.contains(s)).toBe(true);
+  });
+
   it('a fresh install ends up with the same stores as an upgrade', async () => {
     const db = await openDB('mig-fresh', SCHEMA_VERSION);
     expect(storeNames(db)).toEqual([...STORE_NAMES].sort());
@@ -55,7 +63,7 @@ describe('schema migrations', () => {
 
   it('the v2 and v3 stores carry their indexes', async () => {
     const db = await openDB('mig-idx', SCHEMA_VERSION);
-    const t = db.transaction(['focus_sessions', 'projects', 'reviews', 'books', 'reading_logs', 'decks', 'cards', 'card_reviews']);
+    const t = db.transaction(['focus_sessions', 'projects', 'reviews', 'books', 'reading_logs', 'decks', 'cards', 'card_reviews', 'debts', 'debt_payments']);
     expect([...t.objectStore('focus_sessions').indexNames]).toEqual(['by_date', 'by_task']);
     expect([...t.objectStore('projects').indexNames]).toEqual(['by_kind', 'by_status']);
     expect([...t.objectStore('reviews').indexNames]).toEqual(['by_date']);
@@ -63,5 +71,7 @@ describe('schema migrations', () => {
     expect([...t.objectStore('reading_logs').indexNames]).toEqual(['by_book', 'by_date']);
     expect([...t.objectStore('cards').indexNames]).toEqual(['by_deck', 'by_due']);
     expect([...t.objectStore('card_reviews').indexNames]).toEqual(['by_card', 'by_date']);
+    expect([...t.objectStore('debts').indexNames]).toEqual(['by_date', 'by_due']);
+    expect([...t.objectStore('debt_payments').indexNames]).toEqual(['by_date', 'by_debt']);
   });
 });

@@ -5,7 +5,7 @@
 //   • text that starts with = + - @ is prefixed with an apostrophe so a note can never run as a formula;
 //   • money is written in major units with the currency's real number of decimals (¥ 0, $ 2, KWD 3).
 import { getAll } from '../db/idb';
-import type { FinanceCategory, FocusSession, Habit, HabitLog, Note, Task, Transaction } from '../db/schema';
+import type { Debt, DebtPayment, FinanceCategory, FocusSession, Habit, HabitLog, Note, Task, Transaction } from '../db/schema';
 import { minorDigits } from '../util/money';
 import { today } from '../util/dates';
 
@@ -39,6 +39,15 @@ export function transactionsCsv(txns: Transaction[], cats: FinanceCategory[]): s
     rows.map((t) => [t.date, t.type, money(t.amountMinor, t.currency), t.currency, t.categoryId ? name.get(t.categoryId) ?? '' : '', t.note]));
 }
 
+/** One row per debt: who, which way, the original amount, what has been repaid and what is left. */
+export function debtsCsv(debts: Debt[], payments: DebtPayment[]): string {
+  const paid = new Map<string, number>();
+  for (const p of payments) paid.set(p.debtId, (paid.get(p.debtId) ?? 0) + p.amountMinor);
+  const rows = [...debts].sort((a, b) => a.date.localeCompare(b.date) || a.person.localeCompare(b.person));
+  return toCsv(['Person', 'Direction', 'Amount', 'Repaid', 'Balance', 'Currency', 'Started', 'Due', 'Settled on', 'Note'],
+    rows.map((d) => { const p = Math.min(d.amountMinor, paid.get(d.id) ?? 0); return [d.person, d.direction === 'owe' ? 'I owe them' : 'They owe me', money(d.amountMinor, d.currency), money(p, d.currency), money(d.amountMinor - p, d.currency), d.currency, d.date, d.dueDate, d.settledOn, d.note]; }));
+}
+
 export function habitCheckinsCsv(habits: Habit[], logs: HabitLog[]): string {
   const name = new Map(habits.map((h) => [h.id, h.name]));
   const rows = [...logs].sort((a, b) => a.date.localeCompare(b.date) || (name.get(a.habitId) ?? '').localeCompare(name.get(b.habitId) ?? ''));
@@ -57,10 +66,11 @@ export function notesCsv(notes: Note[]): string {
     rows.map((n) => [n.date, n.kind === 'journal' ? 'journal' : 'note', n.title, n.content, n.tags.join('; '), n.mood ? `${n.mood} ${MOOD[n.mood]}` : '']));
 }
 
-export type ExportKind = 'tasks' | 'money' | 'habits' | 'focus' | 'notes';
+export type ExportKind = 'tasks' | 'money' | 'debts' | 'habits' | 'focus' | 'notes';
 export const EXPORTS: { id: ExportKind; label: string; hint: string; module: string | null }[] = [
   { id: 'tasks', label: 'Tasks', hint: 'Every task with its dates and tags', module: 'tasks' },
   { id: 'money', label: 'Money', hint: 'Every transaction with its category', module: 'finance' },
+  { id: 'debts', label: 'Debts', hint: 'Who owes whom, repaid and balance', module: 'finance' },
   { id: 'habits', label: 'Habit check-ins', hint: 'One row per habit per day', module: 'habits' },
   { id: 'focus', label: 'Focus sessions', hint: 'Start, end and minutes focused', module: null },
   { id: 'notes', label: 'Journal & notes', hint: 'Text, tags and mood', module: 'notes' },
@@ -72,6 +82,7 @@ export async function buildExport(kind: ExportKind): Promise<{ name: string; tex
   switch (kind) {
     case 'tasks': { const r = await getAll('tasks'); return { name: `LifeOS-tasks-${stamp}.csv`, text: tasksCsv(r), rows: r.length }; }
     case 'money': { const [r, c] = await Promise.all([getAll('transactions'), getAll('finance_categories')]); return { name: `LifeOS-money-${stamp}.csv`, text: transactionsCsv(r, c), rows: r.length }; }
+    case 'debts': { const [d, p] = await Promise.all([getAll('debts'), getAll('debt_payments')]); return { name: `LifeOS-debts-${stamp}.csv`, text: debtsCsv(d, p), rows: d.length }; }
     case 'habits': { const [h, l] = await Promise.all([getAll('habits'), getAll('habit_logs')]); return { name: `LifeOS-habit-checkins-${stamp}.csv`, text: habitCheckinsCsv(h, l), rows: l.length }; }
     case 'focus': { const r = await getAll('focus_sessions'); return { name: `LifeOS-focus-${stamp}.csv`, text: focusCsv(r), rows: r.length }; }
     case 'notes': { const r = await getAll('notes'); return { name: `LifeOS-notes-${stamp}.csv`, text: notesCsv(r), rows: r.length }; }

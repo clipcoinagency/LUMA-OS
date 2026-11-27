@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Plus, Wallet } from '@lucide/svelte';
+  import { Plus, Wallet, HandCoins } from '@lucide/svelte';
+  import { router } from '../../../lib/router.svelte';
+  import { financeView } from '../../modules/finance/view.svelte';
+  import { loadDebtViews, totalsByCurrency, type DebtTotals } from '../../../lib/domain/debts';
   import WidgetCard from '../WidgetCard.svelte';
   import Button from '../../../lib/ui/Button.svelte';
   import EmptyState from '../../../lib/ui/EmptyState.svelte';
@@ -15,12 +18,14 @@
   let sum = $state<PeriodSummary | null>(null);
   let cats = $state<Map<string, FinanceCategory>>(new Map());
   const currency = $derived(app.settings?.currency ?? 'USD');
+  let debt = $state<DebtTotals | null>(null);
 
   $effect(() => {
     void changes.version;
     const d = clock.today;
     const cur = currency;
     void monthSummary(cur, d).then((s) => { sum = s; });
+    void loadDebtViews(d).then((v) => { const t = totalsByCurrency(v, cur)[0]; debt = t && t.openCount > 0 ? t : null; });
     void listCategories().then((c) => { cats = new Map(c.map((x) => [x.id, x])); });
   });
 
@@ -79,6 +84,14 @@
       {#if sum.otherCurrencyCount}<p class="meta">{sum.otherCurrencyCount} transaction{sum.otherCurrencyCount === 1 ? '' : 's'} in other currencies not included.</p>{/if}
     {/if}
   {/if}
+  {#if debt}
+    <button type="button" class="debts" onclick={() => { financeView.tab = 'debts'; router.go({ name: 'module', module: 'finance' }); }} aria-label="Open debts: you owe {money(debt.oweMinor)}, owed to you {money(debt.owedMinor)}{debt.overdueCount ? `, ${debt.overdueCount} overdue` : ''}">
+      <span class="dico" aria-hidden="true"><HandCoins size={16} /></span>
+      <span class="dtxt"><span class="lbl">Debts</span>
+        <span class="drow">{#if debt.oweMinor}<span class="o">you owe <b class="num">{money(debt.oweMinor)}</b></span>{/if}{#if debt.owedMinor}<span class="w">owed to you <b class="num">{money(debt.owedMinor)}</b></span>{/if}</span></span>
+      {#if debt.overdueCount}<span class="late">{debt.overdueCount} overdue</span>{/if}
+    </button>
+  {/if}
 </WidgetCard>
 
 <style>
@@ -102,4 +115,11 @@
   .track span { display: block; height: 100%; border-radius: inherit; animation: grow var(--dur-slow) var(--ease-out); }
   @keyframes grow { from { width: 0 !important; } }
   .amt { color: var(--text-2); }
+  .debts { margin-top: var(--space-4); width: 100%; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); text-align: left; cursor: pointer; }
+  .debts:hover { border-color: var(--border-strong); }
+  .dico { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex: none; color: var(--mod-finance); background: color-mix(in srgb, var(--mod-finance) 16%, transparent); }
+  .dtxt { flex: 1; min-width: 0; display: grid; gap: 1px; }
+  .drow { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+  .drow b { color: var(--text); } .drow .o b { color: var(--warning); } .drow .w b { color: var(--success); }
+  .late { flex: none; font-size: var(--text-xs); font-weight: 750; color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); padding: 3px 8px; border-radius: 99px; }
 </style>

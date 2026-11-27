@@ -27,6 +27,8 @@ export interface InsightsData {
   categories: FinanceCategory[];
   goals: Goal[];
   goalProgress: GoalProgress[];
+  /** New looks only: weekly task rhythm uses the last 8 COMPLETE weeks (the original looks keep counting this week). */
+  fullWeeksOnly?: boolean;
 }
 
 export type SeriesFormat = 'count' | 'minutes' | 'percent' | 'money';
@@ -74,8 +76,8 @@ export function computeInsights(d: InsightsData): InsightsResult {
   if (on('tasks')) {
     const done = d.tasks.filter((t) => t.done && t.completedOn);
     const wkStart = startOfWeek(d.today, d.weekStartsOn);
-    // the last 8 COMPLETE weeks: this week isn't over, so counting it would understate the average
-    const weeks = Array.from({ length: 8 }, (_, i) => addDays(wkStart, -7 * (8 - i)));
+    // fullWeeksOnly: the last 8 COMPLETE weeks (this week isn't over, so counting it would understate the average)
+    const weeks = Array.from({ length: 8 }, (_, i) => addDays(wkStart, -7 * ((d.fullWeeksOnly ? 8 : 7) - i)));
     const counts = weeks.map((w) => done.filter((t) => t.completedOn! >= w && t.completedOn! <= addDays(w, 6)).length);
     const total = counts.reduce((a, b) => a + b, 0);
     if (total >= 8 && days >= 10) {
@@ -89,7 +91,7 @@ export function computeInsights(d: InsightsData): InsightsResult {
       ready.push({
         id: 'tasks-trend', area: 'tasks', title: 'Task completion', headline: `You finish about ${rA.toFixed(rA >= 10 ? 0 : 1)} tasks a week.`, detail,
         series: weeks.map((w, i) => ({ label: new Date(w + 'T00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' }), value: counts[i]! })), format: 'count',
-        note: 'Tasks completed per week, last 8 full weeks (this week is not over yet).',
+        note: d.fullWeeksOnly ? 'Tasks completed per week, last 8 full weeks (this week is not over yet).' : 'Tasks completed per week, last 8 weeks.',
       });
       if (done.length >= 14) {
         const by = Array.from({ length: 7 }, () => 0);
@@ -240,7 +242,7 @@ export function computeInsights(d: InsightsData): InsightsResult {
 /** Day indices in the user's week order (Mon-first or Sun-first). */
 function orderWeek(ws: 0 | 1): number[] { return Array.from({ length: 7 }, (_, i) => (i + ws) % 7); }
 
-export async function loadInsightsData(o: { today: DateKey; weekStartsOn: 0 | 1; enabled: ModuleId[]; currency: string }): Promise<InsightsData> {
+export async function loadInsightsData(o: { today: DateKey; weekStartsOn: 0 | 1; enabled: ModuleId[]; currency: string; fullWeeksOnly?: boolean }): Promise<InsightsData> {
   const [tasks, habits, habitLogs, sessions, workouts, wellness, transactions, categories, goals, goalProgress] = await Promise.all([
     getAll('tasks'), getAll('habits'), getAll('habit_logs'), getAll('focus_sessions'), getAll('workouts'), getAll('wellness'),
     getAll('transactions'), getAll('finance_categories'), getAll('goals'), getAll('goal_progress'),

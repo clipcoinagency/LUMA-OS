@@ -42,10 +42,19 @@ describe('insights never fabricate', () => {
     // 5 tasks in each of the last 8 COMPLETE weeks (Mon 2026-09-28 starts the current, unfinished week) and none yet this week
     const tasks: Task[] = [];
     for (let w = 1; w <= 8; w++) for (let k = 0; k < 5; k++) tasks.push(doneTask(w * 10 + k, addDays('2026-09-28' as DateKey, -7 * w + k)));
-    const t = computeInsights(empty({ tasks })).ready.find((i) => i.id === 'tasks-trend');
+    const t = computeInsights(empty({ tasks, fullWeeksOnly: true })).ready.find((i) => i.id === 'tasks-trend');
     expect(t!.headline).toBe('You finish about 5.0 tasks a week.');
     expect(t!.detail).toBeUndefined();                       // steady → no invented "up/down"
     expect(t!.series!.map((s) => s.value)).toEqual([5, 5, 5, 5, 5, 5, 5, 5]);
+  });
+
+  it('keeps the original weekly maths (this week included) unless full weeks are requested', () => {
+    const tasks: Task[] = [];
+    for (let w = 1; w <= 8; w++) for (let k = 0; k < 5; k++) tasks.push(doneTask(w * 10 + k, addDays('2026-09-28' as DateKey, -7 * w + k)));
+    const t = computeInsights(empty({ tasks })).ready.find((i) => i.id === 'tasks-trend');
+    expect(t!.series).toHaveLength(8);
+    expect(t!.series![7]!.value).toBe(0);                    // the unfinished current week is the last bar
+    expect(t!.note).toBe('Tasks completed per week, last 8 weeks.');
   });
 
   it('finds the weekday you finish the most on, only if it clearly stands out', () => {

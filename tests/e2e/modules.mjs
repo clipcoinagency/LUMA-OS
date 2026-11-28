@@ -303,10 +303,15 @@ await ctx.close();
 ({ ctx, page } = await launch());
 await page.getByRole('heading', { level: 1, name: /^Good/ }).waitFor();
 const persisted = [];
-await go(page, 'notes'); persisted.push(await page.locator('.item').filter({ hasText: 'Trip ideas' }).isVisible());
-await go(page, 'goals'); persisted.push(await page.getByText('4 / 10 books').isVisible());
-await go(page, 'finance'); persisted.push(await page.locator('.summary').getByText('$974.50').isVisible());
-await go(page, 'wellness'); persisted.push((await page.getByLabel(/Sleep \(hours\)/).inputValue()) === '7.5');
+// each page loads its data a moment after it opens: wait for the thing to appear instead of looking once
+const appears = (loc) => loc.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false);
+await go(page, 'notes'); persisted.push(await appears(page.locator('.item').filter({ hasText: 'Trip ideas' })));
+await go(page, 'goals'); persisted.push(await appears(page.getByText('4 / 10 books')));
+await go(page, 'finance'); persisted.push(await appears(page.locator('.summary').getByText('$974.50')));
+await go(page, 'wellness');
+const sleepField = page.getByLabel(/Sleep \(hours\)/);
+await sleepField.waitFor({ timeout: 8000 });
+persisted.push(await page.waitForFunction(() => { const el = [...document.querySelectorAll('input')].find((i) => /Sleep/.test(i.labels?.[0]?.textContent ?? '')); return el?.value === '7.5'; }, null, { timeout: 8000 }).then(() => true).catch(() => false));
 check(persisted.every(Boolean), 'Relaunch: notes, goal progress, finance, wellness all persisted', persisted.join(','));
 
 // sample data → screenshots + phone overflow per module

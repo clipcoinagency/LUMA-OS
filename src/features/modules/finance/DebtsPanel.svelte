@@ -213,7 +213,7 @@
   .pd { font-size: var(--text-xs); color: var(--text-3); }
   .pa { font-weight: 700; } .pa.pos { color: var(--success); } .pa.neg { color: var(--warning); }
   .av { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: var(--text-sm); color: hsl(var(--h) 70% 38%); background: hsl(var(--h) 80% 55% / .18); border: 1px solid hsl(var(--h) 70% 50% / .35); }
-  :global(:root[data-theme='dark']) .av, :global(:root[data-theme='graphite']) .av, :global(:root[data-theme='ink']) .av, :global(:root[data-theme='nebula']) .av { color: hsl(var(--h) 85% 76%); }
+  :global(:root[data-theme='dark']) .av, :global(:root[data-theme='ink']) .av, :global(:root[data-theme='nebula']) .av { color: hsl(var(--h) 85% 76%); }
   .listbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin: var(--space-5) 0 var(--space-3); }
   .listbar h2 { font-size: var(--text-md); margin: 0; }
   .debts { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; gap: var(--space-3); }

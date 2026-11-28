@@ -2,7 +2,7 @@
 import { boot, loadState, saveSettings, saveWorkspace, type BootInfo } from './db/defaults';
 import { setVersionChangeHandler, toStorageError, type StorageError } from './db/idb';
 import type { Settings, ThemeId, Workspace } from './db/schema';
-import { styleOf } from './theme';
+import { styleOf, THEMES } from './theme';
 import { detectPlatform, requestPersistentStorage } from './platform/platform';
 import { checkBackupReminder } from './domain/backupReminder';
 import { initReminders } from './reminders.svelte';
@@ -94,11 +94,12 @@ class AppState {
 
 export const app = new AppState();
 
-const THEME_COLORS: Record<ThemeId, string> = { paper: '#efe9dd', ink: '#11100e', nebula: '#0b0716', clay: '#efe4d3', chalk: '#f1f0ea', graphite: '#0d0e10', soft: '#fbf6f2', light: '#f2f5fc', dark: '#04050d' };
+const THEME_COLORS: Record<ThemeId, string> = { paper: '#efe9dd', ink: '#11100e', nebula: '#0b0716', soft: '#fbf6f2', light: '#f2f5fc', dark: '#04050d' };
 
 /** The theme actually on screen: the chosen one, except that Paper/Night Ink with "turn the page at
  *  night" follow the clock. The original three themes are always shown exactly as chosen. */
 export function shownTheme(theme: ThemeId, auto?: boolean, hour = new Date().getHours()): ThemeId {
+  if (!THEMES.some((t) => t.id === theme)) theme = 'soft';   // a look that no longer exists (e.g. an earlier test build)
   if (!auto || styleOf(theme) !== 'almanac') return theme;
   return hour >= 7 && hour < 19 ? 'paper' : 'ink';
 }

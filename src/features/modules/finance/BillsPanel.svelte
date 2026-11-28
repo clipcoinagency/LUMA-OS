@@ -107,7 +107,7 @@
   .bill.overdue { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
   .bill.paused { opacity: .6; }
   .av { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: hsl(var(--h) 70% 38%); background: hsl(var(--h) 80% 55% / .18); border: 1px solid hsl(var(--h) 70% 50% / .35); }
-  :global(:root[data-theme='dark']) .av, :global(:root[data-theme='graphite']) .av, :global(:root[data-theme='ink']) .av, :global(:root[data-theme='nebula']) .av { color: hsl(var(--h) 85% 76%); }
+  :global(:root[data-theme='dark']) .av, :global(:root[data-theme='ink']) .av, :global(:root[data-theme='nebula']) .av { color: hsl(var(--h) 85% 76%); }
   .who { display: grid; gap: 3px; min-width: 0; }
   .n { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sub { display: flex; gap: 6px 10px; align-items: center; flex-wrap: wrap; font-size: var(--text-xs); color: var(--text-3); }

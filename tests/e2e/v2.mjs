@@ -160,7 +160,7 @@ check(await page.getByRole('radio', { name: 'Journal' }).first().isVisible(), 'J
 // themes: the original three, plus Paper, Night Ink and Nebula
 await page.goto(url + '#/settings');
 await page.getByRole('heading', { level: 1, name: 'Settings' }).waitFor();
-check((await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio').count()) === 9, 'Settings offers nine themes (Light, Soft, Dark, Paper, Night Ink, Nebula, Clay, Chalk, Graphite)');
+check((await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio').count()) === 6, 'Settings offers six themes (Light, Soft, Dark, Paper, Night Ink, Nebula)');
 await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Light/ }).click();
 check((await page.evaluate(() => document.documentElement.dataset.theme)) === 'light', 'Choosing Light applies the light theme');
 await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: /^Soft/ }).click();
